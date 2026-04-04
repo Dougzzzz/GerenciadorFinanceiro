@@ -1,9 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace GerenciadorFinanceiro.Domain.Entidades
 {
     public class Categoria
@@ -25,6 +19,6 @@ namespace GerenciadorFinanceiro.Domain.Entidades
     public enum TipoTransacao
     {
         Receita,
-        Despesa
+        Despesa,
     }
 }

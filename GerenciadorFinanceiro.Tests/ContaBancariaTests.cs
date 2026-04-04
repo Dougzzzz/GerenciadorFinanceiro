@@ -1,9 +1,4 @@
-﻿using GerenciadorFinanceiro.Domain.Entidades;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using GerenciadorFinanceiro.Domain.Entidades;
 
 namespace GerenciadorFinanceiro.Tests
 {
@@ -36,10 +31,8 @@ namespace GerenciadorFinanceiro.Tests
         [Fact]
         public void AtualizarSaldo_DeveSubtrairValor_QuandoForNegativo()
         {
-
             var conta = new ContaBancaria("Banco Itaú", 100m);
-            decimal valorSaque = -30m; 
-
+            decimal valorSaque = -30m;
 
             conta.AtualizarSaldo(valorSaque);
 

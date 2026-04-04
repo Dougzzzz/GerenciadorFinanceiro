@@ -1,9 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace GerenciadorFinanceiro.Domain.Entidades
 {
     public class ContaBancaria
@@ -21,9 +15,6 @@ namespace GerenciadorFinanceiro.Domain.Entidades
 
         protected ContaBancaria() { }
 
-        public void AtualizarSaldo(decimal valor)
-        {
-            SaldoAtual += valor;
-        }
+        public void AtualizarSaldo(decimal valor) => SaldoAtual += valor;
     }
 }

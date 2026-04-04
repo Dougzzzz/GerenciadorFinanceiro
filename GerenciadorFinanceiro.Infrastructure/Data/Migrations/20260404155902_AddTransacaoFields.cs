@@ -24,7 +24,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 type: "character varying(150)",
                 maxLength: 150,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: string.Empty);
 
             migrationBuilder.AddColumn<decimal>(
                 name: "Cotacao",
@@ -39,7 +39,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 type: "character varying(20)",
                 maxLength: 20,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: string.Empty);
 
             migrationBuilder.AddColumn<string>(
                 name: "NomeCartao",
@@ -47,7 +47,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 type: "character varying(150)",
                 maxLength: 150,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: string.Empty);
 
             migrationBuilder.AddColumn<string>(
                 name: "Parcela",
@@ -55,7 +55,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 type: "character varying(50)",
                 maxLength: 50,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: string.Empty);
         }
 
         /// <inheritdoc />

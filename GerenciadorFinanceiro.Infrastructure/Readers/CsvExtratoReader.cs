@@ -1,11 +1,7 @@
-﻿using GerenciadorFinanceiro.Application.DTOs;
-using GerenciadorFinanceiro.Application.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Text;
-using System.Threading.Tasks;
+using GerenciadorFinanceiro.Application.DTOs;
+using GerenciadorFinanceiro.Application.Interfaces;
 
 namespace GerenciadorFinanceiro.Infrastructure.Readers
 {
@@ -19,10 +15,13 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
 
             // Lê o cabeçalho e identifica índices das colunas relevantes
             var headerLine = await reader.ReadLineAsync();
-            if (headerLine == null) return transacoes;
+            if (headerLine == null)
+            {
+                return transacoes;
+            }
 
             // Não usar ',' como separador para não quebrar valores decimais com vírgula
-            var headers = headerLine.Split(new[] { ';', '\t' }, StringSplitOptions.None)
+            var headers = headerLine.Split([';', '\t'], StringSplitOptions.None)
                 .Select(h => RemoveDiacritics(h).Trim().ToLowerInvariant())
                 .ToArray();
 
@@ -41,24 +40,26 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
             while (!reader.EndOfStream)
             {
                 var linha = await reader.ReadLineAsync();
-                if (string.IsNullOrWhiteSpace(linha)) continue;
+                if (string.IsNullOrWhiteSpace(linha))
+                {
+                    continue;
+                }
 
                 // Suporta CSV com ; ou \t (não usamos ',' pois pode aparecer em valores)
-                var colunas = linha.Split(new[] { ';', '\t' });
+                var colunas = linha.Split([';', '\t']);
 
                 // Função local para obter coluna segura
-                string Obter(int idx) => (idx >=0 && idx < colunas.Length) ? colunas[idx].Trim() : string.Empty;
+                string Obter(int idx) => (idx >= 0 && idx < colunas.Length) ? colunas[idx].Trim() : string.Empty;
 
                 // Lê data
-                DateTime data;
                 var dataText = Obter(idxData);
-                bool dataValida = DateTime.TryParse(dataText, culture, DateTimeStyles.None, out data);
+                bool dataValida = DateTime.TryParse(dataText, culture, DateTimeStyles.None, out DateTime data);
 
                 // Lê descrição
                 var descricao = Obter(idxDescricao);
 
                 // Ignora coluna em US$ — tenta pegar valor em R$
-                decimal valor =0m;
+                decimal valor = 0m;
                 var valorReaisText = Obter(idxValorReais);
                 var valorDolarText = Obter(idxValorDolar);
 
@@ -66,8 +67,8 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
                 if (!string.IsNullOrWhiteSpace(valorReaisText))
                 {
                     // Remove possíveis símbolos e espaços e pontos de milhar
-                    var cleaned = valorReaisText.Replace("R$", "").Replace(" ", "").Trim();
-                    cleaned = cleaned.Replace(".", ""); // remove milhares
+                    var cleaned = valorReaisText.Replace("R$", string.Empty).Replace(" ", string.Empty).Trim();
+                    cleaned = cleaned.Replace(".", string.Empty); // remove milhares
                     valorValido = decimal.TryParse(cleaned, NumberStyles.Any, culture, out valor);
                 }
 
@@ -75,7 +76,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
                 {
                     // Caso não tenha valor em reais, tenta ler o valor em dólar (mas conforme solicitado, será ignorado)
                     // Apenas tentamos parse para evitar erros, mas não usamos o valor em dólar
-                    var cleaned = valorDolarText.Replace("$", "").Replace(" ", "").Trim();
+                    var cleaned = valorDolarText.Replace("$", string.Empty).Replace(" ", string.Empty).Trim();
                     decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out _);
                 }
 
@@ -90,12 +91,12 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
                 var nomeCartao = Obter(idxNomeCartao);
                 var finalCartao = Obter(idxFinalCartao);
                 var parcela = Obter(idxParcela);
-                decimal cotacao =0m;
+                decimal cotacao = 0m;
                 var cotacaoText = Obter(idxCotacao);
                 if (!string.IsNullOrWhiteSpace(cotacaoText))
                 {
-                    var cleaned = cotacaoText.Replace("R$", "").Replace(" ", "").Trim();
-                    cleaned = cleaned.Replace(".", "");
+                    var cleaned = cotacaoText.Replace("R$", string.Empty).Replace(" ", string.Empty).Trim();
+                    cleaned = cleaned.Replace(".", string.Empty);
                     decimal.TryParse(cleaned, NumberStyles.Any, culture, out cotacao);
                 }
 
@@ -107,7 +108,11 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
 
         private static string RemoveDiacritics(string text)
         {
-            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
             var normalized = text.Normalize(NormalizationForm.FormD);
             var sb = new StringBuilder();
             foreach (var c in normalized)
@@ -118,6 +123,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
                     sb.Append(c);
                 }
             }
+
             return sb.ToString().Normalize(NormalizationForm.FormC);
         }
     }

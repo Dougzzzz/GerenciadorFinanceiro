@@ -1,131 +1,126 @@
-using GerenciadorFinanceiro.Application.DTOs;
+using System.Globalization;
+using System.Text;
 using GerenciadorFinanceiro.Application.UseCases;
-using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Infrastructure.Data;
 using GerenciadorFinanceiro.Infrastructure.Readers;
 using GerenciadorFinanceiro.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using Xunit;
 
 namespace GerenciadorFinanceiro.Tests
 {
- public class CsvExtratoReaderTests
- {
- [Fact]
- public async Task LerArquivo_ComColunasValidas_DeveRetornarTransacoes()
- {
- // Arrange
- var csv = new StringBuilder();
- csv.AppendLine("Data de Compra;Nome no Cart„o;Final do Cart„o;Categoria;DescriÁ„o;Parcela;Valor (em US$);CotaÁ„o (em R$);Valor (em R$)");
- csv.AppendLine("12/12/2025;ANA PAULA SIQUEIRA;8262;Foto / FotocÛpia;JIM.COM*49865135 THA;03/mar;0;0;1142,72");
- csv.AppendLine("14/02/2026;ANA PAULA SIQUEIRA;8262;Vestu·rio / Roupas;TRG COMERCIO VAREJISTA;;0;0;150,00");
+    public class CsvExtratoReaderTests
+    {
+        [Fact]
+        public async Task LerArquivo_ComColunasValidas_DeveRetornarTransacoes()
+        {
+            // Arrange
+            var csv = new StringBuilder();
+            csv.AppendLine("Data de Compra;Nome no Cart√£o;Final do Cart√£o;Categoria;Descri√ß√£o;Parcela;Valor (em US$);Cota√ß√£o (em R$);Valor (em R$)");
+            csv.AppendLine("12/12/2025;ANA PAULA SIQUEIRA;8262;Foto / Fotoc√≥pia;JIM.COM*49865135 THA;03/mar;0;0;1142,72");
+            csv.AppendLine("14/02/2026;ANA PAULA SIQUEIRA;8262;Vestu√°rio / Roupas;TRG COMERCIO VAREJISTA;;0;0;150,00");
 
- var bytes = Encoding.Default.GetBytes(csv.ToString());
- using var stream = new MemoryStream(bytes);
+            var bytes = Encoding.Default.GetBytes(csv.ToString());
+            using var stream = new MemoryStream(bytes);
 
- var reader = new CsvExtratoReader();
+            var reader = new CsvExtratoReader();
 
- // Act
- var result = await reader.LerArquivoAsync(stream);
- var list = result.ToList();
+            // Act
+            var result = await reader.LerArquivoAsync(stream);
+            var list = result.ToList();
 
- // Assert
- Assert.Equal(2, list.Count);
+            // Assert
+            Assert.Equal(2, list.Count);
 
- var culture = new CultureInfo("pt-BR");
+            var culture = new CultureInfo("pt-BR");
 
- var primeira = list[0];
- Assert.Equal(new DateTime(2025,12,12), primeira.Data.Date);
- Assert.Equal("JIM.COM*49865135 THA", primeira.Descricao);
- var expectedPrimeiraValor = decimal.Parse("1142,72", culture);
- Assert.Equal(expectedPrimeiraValor, primeira.Valor);
- Assert.Equal("Foto / FotocÛpia", primeira.Categoria);
- Assert.Equal("ANA PAULA SIQUEIRA", primeira.NomeCartao);
- Assert.Equal("8262", primeira.FinalCartao);
- Assert.Equal("03/mar", primeira.Parcela);
- Assert.Equal(0m, primeira.Cotacao);
+            var primeira = list[0];
+            Assert.Equal(new DateTime(2025, 12, 12), primeira.data.Date);
+            Assert.Equal("JIM.COM*49865135 THA", primeira.descricao);
+            var expectedPrimeiraValor = decimal.Parse("1142,72", culture);
+            Assert.Equal(expectedPrimeiraValor, primeira.valor);
+            Assert.Equal("Foto / Fotoc√≥pia", primeira.categoria);
+            Assert.Equal("ANA PAULA SIQUEIRA", primeira.nomeCartao);
+            Assert.Equal("8262", primeira.finalCartao);
+            Assert.Equal("03/mar", primeira.parcela);
+            Assert.Equal(0m, primeira.cotacao);
 
- var segunda = list[1];
- Assert.Equal(new DateTime(2026,2,14), segunda.Data.Date);
- Assert.Equal("TRG COMERCIO VAREJISTA", segunda.Descricao);
- var expectedSegundaValor = decimal.Parse("150,00", culture);
- Assert.Equal(expectedSegundaValor, segunda.Valor);
- Assert.Equal("Vestu·rio / Roupas", segunda.Categoria);
- }
+            var segunda = list[1];
+            Assert.Equal(new DateTime(2026, 2, 14), segunda.data.Date);
+            Assert.Equal("TRG COMERCIO VAREJISTA", segunda.descricao);
+            var expectedSegundaValor = decimal.Parse("150,00", culture);
+            Assert.Equal(expectedSegundaValor, segunda.valor);
+            Assert.Equal("Vestu√°rio / Roupas", segunda.categoria);
+        }
 
- [Fact]
- public async Task LerArquivo_ComValorReaisAusente_DeveIgnorarLinhaMesmoComValorDolar()
- {
- // Arrange: linha possui valor em US$ mas coluna de Valor (em R$) vazia
- var csv = new StringBuilder();
- csv.AppendLine("Data de Compra;Nome no Cart„o;Final do Cart„o;Categoria;DescriÁ„o;Parcela;Valor (em US$);CotaÁ„o (em R$);Valor (em R$)");
- csv.AppendLine("19/02/2026;ANA PAULA SIQUEIRA;8262;Foto / FotocÛpia;JIM.COM*49865135 THA;03/mar;2127.44;0;");
+        [Fact]
+        public async Task LerArquivo_ComValorReaisAusente_DeveIgnorarLinhaMesmoComValorDolar()
+        {
+            // Arrange: linha possui valor em US$ mas coluna de Valor (em R$) vazia
+            var csv = new StringBuilder();
+            csv.AppendLine("Data de Compra;Nome no Cart√£o;Final do Cart√£o;Categoria;Descri√ß√£o;Parcela;Valor (em US$);Cota√ß√£o (em R$);Valor (em R$)");
+            csv.AppendLine("19/02/2026;ANA PAULA SIQUEIRA;8262;Foto / Fotoc√≥pia;JIM.COM*49865135 THA;03/mar;2127.44;0;");
 
- var bytes = Encoding.Default.GetBytes(csv.ToString());
- using var stream = new MemoryStream(bytes);
+            var bytes = Encoding.Default.GetBytes(csv.ToString());
+            using var stream = new MemoryStream(bytes);
 
- var reader = new CsvExtratoReader();
+            var reader = new CsvExtratoReader();
 
- // Act
- var result = await reader.LerArquivoAsync(stream);
- var list = result.ToList();
+            // Act
+            var result = await reader.LerArquivoAsync(stream);
+            var list = result.ToList();
 
- // Assert: linha deve ser pulada porque Valor (em R$) est· ausente
- Assert.Empty(list);
- }
+            // Assert: linha deve ser pulada porque Valor (em R$) est√° ausente
+            Assert.Empty(list);
+        }
 
- [Fact]
- public async Task LerArquivo_DeveLerCotacaoEImportarParaTransacao()
- {
- // Arrange
- var csv = new StringBuilder();
- csv.AppendLine("Data de Compra;Nome no Cart„o;Final do Cart„o;Categoria;DescriÁ„o;Parcela;Valor (em US$);CotaÁ„o (em R$);Valor (em R$)");
- csv.AppendLine("20/02/2026;ANA;0000;Restaurante;COMIDA;1/1;0;5,25;52,50");
+        [Fact]
+        public async Task LerArquivo_DeveLerCotacaoEImportarParaTransacao()
+        {
+            // Arrange
+            var csv = new StringBuilder();
+            csv.AppendLine("Data de Compra;Nome no Cart√£o;Final do Cart√£o;Categoria;Descri√ß√£o;Parcela;Valor (em US$);Cota√ß√£o (em R$);Valor (em R$)");
+            csv.AppendLine("20/02/2026;ANA;0000;Restaurante;COMIDA;1/1;0;5,25;52,50");
 
- var bytes = Encoding.Default.GetBytes(csv.ToString());
- using var stream = new MemoryStream(bytes);
- var reader = new CsvExtratoReader();
- var list = (await reader.LerArquivoAsync(stream)).ToList();
+            var bytes = Encoding.Default.GetBytes(csv.ToString());
+            using var stream = new MemoryStream(bytes);
+            var reader = new CsvExtratoReader();
+            var list = (await reader.LerArquivoAsync(stream)).ToList();
 
- Assert.Single(list);
- var t = list[0];
- Assert.Equal(52.50m, t.Valor);
- Assert.Equal(5.25m, t.Cotacao);
- }
+            Assert.Single(list);
+            var t = list[0];
+            Assert.Equal(52.50m, t.valor);
+            Assert.Equal(5.25m, t.cotacao);
+        }
 
- [Fact]
- public async Task ImportarExtratoUseCase_DevePersistirTransacoesNoRepositorio()
- {
- // Arrange: cria contexto em memÛria
- var options = new DbContextOptionsBuilder<AppDbContext>()
- .UseInMemoryDatabase(databaseName: $"DbTeste_{Guid.NewGuid()}")
- .Options;
+        [Fact]
+        public async Task ImportarExtratoUseCase_DevePersistirTransacoesNoRepositorio()
+        {
+            // Arrange: cria contexto em mem√≥ria
+            var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(databaseName: $"DbTeste_{Guid.NewGuid()}")
+            .Options;
 
- using var contexto = new AppDbContext(options);
- var repository = new TransacaoRepository(contexto);
- var reader = new CsvExtratoReader();
- var useCase = new ImportarExtratoUseCase(repository, reader);
+            using var contexto = new AppDbContext(options);
+            var repository = new TransacaoRepository(contexto);
+            var reader = new CsvExtratoReader();
+            var useCase = new ImportarExtratoUseCase(repository, reader);
 
- var csv = new StringBuilder();
- csv.AppendLine("Data de Compra;Nome no Cart„o;Final do Cart„o;Categoria;DescriÁ„o;Parcela;Valor (em US$);CotaÁ„o (em R$);Valor (em R$)");
- csv.AppendLine("12/12/2025;ANA;1111;Servico;PAGAMENTO;1/1;0;0;200,00");
+            var csv = new StringBuilder();
+            csv.AppendLine("Data de Compra;Nome no Cart√£o;Final do Cart√£o;Categoria;Descri√ß√£o;Parcela;Valor (em US$);Cota√ß√£o (em R$);Valor (em R$)");
+            csv.AppendLine("12/12/2025;ANA;1111;Servico;PAGAMENTO;1/1;0;0;200,00");
 
- var bytes = Encoding.Default.GetBytes(csv.ToString());
- using var stream = new MemoryStream(bytes);
+            var bytes = Encoding.Default.GetBytes(csv.ToString());
+            using var stream = new MemoryStream(bytes);
 
- // Act
- await useCase.ExecutarAsync(stream, Guid.NewGuid(), null, null);
+            // Act
+            await useCase.ExecutarAsync(stream, Guid.NewGuid(), null, null);
 
- // Assert
- var todas = await repository.ObterTodasAsync();
- Assert.Single(todas);
- var salva = todas.First();
- Assert.Equal(200.00m, salva.Valor);
- Assert.Equal("Servico", salva.Categoria);
- }
- }
+            // Assert
+            var todas = await repository.ObterTodasAsync();
+            Assert.Single(todas);
+            var salva = todas.First();
+            Assert.Equal(200.00m, salva.Valor);
+            Assert.Equal("Servico", salva.Categoria);
+        }
+    }
 }

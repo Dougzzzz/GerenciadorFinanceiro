@@ -5,11 +5,11 @@ namespace GerenciadorFinanceiro.Infrastructure.Data
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options)
         {
         }
 
-     
         public DbSet<Transacao> Transacoes { get; set; }
         public DbSet<ContaBancaria> ContasBancarias { get; set; }
         public DbSet<CartaoCredito> CartoesDeCredito { get; set; }
@@ -39,19 +39,19 @@ namespace GerenciadorFinanceiro.Infrastructure.Data
                 // Campos de texto adicionais
                 entity.Property(t => t.Categoria)
                     .HasMaxLength(150)
-                    .HasDefaultValue("");
+                    .HasDefaultValue(string.Empty);
 
                 entity.Property(t => t.NomeCartao)
                     .HasMaxLength(150)
-                    .HasDefaultValue("");
+                    .HasDefaultValue(string.Empty);
 
                 entity.Property(t => t.FinalCartao)
                     .HasMaxLength(20)
-                    .HasDefaultValue("");
+                    .HasDefaultValue(string.Empty);
 
                 entity.Property(t => t.Parcela)
                     .HasMaxLength(50)
-                    .HasDefaultValue("");
+                    .HasDefaultValue(string.Empty);
 
                 // Chaves e relacionamentos já são inferidos pelas propriedades existentes
             });
@@ -61,7 +61,6 @@ namespace GerenciadorFinanceiro.Infrastructure.Data
                 .Property(c => c.NomeBanco)
                 .HasMaxLength(100)
                 .IsRequired();
-
         }
     }
 }

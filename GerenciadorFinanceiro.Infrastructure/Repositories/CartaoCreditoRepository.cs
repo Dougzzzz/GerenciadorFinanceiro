@@ -14,10 +14,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<CartaoCredito>> ObterTodosAsync()
-        {
-            return await _context.CartoesDeCredito.ToListAsync();
-        }
+        public async Task<IEnumerable<CartaoCredito>> ObterTodosAsync() => await _context.CartoesDeCredito.ToListAsync();
 
         public async Task AdicionarAsync(CartaoCredito cartao)
         {

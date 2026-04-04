@@ -16,7 +16,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 type: "character varying(50)",
                 maxLength: 50,
                 nullable: false,
-                defaultValue: "",
+                defaultValue: string.Empty,
                 oldClrType: typeof(string),
                 oldType: "character varying(50)",
                 oldMaxLength: 50);
@@ -27,7 +27,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 type: "character varying(150)",
                 maxLength: 150,
                 nullable: false,
-                defaultValue: "",
+                defaultValue: string.Empty,
                 oldClrType: typeof(string),
                 oldType: "character varying(150)",
                 oldMaxLength: 150);
@@ -38,7 +38,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 type: "character varying(20)",
                 maxLength: 20,
                 nullable: false,
-                defaultValue: "",
+                defaultValue: string.Empty,
                 oldClrType: typeof(string),
                 oldType: "character varying(20)",
                 oldMaxLength: 20);
@@ -60,7 +60,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 type: "character varying(150)",
                 maxLength: 150,
                 nullable: false,
-                defaultValue: "",
+                defaultValue: string.Empty,
                 oldClrType: typeof(string),
                 oldType: "character varying(150)",
                 oldMaxLength: 150);
@@ -78,7 +78,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "character varying(50)",
                 oldMaxLength: 50,
-                oldDefaultValue: "");
+                oldDefaultValue: string.Empty);
 
             migrationBuilder.AlterColumn<string>(
                 name: "NomeCartao",
@@ -89,7 +89,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "character varying(150)",
                 oldMaxLength: 150,
-                oldDefaultValue: "");
+                oldDefaultValue: string.Empty);
 
             migrationBuilder.AlterColumn<string>(
                 name: "FinalCartao",
@@ -100,7 +100,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "character varying(20)",
                 oldMaxLength: 20,
-                oldDefaultValue: "");
+                oldDefaultValue: string.Empty);
 
             migrationBuilder.AlterColumn<decimal>(
                 name: "Cotacao",
@@ -122,7 +122,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "character varying(150)",
                 oldMaxLength: 150,
-                oldDefaultValue: "");
+                oldDefaultValue: string.Empty);
         }
     }
 }

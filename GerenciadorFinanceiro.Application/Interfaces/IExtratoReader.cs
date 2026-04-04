@@ -1,9 +1,4 @@
-﻿using GerenciadorFinanceiro.Application.DTOs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using GerenciadorFinanceiro.Application.DTOs;
 
 namespace GerenciadorFinanceiro.Application.Interfaces
 {

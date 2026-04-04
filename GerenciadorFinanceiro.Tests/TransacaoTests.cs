@@ -1,9 +1,4 @@
-﻿using GerenciadorFinanceiro.Domain.Entidades;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using GerenciadorFinanceiro.Domain.Entidades;
 
 namespace GerenciadorFinanceiro.Tests
 {
@@ -12,7 +7,7 @@ namespace GerenciadorFinanceiro.Tests
         [Fact]
         public void Transacao_ComValorPositivo_DeveSerClassificadaComoReceita()
         {
-            decimal valorPositivo = 5000m; 
+            decimal valorPositivo = 5000m;
             Guid categoriaId = Guid.NewGuid();
             Guid contaId = Guid.NewGuid();
 
@@ -26,7 +21,7 @@ namespace GerenciadorFinanceiro.Tests
         {
             decimal valorNegativo = -150.75m;
             Guid categoriaId = Guid.NewGuid();
-            Guid cartaoId = Guid.NewGuid(); 
+            Guid cartaoId = Guid.NewGuid();
 
             var transacao = new Transacao(DateTime.Now, "Mercado", valorNegativo, categoriaId, null, cartaoId);
 

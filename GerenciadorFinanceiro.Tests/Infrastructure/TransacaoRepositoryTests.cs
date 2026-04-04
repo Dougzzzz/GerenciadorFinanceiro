@@ -11,6 +11,7 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
         private AppDbContext CriarContextoEmMemoria()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
+
                 // O Guid garante que cada execução do teste ganhe um banco zerado e com nome único
                 .UseInMemoryDatabase(databaseName: $"GerenciadorDbTeste_{Guid.NewGuid()}")
                 .Options;
@@ -30,7 +31,7 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
 
             var transacaoSalva = await context.Transacoes.FirstOrDefaultAsync(t => t.Id == novaTransacao.Id);
 
-            Assert.NotNull(transacaoSalva); 
+            Assert.NotNull(transacaoSalva);
             Assert.Equal("Compra no Mercado", transacaoSalva.Descricao);
             Assert.Equal(TipoTransacao.Despesa, transacaoSalva.Tipo);
         }

@@ -14,10 +14,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Categoria>> ObterTodasAsync()
-        {
-            return await _context.Categorias.ToListAsync();
-        }
+        public async Task<IEnumerable<Categoria>> ObterTodasAsync() => await _context.Categorias.ToListAsync();
 
         public async Task AdicionarAsync(Categoria categoria)
         {

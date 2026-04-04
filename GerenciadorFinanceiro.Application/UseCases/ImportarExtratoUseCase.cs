@@ -22,18 +22,17 @@ namespace GerenciadorFinanceiro.Application.UseCases
             foreach (var dto in transacoesDto)
             {
                 var transacao = new Transacao(
-                    dto.Data,
-                    dto.Descricao,
-                    dto.Valor,
+                    dto.data,
+                    dto.descricao,
+                    dto.valor,
                     categoriaPadraoId,
                     contaId,
                     cartaoId,
-                    dto.Categoria,
-                    dto.NomeCartao,
-                    dto.FinalCartao,
-                    dto.Parcela,
-                    dto.Cotacao
-                );
+                    dto.categoria,
+                    dto.nomeCartao,
+                    dto.finalCartao,
+                    dto.parcela,
+                    dto.cotacao);
 
                 await _repository.AdicionarAsync(transacao);
             }

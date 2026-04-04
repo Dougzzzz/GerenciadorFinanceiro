@@ -1,4 +1,4 @@
-﻿using GerenciadorFinanceiro.Domain.Entidades;
+using GerenciadorFinanceiro.Domain.Entidades;
 
 namespace GerenciadorFinanceiro.Domain.Interfaces
 {

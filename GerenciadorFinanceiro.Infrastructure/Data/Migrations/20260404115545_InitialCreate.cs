@@ -1,4 +1,3 @@
-﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -19,12 +18,9 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                     Nome = table.Column<string>(type: "text", nullable: false),
                     Limite = table.Column<decimal>(type: "numeric", nullable: false),
                     DiaFechamento = table.Column<int>(type: "integer", nullable: false),
-                    DiaVencimento = table.Column<int>(type: "integer", nullable: false)
+                    DiaVencimento = table.Column<int>(type: "integer", nullable: false),
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CartoesDeCredito", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_CartoesDeCredito", x => x.Id));
 
             migrationBuilder.CreateTable(
                 name: "Categorias",
@@ -32,12 +28,9 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Nome = table.Column<string>(type: "text", nullable: false),
-                    Tipo = table.Column<int>(type: "integer", nullable: false)
+                    Tipo = table.Column<int>(type: "integer", nullable: false),
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Categorias", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_Categorias", x => x.Id));
 
             migrationBuilder.CreateTable(
                 name: "ContasBancarias",
@@ -45,12 +38,9 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     NomeBanco = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    SaldoAtual = table.Column<decimal>(type: "numeric", nullable: false)
+                    SaldoAtual = table.Column<decimal>(type: "numeric", nullable: false),
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ContasBancarias", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_ContasBancarias", x => x.Id));
 
             migrationBuilder.CreateTable(
                 name: "Transacoes",
@@ -63,12 +53,9 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                     Tipo = table.Column<int>(type: "integer", nullable: false),
                     CategoriaId = table.Column<Guid>(type: "uuid", nullable: false),
                     ContaBancariaId = table.Column<Guid>(type: "uuid", nullable: true),
-                    CartaoCreditoId = table.Column<Guid>(type: "uuid", nullable: true)
+                    CartaoCreditoId = table.Column<Guid>(type: "uuid", nullable: true),
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Transacoes", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_Transacoes", x => x.Id));
         }
 
         /// <inheritdoc />

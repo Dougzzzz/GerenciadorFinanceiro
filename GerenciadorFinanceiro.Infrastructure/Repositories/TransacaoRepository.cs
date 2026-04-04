@@ -1,4 +1,4 @@
-﻿using GerenciadorFinanceiro.Domain.Entidades;
+using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Interfaces;
 using GerenciadorFinanceiro.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -17,17 +17,11 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
         public async Task AdicionarAsync(Transacao transacao)
         {
             await _context.Transacoes.AddAsync(transacao);
-            await _context.SaveChangesAsync(); 
+            await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Transacao>> ObterTodasAsync()
-        {
-            return await _context.Transacoes.AsNoTracking().ToListAsync();
-        }
+        public async Task<IEnumerable<Transacao>> ObterTodasAsync() => await _context.Transacoes.AsNoTracking().ToListAsync();
 
-        public async Task<Transacao?> ObterPorIdAsync(Guid id)
-        {
-            return await _context.Transacoes.FindAsync(id);
-        }
+        public async Task<Transacao?> ObterPorIdAsync(Guid id) => await _context.Transacoes.FindAsync(id);
     }
 }

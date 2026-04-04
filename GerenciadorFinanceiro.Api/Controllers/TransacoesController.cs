@@ -29,7 +29,11 @@ namespace GerenciadorFinanceiro.Api.Controllers
         public async Task<ActionResult<Transacao>> Get(Guid id)
         {
             var transacao = await _repository.ObterPorIdAsync(id);
-            if (transacao == null) return NotFound();
+            if (transacao == null)
+            {
+                return NotFound();
+            }
+
             return Ok(transacao);
         }
 
@@ -37,7 +41,9 @@ namespace GerenciadorFinanceiro.Api.Controllers
         public async Task<IActionResult> Importar(IFormFile arquivo, [FromQuery] Guid categoriaPadraoId, [FromQuery] Guid? contaId, [FromQuery] Guid? cartaoId)
         {
             if (arquivo == null || arquivo.Length == 0)
+            {
                 return BadRequest("Arquivo inválido.");
+            }
 
             using var stream = arquivo.OpenReadStream();
             await _importarExtratoUseCase.ExecutarAsync(stream, categoriaPadraoId, contaId, cartaoId);

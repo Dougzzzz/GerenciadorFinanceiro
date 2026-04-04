@@ -1,4 +1,3 @@
-using GerenciadorFinanceiro.Application.Interfaces;
 using GerenciadorFinanceiro.Application.UseCases;
 using Microsoft.Extensions.DependencyInjection;
 
