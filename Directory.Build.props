@@ -1,20 +1,22 @@
 <Project>
   <PropertyGroup>
-    <!-- Ativa a verificação de estilo de código durante o build -->
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    
-    <!-- Define o nível de análise como o mais recente do .NET 9 -->
     <AnalysisLevel>latest-Recommended</AnalysisLevel>
-    
-    <!-- Trata os avisos de estilo como erros se preferir (opcional) -->
-    <!-- <TreatWarningsAsErrors>true</TreatWarningsAsErrors> -->
+    <!-- Ativa a documentação para permitir que o IDE limpe usings desnecessários -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Silencia o aviso de falta de comentários XML já que ativamos GenerateDocumentationFile -->
+    <NoWarn>$(NoWarn);1591;SA1600;SA1601;SA1602;SA1633</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Adiciona o analisador StyleCop para todos os projetos -->
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <!-- Unifica a versão do Npgsql em todos os projetos para evitar conflitos -->
+  <ItemGroup>
+    <PackageReference Update="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   </ItemGroup>
 </Project>

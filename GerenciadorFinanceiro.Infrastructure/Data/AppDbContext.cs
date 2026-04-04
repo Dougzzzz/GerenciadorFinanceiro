@@ -1,4 +1,4 @@
-﻿using GerenciadorFinanceiro.Domain.Entidades;
+using GerenciadorFinanceiro.Domain.Entidades;
 using Microsoft.EntityFrameworkCore;
 
 namespace GerenciadorFinanceiro.Infrastructure.Data

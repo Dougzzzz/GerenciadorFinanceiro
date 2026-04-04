@@ -28,7 +28,7 @@ namespace GerenciadorFinanceiro.Tests
             using var cmd = connection.CreateCommand();
             cmd.CommandText = "PRAGMA table_info('Transacoes');";
 
-            var columns = new List<(string name, string type, string dflt_value, int notnull)>();
+            var columns = new List<(string name, string type, string? dflt_value, int notnull)>();
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -69,7 +69,7 @@ namespace GerenciadorFinanceiro.Tests
             using var cmd = connection.CreateCommand();
             cmd.CommandText = "PRAGMA table_info('Transacoes');";
 
-            var cols = new Dictionary<string, (string type, string dflt_value, int notnull)>();
+            var cols = new Dictionary<string, (string type, string? dflt_value, int notnull)>();
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
@@ -82,25 +82,34 @@ namespace GerenciadorFinanceiro.Tests
                 }
             }
 
-            Assert.True(cols.ContainsKey("Valor"), "Coluna 'Valor' n�o encontrada");
-            Assert.True(cols.ContainsKey("Cotacao"), "Coluna 'Cotacao' n�o encontrada");
+            Assert.True(cols.ContainsKey("Valor"), "Coluna 'Valor' não encontrada");
+            Assert.True(cols.ContainsKey("Cotacao"), "Coluna 'Cotacao' não encontrada");
 
             var valorType = cols["Valor"].type?.ToLowerInvariant() ?? string.Empty;
             var cotacaoType = cols["Cotacao"].type?.ToLowerInvariant() ?? string.Empty;
 
             // Accept several possible numeric type strings depending on provider
-            bool valorIsNumeric = valorType.Contains("decimal") || valorType.Contains("numeric") || valorType.Contains("real") || valorType.Contains("double") || valorType.Contains("int") || valorType.Contains("numeric(18,2)");
-            bool cotacaoIsNumeric = cotacaoType.Contains("decimal") || cotacaoType.Contains("numeric") || cotacaoType.Contains("real") || cotacaoType.Contains("double") || cotacaoType.Contains("int") || cotacaoType.Contains("numeric(18,2)");
+            bool valorIsNumeric = valorType.Contains("decimal") || valorType.Contains("numeric") || valorType.Contains("real") || valorType.Contains("double") || valorType.Contains("int");
+            bool cotacaoIsNumeric = cotacaoType.Contains("decimal") || cotacaoType.Contains("numeric") || cotacaoType.Contains("real") || cotacaoType.Contains("double") || cotacaoType.Contains("int");
 
             Assert.True(valorIsNumeric, $"Tipo da coluna Valor inesperado: {valorType}");
             Assert.True(cotacaoIsNumeric, $"Tipo da coluna Cotacao inesperado: {cotacaoType}");
 
-            // Defaults: Categoria should have default empty string and Cotacao default should include0
-            var categoriaDflt = cols.ContainsKey("Categoria") ? cols["Categoria"].dflt_value : null;
-            var cotacaoDflt = cols.ContainsKey("Cotacao") ? cols["Cotacao"].dflt_value : null;
+            // Defaults: Categoria should have default empty string and Cotacao default should include 0
+            string? categoriaDflt = null;
+            if (cols.TryGetValue("Categoria", out var categoriaInfo))
+            {
+                categoriaDflt = categoriaInfo.dflt_value;
+            }
 
-            Assert.True(categoriaDflt != null && (categoriaDflt.Contains("''") || categoriaDflt.Contains("\"\"") || categoriaDflt.Trim() == string.Empty), $"Default de Categoria inesperado: {categoriaDflt}");
-            Assert.True(cotacaoDflt != null && cotacaoDflt.Contains("0"), $"Default de Cotacao inesperado: {cotacaoDflt}");
+            string? cotacaoDflt = null;
+            if (cols.TryGetValue("Cotacao", out var cotacaoInfo))
+            {
+                cotacaoDflt = cotacaoInfo.dflt_value;
+            }
+
+            Assert.True(categoriaDflt != null && (categoriaDflt.Contains("''") || categoriaDflt.Contains("\"\"") || string.IsNullOrWhiteSpace(categoriaDflt.Trim())), $"Default de Categoria inesperado: {categoriaDflt}");
+            Assert.True(cotacaoDflt != null && cotacaoDflt.Contains('0'), $"Default de Cotacao inesperado: {cotacaoDflt}");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text;
 using GerenciadorFinanceiro.Application.DTOs;
 using GerenciadorFinanceiro.Application.Interfaces;
@@ -54,7 +54,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
                 // Lê data
                 var dataText = Obter(idxData);
                 bool dataValida = DateTime.TryParse(dataText, culture, DateTimeStyles.None, out DateTime data);
-                
+
                 // PostgreSQL exige DateTime em UTC para colunas 'timestamp with time zone'
                 if (dataValida)
                 {

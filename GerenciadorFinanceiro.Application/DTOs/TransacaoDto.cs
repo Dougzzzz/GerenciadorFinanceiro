@@ -1,4 +1,4 @@
-﻿namespace GerenciadorFinanceiro.Application.DTOs
+namespace GerenciadorFinanceiro.Application.DTOs
 {
     // Mantemos os três primeiros parâmetros (Data, Descricao, Valor) para compatibilidade
     // e adicionamos campos opcionais para as demais colunas do extrato.
