@@ -24,6 +24,10 @@ export class FinanceiroService {
     return this.http.post<Transacao>(`${this.apiUrl}/transacoes`, transacao);
   }
 
+  excluirTransacoes(ids: string[]): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/transacoes/excluir-muitas`, { body: ids });
+  }
+
   importarExtrato(arquivo: File, categoriaId: string, contaId?: string, cartaoId?: string): Observable<any> {
     const formData = new FormData();
     formData.append('arquivo', arquivo);

@@ -15,6 +15,9 @@ import { FormsModule } from '@angular/forms';
       <header class="page-header">
         <h1>Transações</h1>
         <div class="actions">
+          <app-button *ngIf="selecionadas().size > 0" variant="ghost" (onClick)="excluirSelecionadas()">
+            Excluir ({{ selecionadas().size }})
+          </app-button>
           <app-button variant="outline" (onClick)="mostrarNovo.set(!mostrarNovo())">
             {{ mostrarNovo() ? 'Fechar' : 'Nova Transação' }}
           </app-button>
@@ -67,6 +70,7 @@ import { FormsModule } from '@angular/forms';
         </form>
       </app-card>
 
+      <!-- Formulário de Importação -->
       <app-card *ngIf="mostrarImportacao()" title="Importar Extrato CSV">
         <div class="import-form">
           <div class="form-group">
@@ -112,6 +116,7 @@ import { FormsModule } from '@angular/forms';
         <table class="table">
           <thead>
             <tr>
+              <th width="40"><input type="checkbox" (change)="toggleTodas($event)"></th>
               <th>Data</th>
               <th>Descrição</th>
               <th>Categoria</th>
@@ -121,6 +126,9 @@ import { FormsModule } from '@angular/forms';
           </thead>
           <tbody>
             <tr *ngFor="let t of transacoes()">
+              <td>
+                <input type="checkbox" [checked]="selecionadas().has(t.id)" (change)="toggleSelecionada(t.id)">
+              </td>
               <td>{{ t.data | date:'dd/MM/yyyy' }}</td>
               <td>
                 <div class="desc-cell">
@@ -171,7 +179,7 @@ import { FormsModule } from '@angular/forms';
       color: var(--color-text-secondary);
     }
 
-    select, input[type="file"] {
+    select, input, input[type="file"] {
       padding: var(--spacing-sm);
       border-radius: var(--border-radius);
       border: 1px solid #e2e8f0;
@@ -188,6 +196,11 @@ import { FormsModule } from '@angular/forms';
     .table { width: 100%; border-collapse: collapse; }
     .table th { text-align: left; padding: var(--spacing-md); border-bottom: 2px solid #f1f5f9; }
     .table td { padding: var(--spacing-md); border-bottom: 1px solid #f1f5f9; }
+    .table th input[type="checkbox"], .table td input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
     .text-right { text-align: right; }
     .income { color: var(--color-income); font-weight: 600; }
     .expense { color: var(--color-expense); font-weight: 600; }
@@ -215,6 +228,7 @@ export class TransacoesComponent implements OnInit {
   contas = signal<ContaBancaria[]>([]);
   cartoes = signal<CartaoCredito[]>([]);
   
+  selecionadas = signal<Set<string>>(new Set());
   mostrarImportacao = signal(false);
   mostrarNovo = signal(false);
 
@@ -254,6 +268,35 @@ export class TransacoesComponent implements OnInit {
     });
     this.financeiroService.getContas().subscribe(data => this.contas.set(data));
     this.financeiroService.getCartoes().subscribe(data => this.cartoes.set(data));
+  }
+
+  toggleSelecionada(id: string) {
+    const s = new Set(this.selecionadas());
+    if (s.has(id)) s.delete(id);
+    else s.add(id);
+    this.selecionadas.set(s);
+  }
+
+  toggleTodas(event: any) {
+    if (event.target.checked) {
+      this.selecionadas.set(new Set(this.transacoes().map(t => t.id)));
+    } else {
+      this.selecionadas.set(new Set());
+    }
+  }
+
+  excluirSelecionadas() {
+    if (!confirm(`Deseja excluir ${this.selecionadas().size} transações?`)) return;
+
+    const ids = Array.from(this.selecionadas());
+    this.financeiroService.excluirTransacoes(ids).subscribe({
+      next: () => {
+        this.selecionadas.set(new Set());
+        this.carregarDados();
+        alert('Excluídas com sucesso!');
+      },
+      error: (err) => alert('Erro ao excluir: ' + err.message)
+    });
   }
 
   salvarNovaTransacao(): void {

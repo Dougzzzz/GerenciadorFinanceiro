@@ -23,5 +23,18 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
         public async Task<IEnumerable<Transacao>> ObterTodasAsync() => await _context.Transacoes.AsNoTracking().ToListAsync();
 
         public async Task<Transacao?> ObterPorIdAsync(Guid id) => await _context.Transacoes.FindAsync(id);
+
+        public async Task ExcluirMuitasAsync(IEnumerable<Guid> ids)
+        {
+            var transacoes = await _context.Transacoes
+                .Where(t => ids.Contains(t.Id))
+                .ToListAsync();
+
+            if (transacoes.Count > 0)
+            {
+                _context.Transacoes.RemoveRange(transacoes);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }
