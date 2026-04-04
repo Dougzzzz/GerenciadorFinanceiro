@@ -53,6 +53,29 @@ namespace GerenciadorFinanceiro.Tests
         }
 
         [Fact]
+        public async Task LerArquivo_DeveGarantirQueDataSejaUtc()
+        {
+            // Arrange
+            var csv = new StringBuilder();
+            csv.AppendLine("Data de Compra;Valor (em R$)");
+            csv.AppendLine("15/03/2026;100,00");
+
+            var bytes = Encoding.Default.GetBytes(csv.ToString());
+            using var stream = new MemoryStream(bytes);
+            var reader = new CsvExtratoReader();
+
+            // Act
+            var result = await reader.LerArquivoAsync(stream);
+            var transacao = result.First();
+
+            // Assert
+            Assert.Equal(DateTimeKind.Utc, transacao.data.Kind);
+            Assert.Equal(15, transacao.data.Day);
+            Assert.Equal(3, transacao.data.Month);
+            Assert.Equal(2026, transacao.data.Year);
+        }
+
+        [Fact]
         public async Task LerArquivo_ComValorReaisAusente_DeveIgnorarLinhaMesmoComValorDolar()
         {
             // Arrange: linha possui valor em US$ mas coluna de Valor (em R$) vazia
