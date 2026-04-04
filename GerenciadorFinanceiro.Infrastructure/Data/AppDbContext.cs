@@ -10,10 +10,10 @@ namespace GerenciadorFinanceiro.Infrastructure.Data
         {
         }
 
-        public DbSet<Transacao> Transacoes { get; set; }
-        public DbSet<ContaBancaria> ContasBancarias { get; set; }
-        public DbSet<CartaoCredito> CartoesDeCredito { get; set; }
-        public DbSet<Categoria> Categorias { get; set; }
+        public DbSet<Transacao> Transacoes { get; set; } = null!;
+        public DbSet<ContaBancaria> ContasBancarias { get; set; } = null!;
+        public DbSet<CartaoCredito> CartoesDeCredito { get; set; } = null!;
+        public DbSet<Categoria> Categorias { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -53,10 +53,26 @@ namespace GerenciadorFinanceiro.Tests
         }
 
         [Fact]
-        public Task LerArquivo_DeveGarantirQueDataSejaUtc()
+        public async Task LerArquivo_DeveGarantirQueDataSejaUtc()
         {
-            return Task.CompletedTask;
-            // ... (código existente)
+            // Arrange
+            var csv = new StringBuilder();
+            csv.AppendLine("Data de Compra;Valor (em R$)");
+            csv.AppendLine("15/03/2026;100,00");
+
+            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+            using var stream = new MemoryStream(bytes);
+            var reader = new CsvExtratoReader();
+
+            // Act
+            var result = await reader.LerArquivoAsync(stream);
+            var transacao = result.First();
+
+            // Assert
+            Assert.Equal(DateTimeKind.Utc, transacao.data.Kind);
+            Assert.Equal(15, transacao.data.Day);
+            Assert.Equal(3, transacao.data.Month);
+            Assert.Equal(2026, transacao.data.Year);
         }
 
         [Fact]

@@ -38,9 +38,9 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
 
             var cultureBr = new CultureInfo("pt-BR");
 
-            while (!reader.EndOfStream)
+            string? linha;
+            while ((linha = await reader.ReadLineAsync()) != null)
             {
-                var linha = await reader.ReadLineAsync();
                 if (string.IsNullOrWhiteSpace(linha))
                 {
                     continue;
@@ -72,7 +72,9 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
                 var finalCartao = Obter(idxFinalCartao);
                 var parcela = Obter(idxParcela);
 
+#pragma warning disable CA1806 // Ignore result of TryParseDecimalFlex for optional cotacao
                 TryParseDecimalFlex(Obter(idxCotacao), out decimal cotacao);
+#pragma warning restore CA1806
 
                 transacoes.Add(new TransacaoDto(data, descricao, valor, categoria, nomeCartao, finalCartao, parcela, cotacao));
             }
