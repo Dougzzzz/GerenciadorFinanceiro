@@ -9,7 +9,7 @@ namespace GerenciadorFinanceiro.Domain.Entidades
     public class Categoria
     {
         public Guid Id { get; private set; }
-        public string Nome { get; private set; }
+        public string Nome { get; private set; } = null!;
         public TipoTransacao Tipo { get; private set; }
 
         public Categoria(string nome, TipoTransacao tipo)
@@ -18,6 +18,8 @@ namespace GerenciadorFinanceiro.Domain.Entidades
             Nome = nome;
             Tipo = tipo;
         }
+
+        protected Categoria() { }
     }
 
     public enum TipoTransacao

@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace GerenciadorFinanceiro.Infrastructure.Migrations
+namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260404155902_AddTransacaoFields")]

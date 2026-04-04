@@ -29,24 +29,29 @@ namespace GerenciadorFinanceiro.Infrastructure.Data
 
                 // Mapeamento de valores numéricos com precisão
                 entity.Property(t => t.Valor)
-                    .HasColumnType("decimal(18,2)")
+                    .HasPrecision(18, 2)
                     .IsRequired();
 
                 entity.Property(t => t.Cotacao)
-                    .HasColumnType("decimal(18,2)");
+                    .HasPrecision(18, 2)
+                    .HasDefaultValue(0m);
 
                 // Campos de texto adicionais
                 entity.Property(t => t.Categoria)
-                    .HasMaxLength(150);
+                    .HasMaxLength(150)
+                    .HasDefaultValue("");
 
                 entity.Property(t => t.NomeCartao)
-                    .HasMaxLength(150);
+                    .HasMaxLength(150)
+                    .HasDefaultValue("");
 
                 entity.Property(t => t.FinalCartao)
-                    .HasMaxLength(20);
+                    .HasMaxLength(20)
+                    .HasDefaultValue("");
 
                 entity.Property(t => t.Parcela)
-                    .HasMaxLength(50);
+                    .HasMaxLength(50)
+                    .HasDefaultValue("");
 
                 // Chaves e relacionamentos já são inferidos pelas propriedades existentes
             });

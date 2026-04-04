@@ -9,7 +9,7 @@ namespace GerenciadorFinanceiro.Domain.Entidades
     public class ContaBancaria
     {
         public Guid Id { get; private set; }
-        public string NomeBanco { get; private set; }
+        public string NomeBanco { get; private set; } = null!;
         public decimal SaldoAtual { get; private set; }
 
         public ContaBancaria(string nomeBanco, decimal saldoInicial = 0)

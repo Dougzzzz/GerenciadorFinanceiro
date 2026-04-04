@@ -9,7 +9,7 @@ namespace GerenciadorFinanceiro.Domain.Entidades
     public class CartaoCredito
     {
         public Guid Id { get; private set; }
-        public string Nome { get; private set; }
+        public string Nome { get; private set; } = null!;
         public decimal Limite { get; private set; }
         public int DiaFechamento { get; private set; }
         public int DiaVencimento { get; private set; }
@@ -22,5 +22,7 @@ namespace GerenciadorFinanceiro.Domain.Entidades
             DiaFechamento = diaFechamento;
             DiaVencimento = diaVencimento;
         }
+
+        protected CartaoCredito() { }
     }
 }

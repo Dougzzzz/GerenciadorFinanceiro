@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace GerenciadorFinanceiro.Infrastructure.Migrations
+namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
     public partial class AddTransacaoFields : Migration

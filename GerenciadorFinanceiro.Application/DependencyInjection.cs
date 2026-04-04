@@ -1,0 +1,16 @@
+using GerenciadorFinanceiro.Application.Interfaces;
+using GerenciadorFinanceiro.Application.UseCases;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace GerenciadorFinanceiro.Application
+{
+    public static class DependencyInjection
+    {
+        public static IServiceCollection AddApplication(this IServiceCollection services)
+        {
+            services.AddScoped<ImportarExtratoUseCase>();
+
+            return services;
+        }
+    }
+}

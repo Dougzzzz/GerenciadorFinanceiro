@@ -1,6 +1,6 @@
-using GerenciadorFinanceiro.Domain.Interfaces;
+using GerenciadorFinanceiro.Application;
+using GerenciadorFinanceiro.Infrastructure;
 using GerenciadorFinanceiro.Infrastructure.Data;
-using GerenciadorFinanceiro.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 internal class Program
@@ -10,18 +10,19 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // 1. Configurando o banco de dados PostgreSQL
-        // Ele busca a string de conex�o que acabamos de colocar no appsettings.json
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        // Adiciona os servi�os para os Controllers da API
+        // Adiciona os serviços para os Controllers da API
         builder.Services.AddControllers();
 
-        // Adiciona o Swagger para podermos testar a API no navegador depois
+        // Adiciona o Swagger
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        builder.Services.AddScoped<ITransacaoRepository, TransacaoRepository>();
+        // Configura Injeção de Dependência das camadas
+        builder.Services.AddInfrastructure();
+        builder.Services.AddApplication();
 
         var app = builder.Build();
 

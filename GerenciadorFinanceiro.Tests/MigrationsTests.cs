@@ -15,6 +15,7 @@ namespace GerenciadorFinanceiro.Tests
 
  var options = new DbContextOptionsBuilder<AppDbContext>()
  .UseSqlite(connection)
+ .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning))
  .Options;
 
  // Act: apply migrations
@@ -58,6 +59,7 @@ namespace GerenciadorFinanceiro.Tests
 
  var options = new DbContextOptionsBuilder<AppDbContext>()
  .UseSqlite(connection)
+ .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning))
  .Options;
 
  using (var context = new AppDbContext(options))
@@ -81,8 +83,8 @@ namespace GerenciadorFinanceiro.Tests
  }
  }
 
- Assert.True(cols.ContainsKey("Valor"), "Coluna 'Valor' não encontrada");
- Assert.True(cols.ContainsKey("Cotacao"), "Coluna 'Cotacao' não encontrada");
+ Assert.True(cols.ContainsKey("Valor"), "Coluna 'Valor' nï¿½o encontrada");
+ Assert.True(cols.ContainsKey("Cotacao"), "Coluna 'Cotacao' nï¿½o encontrada");
 
  var valorType = cols["Valor"].type?.ToLowerInvariant() ?? string.Empty;
  var cotacaoType = cols["Cotacao"].type?.ToLowerInvariant() ?? string.Empty;
