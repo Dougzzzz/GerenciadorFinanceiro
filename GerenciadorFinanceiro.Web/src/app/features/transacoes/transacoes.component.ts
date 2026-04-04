@@ -15,9 +15,57 @@ import { FormsModule } from '@angular/forms';
       <header class="page-header">
         <h1>Transações</h1>
         <div class="actions">
-          <app-button (onClick)="mostrarImportacao.set(true)">Importar Extrato</app-button>
+          <app-button variant="outline" (onClick)="mostrarNovo.set(!mostrarNovo())">
+            {{ mostrarNovo() ? 'Fechar' : 'Nova Transação' }}
+          </app-button>
+          <app-button (onClick)="mostrarImportacao.set(!mostrarImportacao())">
+            {{ mostrarImportacao() ? 'Fechar' : 'Importar Extrato' }}
+          </app-button>
         </div>
       </header>
+
+      <!-- Formulário de Nova Transação -->
+      <app-card *ngIf="mostrarNovo()" title="Nova Transação">
+        <form (submit)="salvarNovaTransacao()" class="form-grid">
+          <div class="form-group">
+            <label>Data</label>
+            <input type="date" [(ngModel)]="novaTransacao.data" name="data" required>
+          </div>
+          <div class="form-group">
+            <label>Descrição</label>
+            <input type="text" [(ngModel)]="novaTransacao.descricao" name="descricao" placeholder="Ex: Almoço" required>
+          </div>
+          <div class="form-group">
+            <label>Valor (R$)</label>
+            <input type="number" step="0.01" [(ngModel)]="novaTransacao.valor" name="valor" placeholder="Negativo para despesas" required>
+          </div>
+          <div class="form-group">
+            <label>Categoria</label>
+            <select [(ngModel)]="novaTransacao.categoriaId" name="categoriaId" required>
+              <option *ngFor="let c of categorias()" [value]="c.id">{{ c.nome }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Conta (Opcional)</label>
+            <select [(ngModel)]="novaTransacao.contaBancariaId" name="contaBancariaId">
+              <option [value]="undefined">Nenhuma</option>
+              <option *ngFor="let c of contas()" [value]="c.id">{{ c.nomeBanco }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Cartão (Opcional)</label>
+            <select [(ngModel)]="novaTransacao.cartaoCreditoId" name="cartaoCreditoId">
+              <option [value]="undefined">Nenhum</option>
+              <option *ngFor="let c of cartoes()" [value]="c.id">{{ c.nome }}</option>
+            </select>
+          </div>
+          <div class="form-actions-full">
+            <app-button type="submit" [disabled]="!novaTransacao.descricao || !novaTransacao.valor || !novaTransacao.categoriaId">
+              Salvar Transação
+            </app-button>
+          </div>
+        </form>
+      </app-card>
 
       <app-card *ngIf="mostrarImportacao()" title="Importar Extrato CSV">
         <div class="import-form">
@@ -146,6 +194,19 @@ import { FormsModule } from '@angular/forms';
     .desc-cell { display: flex; flex-direction: column; }
     .desc-cell small { color: var(--color-text-secondary); font-size: 0.75rem; }
     .badge { background: #f1f5f9; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-md);
+    }
+
+    .form-actions-full {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: var(--spacing-md);
+    }
   `]
 })
 export class TransacoesComponent implements OnInit {
@@ -155,6 +216,8 @@ export class TransacoesComponent implements OnInit {
   cartoes = signal<CartaoCredito[]>([]);
   
   mostrarImportacao = signal(false);
+  mostrarNovo = signal(false);
+
   selectedFile: File | null = null;
   importConfig = {
     categoriaId: '',
@@ -162,20 +225,47 @@ export class TransacoesComponent implements OnInit {
     cartaoId: undefined as string | undefined
   };
 
+  novaTransacao = this.getNovoObjetoTransacao();
+
   constructor(private financeiroService: FinanceiroService) {}
 
   ngOnInit(): void {
     this.carregarDados();
   }
 
+  getNovoObjetoTransacao() {
+    return {
+      data: new Date().toISOString().split('T')[0],
+      descricao: '',
+      valor: 0,
+      categoriaId: '',
+      contaBancariaId: undefined as string | undefined,
+      cartaoCreditoId: undefined as string | undefined
+    };
+  }
+
   carregarDados(): void {
     this.financeiroService.getTransacoes().subscribe(data => this.transacoes.set(data));
     this.financeiroService.getCategorias().subscribe(data => {
       this.categorias.set(data);
-      if (data.length > 0) this.importConfig.categoriaId = data[0].id;
+      if (data.length > 0 && !this.novaTransacao.categoriaId) {
+        this.novaTransacao.categoriaId = data[0].id;
+      }
     });
     this.financeiroService.getContas().subscribe(data => this.contas.set(data));
     this.financeiroService.getCartoes().subscribe(data => this.cartoes.set(data));
+  }
+
+  salvarNovaTransacao(): void {
+    this.financeiroService.criarTransacao(this.novaTransacao).subscribe({
+      next: () => {
+        this.mostrarNovo.set(false);
+        this.novaTransacao = this.getNovoObjetoTransacao();
+        this.carregarDados();
+        alert('Transação salva com sucesso!');
+      },
+      error: (err) => alert('Erro ao salvar: ' + err.message)
+    });
   }
 
   onFileSelected(event: any): void {

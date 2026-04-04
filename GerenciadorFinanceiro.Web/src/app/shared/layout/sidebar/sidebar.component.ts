@@ -15,6 +15,7 @@ import { RouterModule } from '@angular/router';
         <ul>
           <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Dashboard</a></li>
           <li><a routerLink="/transacoes" routerLinkActive="active">Transações</a></li>
+          <li><a routerLink="/categorias" routerLinkActive="active">Categorias</a></li>
           <li><a routerLink="/contas" routerLinkActive="active">Contas</a></li>
           <li><a routerLink="/cartoes" routerLinkActive="active">Cartões</a></li>
         </ul>
