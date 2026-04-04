@@ -60,7 +60,7 @@ namespace GerenciadorFinanceiro.Tests
             csv.AppendLine("Data de Compra;Valor (em R$)");
             csv.AppendLine("15/03/2026;100,00");
 
-            var bytes = Encoding.Default.GetBytes(csv.ToString());
+            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
             using var stream = new MemoryStream(bytes);
             var reader = new CsvExtratoReader();
 
@@ -73,6 +73,32 @@ namespace GerenciadorFinanceiro.Tests
             Assert.Equal(15, transacao.data.Day);
             Assert.Equal(3, transacao.data.Month);
             Assert.Equal(2026, transacao.data.Year);
+        }
+
+        [Fact]
+        public async Task LerArquivo_DeveSuportarDiferentesFormatosDecimais()
+        {
+            // Arrange
+            var csv = new StringBuilder();
+            csv.AppendLine("Data de Compra;Valor (em R$)");
+            csv.AppendLine("01/01/2026;1142.72");   // Ponto como decimal (da imagem)
+            csv.AppendLine("02/01/2026;1142,72");   // Vírgula como decimal
+            csv.AppendLine("03/01/2026;1.142,72");  // Padrão BR (ponto milhar, vírgula decimal)
+            csv.AppendLine("04/01/2026;1,142.72");  // Padrão US (vírgula milhar, ponto decimal)
+
+            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+            using var stream = new MemoryStream(bytes);
+            var reader = new CsvExtratoReader();
+
+            // Act
+            var result = (await reader.LerArquivoAsync(stream)).ToList();
+
+            // Assert
+            Assert.Equal(4, result.Count);
+            foreach (var transacao in result)
+            {
+                Assert.Equal(1142.72m, transacao.valor);
+            }
         }
 
         [Fact]

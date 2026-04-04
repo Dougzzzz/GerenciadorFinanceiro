@@ -37,6 +37,18 @@ namespace GerenciadorFinanceiro.Api.Controllers
             return Ok(transacao);
         }
 
+        [HttpPost]
+        public async Task<ActionResult<Transacao>> Post([FromBody] Transacao transacao)
+        {
+            if (transacao == null)
+            {
+                return BadRequest();
+            }
+
+            await _repository.AdicionarAsync(transacao);
+            return CreatedAtAction(nameof(Get), new { id = transacao.Id }, transacao);
+        }
+
         [HttpPost("importar")]
         public async Task<IActionResult> Importar(IFormFile arquivo, [FromQuery] Guid categoriaPadraoId, [FromQuery] Guid? contaId, [FromQuery] Guid? cartaoId)
         {

@@ -1,4 +1,4 @@
-﻿using GerenciadorFinanceiro.Domain.Entidades;
+using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Infrastructure.Data;
 using GerenciadorFinanceiro.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -7,18 +7,6 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
 {
     public class TransacaoRepositoryTests
     {
-        // Cria um banco de dados na memória limpo para cada teste
-        private AppDbContext CriarContextoEmMemoria()
-        {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-
-                // O Guid garante que cada execução do teste ganhe um banco zerado e com nome único
-                .UseInMemoryDatabase(databaseName: $"GerenciadorDbTeste_{Guid.NewGuid()}")
-                .Options;
-
-            return new AppDbContext(options);
-        }
-
         [Fact]
         public async Task AdicionarAsync_DeveSalvarTransacaoNoBanco()
         {
@@ -52,6 +40,18 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
             Assert.NotNull(transacaoEncontrada);
             Assert.Equal(5000m, transacaoEncontrada.Valor);
             Assert.Equal(TipoTransacao.Receita, transacaoEncontrada.Tipo);
+        }
+
+        // Cria um banco de dados na memória limpo para cada teste
+        private static AppDbContext CriarContextoEmMemoria()
+        {
+            var options = new DbContextOptionsBuilder<AppDbContext>()
+
+                // O Guid garante que cada execução do teste ganhe um banco zerado e com nome único
+                .UseInMemoryDatabase(databaseName: $"GerenciadorDbTeste_{Guid.NewGuid()}")
+                .Options;
+
+            return new AppDbContext(options);
         }
     }
 }

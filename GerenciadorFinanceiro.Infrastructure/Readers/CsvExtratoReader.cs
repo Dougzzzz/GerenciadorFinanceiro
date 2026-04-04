@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text;
 using GerenciadorFinanceiro.Application.DTOs;
 using GerenciadorFinanceiro.Application.Interfaces;
@@ -11,7 +11,8 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
         {
             var transacoes = new List<TransacaoDto>();
 
-            using var reader = new StreamReader(arquivo, Encoding.Default);
+            // Usa UTF8 com detecção automática de BOM para evitar caracteres estranhos como na imagem
+            using var reader = new StreamReader(arquivo, Encoding.UTF8, true);
 
             // Lê o cabeçalho e identifica índices das colunas relevantes
             var headerLine = await reader.ReadLineAsync();
@@ -35,81 +36,86 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
             int idxParcela = Array.FindIndex(headers, h => h.Contains("parcela"));
             int idxCotacao = Array.FindIndex(headers, h => h.Contains("cota"));
 
-            var culture = new CultureInfo("pt-BR");
+            var cultureBr = new CultureInfo("pt-BR");
 
-            while (!reader.EndOfStream)
+            string? linha;
+            while ((linha = await reader.ReadLineAsync()) != null)
             {
-                var linha = await reader.ReadLineAsync();
                 if (string.IsNullOrWhiteSpace(linha))
                 {
                     continue;
                 }
 
-                // Suporta CSV com ; ou \t (não usamos ',' pois pode aparecer em valores)
                 var colunas = linha.Split([';', '\t']);
-
-                // Função local para obter coluna segura
                 string Obter(int idx) => (idx >= 0 && idx < colunas.Length) ? colunas[idx].Trim() : string.Empty;
 
-                // Lê data
                 var dataText = Obter(idxData);
-                bool dataValida = DateTime.TryParse(dataText, culture, DateTimeStyles.None, out DateTime data);
-                
-                // PostgreSQL exige DateTime em UTC para colunas 'timestamp with time zone'
+                bool dataValida = DateTime.TryParse(dataText, cultureBr, DateTimeStyles.None, out DateTime data);
+
                 if (dataValida)
                 {
                     data = DateTime.SpecifyKind(data, DateTimeKind.Utc);
                 }
 
-                // Lê descrição
                 var descricao = Obter(idxDescricao);
 
-                // Ignora coluna em US$ — tenta pegar valor em R$
-                decimal valor = 0m;
                 var valorReaisText = Obter(idxValorReais);
-                var valorDolarText = Obter(idxValorDolar);
-
-                bool valorValido = false;
-                if (!string.IsNullOrWhiteSpace(valorReaisText))
-                {
-                    // Remove possíveis símbolos e espaços e pontos de milhar
-                    var cleaned = valorReaisText.Replace("R$", string.Empty).Replace(" ", string.Empty).Trim();
-                    cleaned = cleaned.Replace(".", string.Empty); // remove milhares
-                    valorValido = decimal.TryParse(cleaned, NumberStyles.Any, culture, out valor);
-                }
-
-                if (!valorValido && !string.IsNullOrWhiteSpace(valorDolarText))
-                {
-                    // Caso não tenha valor em reais, tenta ler o valor em dólar (mas conforme solicitado, será ignorado)
-                    // Apenas tentamos parse para evitar erros, mas não usamos o valor em dólar
-                    var cleaned = valorDolarText.Replace("$", string.Empty).Replace(" ", string.Empty).Trim();
-                    decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out _);
-                }
+                bool valorValido = TryParseDecimalFlex(valorReaisText, out decimal valor);
 
                 if (!dataValida || !valorValido)
                 {
-                    // Se não conseguiu interpretar data ou valor em reais, pula a linha
                     continue;
                 }
 
-                // Lê campos opcionais
                 var categoria = Obter(idxCategoria);
                 var nomeCartao = Obter(idxNomeCartao);
                 var finalCartao = Obter(idxFinalCartao);
                 var parcela = Obter(idxParcela);
-                decimal cotacao = 0m;
-                var cotacaoText = Obter(idxCotacao);
-                if (!string.IsNullOrWhiteSpace(cotacaoText))
-                {
-                    var cleaned = cotacaoText.Replace("R$", string.Empty).Replace(" ", string.Empty).Trim();
-                    cleaned = cleaned.Replace(".", string.Empty);
-                    decimal.TryParse(cleaned, NumberStyles.Any, culture, out cotacao);
-                }
+
+#pragma warning disable CA1806 // Ignore result of TryParseDecimalFlex for optional cotacao
+                TryParseDecimalFlex(Obter(idxCotacao), out decimal cotacao);
+#pragma warning restore CA1806
 
                 transacoes.Add(new TransacaoDto(data, descricao, valor, categoria, nomeCartao, finalCartao, parcela, cotacao));
             }
 
             return transacoes;
+        }
+
+        private static bool TryParseDecimalFlex(string text, out decimal result)
+        {
+            result = 0;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return false;
+            }
+
+            // Limpa símbolos monetários e espaços
+            var cleaned = text.Replace("R$", string.Empty).Replace("$", string.Empty).Replace(" ", string.Empty).Trim();
+
+            // Lógica Flexível:
+            // 1. Se tem os dois (ex: 1.234,56 ou 1,234.56), o último é o decimal
+            if (cleaned.Contains('.') && cleaned.Contains(','))
+            {
+                if (cleaned.LastIndexOf(',') > cleaned.LastIndexOf('.'))
+                {
+                    // Padrão BR: 1.234,56 -> remove ponto, troca vírgula por ponto
+                    cleaned = cleaned.Replace(".", string.Empty).Replace(',', '.');
+                }
+                else
+                {
+                    // Padrão US: 1,234.56 -> remove vírgula
+                    cleaned = cleaned.Replace(",", string.Empty);
+                }
+            }
+            else if (cleaned.Contains(','))
+            {
+                // Só tem vírgula: trata como decimal (ex: 1234,56)
+                cleaned = cleaned.Replace(',', '.');
+            }
+
+            // Se só tem ponto, mantém (ex: 1234.56)
+            return decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out result);
         }
 
         private static string RemoveDiacritics(string text)

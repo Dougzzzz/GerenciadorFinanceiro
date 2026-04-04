@@ -41,7 +41,9 @@ dotnet_diagnostic.IDE0008.severity = none       # Preferir var ou tipo explícit
 dotnet_diagnostic.IDE0058.severity = none       # Valor da expressão não usado
 dotnet_diagnostic.IDE0290.severity = none       # Sugestão de Construtor Primário
 dotnet_diagnostic.IDE0046.severity = none       # Simplificar if
-dotnet_diagnostic.IDE0011.severity = none       # Exigir chaves em ifs curtos (StyleCop já cuida)
+dotnet_diagnostic.IDE0011.severity = none       # Exigir chaves em ifs curtos
+dotnet_diagnostic.SA1649.severity = none       # Erro do analisador com Records
+dotnet_diagnostic.CA1707.severity = none       # Permitir underscores em nomes (comum em testes)
 
 # Nomenclatura (Padrão PascalCase para classes, métodos, etc)
 dotnet_naming_rule.interface_should_be_begun_with_i.severity = suggestion

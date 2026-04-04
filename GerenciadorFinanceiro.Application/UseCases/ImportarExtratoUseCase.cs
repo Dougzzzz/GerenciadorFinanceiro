@@ -1,4 +1,4 @@
-﻿using GerenciadorFinanceiro.Application.Interfaces;
+using GerenciadorFinanceiro.Application.Interfaces;
 using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Interfaces;
 
