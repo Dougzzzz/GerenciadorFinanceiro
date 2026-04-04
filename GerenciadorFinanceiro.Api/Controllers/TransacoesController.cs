@@ -62,5 +62,17 @@ namespace GerenciadorFinanceiro.Api.Controllers
 
             return Ok("Arquivo importado com sucesso.");
         }
+
+        [HttpDelete("excluir-muitas")]
+        public async Task<IActionResult> ExcluirMuitas([FromBody] IEnumerable<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+            {
+                return BadRequest("Nenhum ID fornecido.");
+            }
+
+            await _repository.ExcluirMuitasAsync(ids);
+            return NoContent();
+        }
     }
 }

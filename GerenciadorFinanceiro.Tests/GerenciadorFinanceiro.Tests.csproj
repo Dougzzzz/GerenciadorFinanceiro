@@ -14,6 +14,7 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="NSubstitute" Version="5.3.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
@@ -26,6 +27,7 @@
     <ProjectReference Include="..\GerenciadorFinanceiro.Domain\GerenciadorFinanceiro.Domain.csproj" />
     <ProjectReference Include="..\GerenciadorFinanceiro.Application\GerenciadorFinanceiro.Application.csproj" />
     <ProjectReference Include="..\GerenciadorFinanceiro.Infrastructure\GerenciadorFinanceiro.Infrastructure.csproj" />
+    <ProjectReference Include="..\GerenciadorFinanceiro.Api\GerenciadorFinanceiro.Api.csproj" />
   </ItemGroup>
 
 </Project>

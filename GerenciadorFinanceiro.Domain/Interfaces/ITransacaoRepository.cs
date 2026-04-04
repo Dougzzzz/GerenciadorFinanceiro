@@ -7,5 +7,6 @@ namespace GerenciadorFinanceiro.Domain.Interfaces
         Task AdicionarAsync(Transacao transacao);
         Task<IEnumerable<Transacao>> ObterTodasAsync();
         Task<Transacao?> ObterPorIdAsync(Guid id);
+        Task ExcluirMuitasAsync(IEnumerable<Guid> ids);
     }
 }

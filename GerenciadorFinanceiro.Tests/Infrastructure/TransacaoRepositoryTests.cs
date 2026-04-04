@@ -42,6 +42,29 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
             Assert.Equal(TipoTransacao.Receita, transacaoEncontrada.Tipo);
         }
 
+        [Fact]
+        public async Task ExcluirMuitasAsync_DeveRemoverApenasAsTransacoesEspecificadas()
+        {
+            // Arrange
+            using var context = CriarContextoEmMemoria();
+            var repository = new TransacaoRepository(context);
+
+            var t1 = new Transacao(DateTime.Now, "T1", -10, Guid.NewGuid(), null, null);
+            var t2 = new Transacao(DateTime.Now, "T2", -20, Guid.NewGuid(), null, null);
+            var t3 = new Transacao(DateTime.Now, "T3", -30, Guid.NewGuid(), null, null);
+
+            context.Transacoes.AddRange(t1, t2, t3);
+            await context.SaveChangesAsync();
+
+            // Act
+            await repository.ExcluirMuitasAsync([t1.Id, t2.Id]);
+
+            // Assert
+            var restantes = await context.Transacoes.ToListAsync();
+            Assert.Single(restantes);
+            Assert.Equal(t3.Id, restantes[0].Id);
+        }
+
         // Cria um banco de dados na memória limpo para cada teste
         private static AppDbContext CriarContextoEmMemoria()
         {
