@@ -17,15 +17,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configuração do CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AngularDev", policy =>
-    {
-        policy.WithOrigins("http://localhost:4200")
+builder.Services.AddCors(options => options.AddPolicy("AngularDev", policy => policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
+              .AllowAnyMethod()));
 
 // Configura Injeção de Dependência das camadas
 builder.Services.AddInfrastructure();

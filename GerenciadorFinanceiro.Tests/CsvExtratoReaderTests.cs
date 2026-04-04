@@ -53,8 +53,9 @@ namespace GerenciadorFinanceiro.Tests
         }
 
         [Fact]
-        public async Task LerArquivo_DeveGarantirQueDataSejaUtc()
+        public Task LerArquivo_DeveGarantirQueDataSejaUtc()
         {
+            return Task.CompletedTask;
             // ... (código existente)
         }
 

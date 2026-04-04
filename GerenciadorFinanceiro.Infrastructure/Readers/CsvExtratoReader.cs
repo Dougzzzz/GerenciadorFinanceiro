@@ -83,10 +83,13 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
         private static bool TryParseDecimalFlex(string text, out decimal result)
         {
             result = 0;
-            if (string.IsNullOrWhiteSpace(text)) return false;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return false;
+            }
 
             // Limpa símbolos monetários e espaços
-            var cleaned = text.Replace("R$", "").Replace("$", "").Replace(" ", "").Trim();
+            var cleaned = text.Replace("R$", string.Empty).Replace("$", string.Empty).Replace(" ", string.Empty).Trim();
 
             // Lógica Flexível:
             // 1. Se tem os dois (ex: 1.234,56 ou 1,234.56), o último é o decimal
@@ -95,12 +98,12 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
                 if (cleaned.LastIndexOf(',') > cleaned.LastIndexOf('.'))
                 {
                     // Padrão BR: 1.234,56 -> remove ponto, troca vírgula por ponto
-                    cleaned = cleaned.Replace(".", "").Replace(',', '.');
+                    cleaned = cleaned.Replace(".", string.Empty).Replace(',', '.');
                 }
                 else
                 {
                     // Padrão US: 1,234.56 -> remove vírgula
-                    cleaned = cleaned.Replace(",", "");
+                    cleaned = cleaned.Replace(",", string.Empty);
                 }
             }
             else if (cleaned.Contains(','))
@@ -108,10 +111,11 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
                 // Só tem vírgula: trata como decimal (ex: 1234,56)
                 cleaned = cleaned.Replace(',', '.');
             }
-            // Se só tem ponto, mantém (ex: 1234.56)
 
+            // Se só tem ponto, mantém (ex: 1234.56)
             return decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out result);
         }
+
         private static string RemoveDiacritics(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
