@@ -47,5 +47,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<bool> PossuiTransacoesPorCategoriaAsync(Guid categoriaId) => await _context.Transacoes.AnyAsync(t => t.CategoriaId == categoriaId);
     }
 }

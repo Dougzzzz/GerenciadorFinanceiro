@@ -59,6 +59,10 @@ export class FinanceiroService {
     return this.http.put(`${this.apiUrl}/categorias/${categoria.id}`, categoria);
   }
 
+  excluirCategorias(ids: string[]): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/categorias/excluir-muitas`, { body: ids });
+  }
+
   // Contas
   getContas(): Observable<ContaBancaria[]> {
     return this.http.get<ContaBancaria[]>(`${this.apiUrl}/contas`);

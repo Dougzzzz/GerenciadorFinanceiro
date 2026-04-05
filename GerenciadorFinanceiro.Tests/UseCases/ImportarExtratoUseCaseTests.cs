@@ -45,6 +45,7 @@ namespace GerenciadorFinanceiro.Tests.UseCases
             var stream = new MemoryStream(Encoding.UTF8.GetBytes("data,descricao,valor\n2024-01-01,Teste,100"));
             var contaId = Guid.NewGuid();
             var dtos = new List<TransacaoDto> { new TransacaoDto(DateTime.Now, "Teste", 100) };
+
             _reader.LerArquivoAsync(Arg.Any<Stream>()).Returns(dtos);
 
             // Mock da categoria "Outros"
@@ -65,6 +66,7 @@ namespace GerenciadorFinanceiro.Tests.UseCases
             var stream = new MemoryStream();
             var contaId = Guid.NewGuid();
             var dtos = new List<TransacaoDto> { new TransacaoDto(DateTime.Now, "Teste", 100) };
+
             _reader.LerArquivoAsync(Arg.Any<Stream>()).Returns(dtos);
 
             // Mock da categoria "Outros" como não existente inicialmente

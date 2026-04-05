@@ -32,5 +32,18 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
             _context.Categorias.Update(categoria);
             await _context.SaveChangesAsync();
         }
+
+        public async Task ExcluirMuitasAsync(IEnumerable<Guid> ids)
+        {
+            var categorias = await _context.Categorias
+                .Where(c => ids.Contains(c.Id))
+                .ToListAsync();
+
+            if (categorias.Count > 0)
+            {
+                _context.Categorias.RemoveRange(categorias);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

@@ -9,5 +9,6 @@ namespace GerenciadorFinanceiro.Domain.Interfaces
         Task<IEnumerable<Transacao>> ObterTodasAsync();
         Task<Transacao?> ObterPorIdAsync(Guid id);
         Task ExcluirMuitasAsync(IEnumerable<Guid> ids);
+        Task<bool> PossuiTransacoesPorCategoriaAsync(Guid categoriaId);
     }
 }

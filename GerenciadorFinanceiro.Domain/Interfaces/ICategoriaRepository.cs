@@ -9,5 +9,6 @@ namespace GerenciadorFinanceiro.Domain.Interfaces
         Task<Categoria?> ObterPorIdAsync(Guid id);
         Task AdicionarAsync(Categoria categoria);
         Task AtualizarAsync(Categoria categoria);
+        Task ExcluirMuitasAsync(IEnumerable<Guid> ids);
     }
 }

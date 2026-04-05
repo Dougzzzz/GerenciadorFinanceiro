@@ -10,12 +10,49 @@ namespace GerenciadorFinanceiro.Tests.Api
     public class CategoriasControllerTests
     {
         private readonly ICategoriaRepository _repository;
+        private readonly ITransacaoRepository _transacaoRepository;
         private readonly CategoriasController _controller;
 
         public CategoriasControllerTests()
         {
             _repository = Substitute.For<ICategoriaRepository>();
-            _controller = new CategoriasController(_repository);
+            _transacaoRepository = Substitute.For<ITransacaoRepository>();
+            _controller = new CategoriasController(_repository, _transacaoRepository);
+        }
+
+        [Fact]
+        public async Task ExcluirMuitas_ComCategoriasSemTransacoes_DeveRetornarNoContent()
+        {
+            // Arrange
+            List<Guid> ids = [Guid.NewGuid()];
+            _transacaoRepository.PossuiTransacoesPorCategoriaAsync(ids[0]).Returns(false);
+
+            // Act
+            var result = await _controller.ExcluirMuitas(ids);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+            await _repository.Received(1).ExcluirMuitasAsync(ids);
+        }
+
+        [Fact]
+        public async Task ExcluirMuitas_ComCategoriaVinculada_DeveRetornarBadRequest()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var ids = new List<Guid> { id };
+            var cat = new Categoria("Teste", TipoTransacao.Despesa);
+
+            _repository.ObterPorIdAsync(id).Returns(cat);
+            _transacaoRepository.PossuiTransacoesPorCategoriaAsync(id).Returns(true);
+
+            // Act
+            var result = await _controller.ExcluirMuitas(ids);
+
+            // Assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Contains("Teste", badRequest.Value?.ToString() ?? string.Empty);
+            await _repository.DidNotReceive().ExcluirMuitasAsync(Arg.Any<IEnumerable<Guid>>());
         }
 
         [Fact]

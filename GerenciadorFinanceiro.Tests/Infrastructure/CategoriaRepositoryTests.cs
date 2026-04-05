@@ -80,6 +80,25 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
             Assert.Equal(TipoTransacao.Receita, noDb.Tipo);
         }
 
+        [Fact]
+        public async Task ExcluirMuitasAsync_DeveRemoverCategorias()
+        {
+            // Arrange
+            using var context = CriarContexto();
+            var repository = new CategoriaRepository(context);
+            var cat1 = new Categoria("C1", TipoTransacao.Despesa);
+            var cat2 = new Categoria("C2", TipoTransacao.Despesa);
+            await repository.AdicionarAsync(cat1);
+            await repository.AdicionarAsync(cat2);
+
+            // Act
+            await repository.ExcluirMuitasAsync([cat1.Id, cat2.Id]);
+
+            // Assert
+            var todas = await repository.ObterTodasAsync();
+            Assert.Empty(todas);
+        }
+
         private static AppDbContext CriarContexto()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
