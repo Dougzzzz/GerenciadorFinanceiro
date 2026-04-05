@@ -154,7 +154,9 @@ import { FormsModule } from '@angular/forms';
                 <select *ngIf="editandoId() === t.id" [(ngModel)]="tempEdit().categoriaId" class="edit-input">
                   <option *ngFor="let c of categorias()" [value]="c.id">{{ c.nome }}</option>
                 </select>
-                <span *ngIf="editandoId() !== t.id" class="badge">{{ t.categoria }}</span>
+                <span *ngIf="editandoId() !== t.id" class="badge">
+                  {{ t.categoriaNavigation?.nome || t.categoria }}
+                </span>
               </td>
 
               <!-- Destino -->
@@ -169,7 +171,9 @@ import { FormsModule } from '@angular/forms';
                     <option *ngFor="let c of cartoes()" [value]="c.id">{{ c.nome }}</option>
                   </select>
                 </div>
-                <span *ngIf="editandoId() !== t.id">{{ t.nomeCartao || 'Conta' }}</span>
+                <span *ngIf="editandoId() !== t.id">
+                  {{ t.cartaoCreditoNavigation?.nome || t.contaBancariaNavigation?.nomeBanco || t.nomeCartao || 'Nenhum' }}
+                </span>
               </td>
 
               <!-- Valor -->

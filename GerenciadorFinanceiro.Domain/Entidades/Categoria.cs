@@ -14,6 +14,12 @@ namespace GerenciadorFinanceiro.Domain.Entidades
         }
 
         protected Categoria() { }
+
+        public void Atualizar(string nome, TipoTransacao tipo)
+        {
+            Nome = nome;
+            Tipo = tipo;
+        }
     }
 
     public enum TipoTransacao

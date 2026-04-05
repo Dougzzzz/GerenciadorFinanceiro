@@ -19,9 +19,17 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
         public async Task<Categoria?> ObterPorNomeAsync(string nome, TipoTransacao tipo) => await _context.Categorias
                 .FirstOrDefaultAsync(c => c.Nome.Equals(nome, StringComparison.CurrentCultureIgnoreCase) && c.Tipo == tipo);
 
+        public async Task<Categoria?> ObterPorIdAsync(Guid id) => await _context.Categorias.FindAsync(id);
+
         public async Task AdicionarAsync(Categoria categoria)
         {
             await _context.Categorias.AddAsync(categoria);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AtualizarAsync(Categoria categoria)
+        {
+            _context.Categorias.Update(categoria);
             await _context.SaveChangesAsync();
         }
     }

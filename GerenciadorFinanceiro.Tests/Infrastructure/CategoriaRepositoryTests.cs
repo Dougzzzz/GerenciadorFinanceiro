@@ -43,6 +43,43 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
             Assert.Null(encontrada);
         }
 
+        [Fact]
+        public async Task ObterPorIdAsync_DeveRetornarCategoriaExistente()
+        {
+            // Arrange
+            using var context = CriarContexto();
+            var repository = new CategoriaRepository(context);
+            var categoria = new Categoria("Aluguel", TipoTransacao.Despesa);
+            await repository.AdicionarAsync(categoria);
+
+            // Act
+            var encontrada = await repository.ObterPorIdAsync(categoria.Id);
+
+            // Assert
+            Assert.NotNull(encontrada);
+            Assert.Equal(categoria.Nome, encontrada.Nome);
+        }
+
+        [Fact]
+        public async Task AtualizarAsync_DeveModificarCategoriaExistente()
+        {
+            // Arrange
+            using var context = CriarContexto();
+            var repository = new CategoriaRepository(context);
+            var categoria = new Categoria("Original", TipoTransacao.Despesa);
+            await repository.AdicionarAsync(categoria);
+
+            // Act
+            categoria.Atualizar("Atualizada", TipoTransacao.Receita);
+            await repository.AtualizarAsync(categoria);
+
+            // Assert
+            var noDb = await repository.ObterPorIdAsync(categoria.Id);
+            Assert.NotNull(noDb);
+            Assert.Equal("Atualizada", noDb.Nome);
+            Assert.Equal(TipoTransacao.Receita, noDb.Tipo);
+        }
+
         private static AppDbContext CriarContexto()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()

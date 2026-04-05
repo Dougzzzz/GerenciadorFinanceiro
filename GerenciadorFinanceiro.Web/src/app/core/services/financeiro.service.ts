@@ -51,7 +51,11 @@ export class FinanceiroService {
   }
 
   criarCategoria(nome: string, tipo: TipoTransacao): Observable<Categoria> {
-    return this.http.post<Categoria>(`${this.apiUrl}/categorias?nome=${nome}&tipo=${tipo}`, {});
+    return this.http.post<Categoria>(`${this.apiUrl}/categorias`, { nome, tipo });
+  }
+
+  atualizarCategoria(categoria: Categoria): Observable<any> {
+    return this.http.put(`${this.apiUrl}/categorias/${categoria.id}`, categoria);
   }
 
   // Contas
