@@ -1,4 +1,5 @@
 using GerenciadorFinanceiro.Api.Controllers;
+using GerenciadorFinanceiro.Application.DTOs;
 using GerenciadorFinanceiro.Application.Interfaces;
 using GerenciadorFinanceiro.Application.UseCases;
 using GerenciadorFinanceiro.Domain.Entidades;
@@ -53,19 +54,43 @@ namespace GerenciadorFinanceiro.Tests.Api
         {
             // Arrange
             var id = Guid.NewGuid();
-            var transacao = new Transacao(DateTime.Now, "Update", 100, Guid.NewGuid(), null, null);
+            var existing = new Transacao(DateTime.Now, "Original", 100, Guid.NewGuid(), null, null);
+            typeof(Transacao).GetProperty("Id")?.SetValue(existing, id);
 
-            // Use reflection or constructor to set the same ID
-            typeof(Transacao).GetProperty("Id")?.SetValue(transacao, id);
+            var dto = new SaveTransacaoDto(id, DateTime.Now, "Update", 150, Guid.NewGuid(), null, null);
 
-            _repository.ObterPorIdAsync(id).Returns(transacao);
+            _repository.ObterPorIdAsync(id).Returns(existing);
 
             // Act
-            var result = await _controller.Put(id, transacao);
+            var result = await _controller.Put(id, dto);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
-            await _repository.Received(1).AtualizarAsync(transacao);
+            await _repository.Received(1).AtualizarAsync(existing);
+            Assert.Equal("Update", existing.Descricao);
+            Assert.Equal(150, existing.Valor);
+        }
+
+        [Fact]
+        public async Task Put_ComIdUndefined_DeveTratarComoNullERetornarNoContent()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var existing = new Transacao(DateTime.Now, "Original", 100, Guid.NewGuid(), Guid.NewGuid(), null);
+            typeof(Transacao).GetProperty("Id")?.SetValue(existing, id);
+
+            // Simulando o que o frontend envia: "undefined" como string
+            var dto = new SaveTransacaoDto(id, DateTime.Now, "Update", 150, Guid.NewGuid(), "undefined", null);
+
+            _repository.ObterPorIdAsync(id).Returns(existing);
+
+            // Act
+            var result = await _controller.Put(id, dto);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+            await _repository.Received(1).AtualizarAsync(existing);
+            Assert.Null(existing.ContaBancariaId); // Deve ter sido limpo para null
         }
     }
 }
