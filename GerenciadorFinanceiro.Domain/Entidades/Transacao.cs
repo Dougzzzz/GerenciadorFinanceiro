@@ -13,7 +13,12 @@ namespace GerenciadorFinanceiro.Domain.Entidades
         public Guid? ContaBancariaId { get; private set; } // Nullable (?) pois pode ser do cartão
         public Guid? CartaoCreditoId { get; private set; } // Nullable (?) pois pode ser da conta
 
-        // Novos campos vindos do CSV
+        // Propriedades de Navegação (para carregar nomes dinamicamente)
+        public virtual Categoria? CategoriaNavigation { get; private set; }
+        public virtual ContaBancaria? ContaBancariaNavigation { get; private set; }
+        public virtual CartaoCredito? CartaoCreditoNavigation { get; private set; }
+
+        // Novos campos vindos do CSV (Snapshot)
         public string Categoria { get; private set; } = null!;
         public string NomeCartao { get; private set; } = null!;
         public string FinalCartao { get; private set; } = null!;

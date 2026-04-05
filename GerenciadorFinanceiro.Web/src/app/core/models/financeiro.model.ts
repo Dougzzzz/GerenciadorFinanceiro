@@ -17,6 +17,9 @@ export interface Transacao {
   finalCartao: string;
   parcela: string;
   cotacao: number;
+  categoriaNavigation?: Categoria;
+  contaBancariaNavigation?: ContaBancaria;
+  cartaoCreditoNavigation?: CartaoCredito;
 }
 
 export interface ContaBancaria {

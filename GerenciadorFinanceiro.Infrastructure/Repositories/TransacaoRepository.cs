@@ -26,7 +26,12 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Transacao>> ObterTodasAsync() => await _context.Transacoes.AsNoTracking().ToListAsync();
+        public async Task<IEnumerable<Transacao>> ObterTodasAsync() => await _context.Transacoes
+            .Include(t => t.CategoriaNavigation)
+            .Include(t => t.ContaBancariaNavigation)
+            .Include(t => t.CartaoCreditoNavigation)
+            .AsNoTracking()
+            .ToListAsync();
 
         public async Task<Transacao?> ObterPorIdAsync(Guid id) => await _context.Transacoes.FindAsync(id);
 
@@ -42,5 +47,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<bool> PossuiTransacoesPorCategoriaAsync(Guid categoriaId) => await _context.Transacoes.AnyAsync(t => t.CategoriaId == categoriaId);
     }
 }

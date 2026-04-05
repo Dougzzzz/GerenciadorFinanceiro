@@ -23,13 +23,26 @@ namespace GerenciadorFinanceiro.Application.UseCases
             _reader = reader;
         }
 
-        public async Task ExecutarAsync(Stream arquivo, Guid categoriaPadraoId, Guid? contaId, Guid? cartaoId)
+        public async Task ExecutarAsync(Stream arquivo, Guid? categoriaPadraoId, Guid? contaId, Guid? cartaoId)
         {
+            if (contaId == null && cartaoId == null)
+            {
+                throw new ArgumentException("É necessário informar uma Conta Bancária ou um Cartão de Crédito para a importação.");
+            }
+
             var dtos = await _reader.LerArquivoAsync(arquivo);
+
+            // Busca ou cria a categoria de fallback "Outros"
+            var categoriaOutros = await _categoriaRepository.ObterPorNomeAsync("Outros", TipoTransacao.Despesa);
+            if (categoriaOutros == null)
+            {
+                categoriaOutros = new Categoria("Outros", TipoTransacao.Despesa);
+                await _categoriaRepository.AdicionarAsync(categoriaOutros);
+            }
 
             foreach (var dto in dtos)
             {
-                Guid categoriaId = categoriaPadraoId;
+                Guid categoriaId = categoriaPadraoId ?? categoriaOutros.Id;
                 Guid? cartaoIdFinal = cartaoId;
 
                 // Se o CSV trouxer um nome de categoria, tenta encontrar ou criar

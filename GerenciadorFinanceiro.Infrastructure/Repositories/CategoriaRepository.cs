@@ -17,12 +17,33 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
         public async Task<IEnumerable<Categoria>> ObterTodasAsync() => await _context.Categorias.ToListAsync();
 
         public async Task<Categoria?> ObterPorNomeAsync(string nome, TipoTransacao tipo) => await _context.Categorias
-                .FirstOrDefaultAsync(c => c.Nome.Equals(nome, StringComparison.CurrentCultureIgnoreCase) && c.Tipo == tipo);
+                .FirstOrDefaultAsync(c => c.Nome.ToLower() == nome.ToLower() && c.Tipo == tipo);
+
+        public async Task<Categoria?> ObterPorIdAsync(Guid id) => await _context.Categorias.FindAsync(id);
 
         public async Task AdicionarAsync(Categoria categoria)
         {
             await _context.Categorias.AddAsync(categoria);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task AtualizarAsync(Categoria categoria)
+        {
+            _context.Categorias.Update(categoria);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ExcluirMuitasAsync(IEnumerable<Guid> ids)
+        {
+            var categorias = await _context.Categorias
+                .Where(c => ids.Contains(c.Id))
+                .ToListAsync();
+
+            if (categorias.Count > 0)
+            {
+                _context.Categorias.RemoveRange(categorias);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
