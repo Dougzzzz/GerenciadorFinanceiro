@@ -17,7 +17,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
         public async Task<IEnumerable<CartaoCredito>> ObterTodosAsync() => await _context.CartoesDeCredito.ToListAsync();
 
         public async Task<CartaoCredito?> ObterPorNomeAsync(string nome) => await _context.CartoesDeCredito
-                .FirstOrDefaultAsync(c => c.Nome.Equals(nome, StringComparison.CurrentCultureIgnoreCase));
+                .FirstOrDefaultAsync(c => c.Nome.ToLower() == nome.ToLower());
 
         public async Task AdicionarAsync(CartaoCredito cartao)
         {

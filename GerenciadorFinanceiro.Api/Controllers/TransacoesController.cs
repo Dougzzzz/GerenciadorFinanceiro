@@ -101,17 +101,23 @@ namespace GerenciadorFinanceiro.Api.Controllers
         }
 
         [HttpPost("importar")]
-        public async Task<IActionResult> Importar(IFormFile arquivo, [FromQuery] Guid categoriaPadraoId, [FromQuery] Guid? contaId, [FromQuery] Guid? cartaoId)
+        public async Task<IActionResult> Importar(IFormFile arquivo, [FromQuery] Guid? categoriaPadraoId, [FromQuery] Guid? contaId, [FromQuery] Guid? cartaoId)
         {
             if (arquivo == null || arquivo.Length == 0)
             {
                 return BadRequest("Arquivo inválido.");
             }
 
-            using var stream = arquivo.OpenReadStream();
-            await _importarExtratoUseCase.ExecutarAsync(stream, categoriaPadraoId, contaId, cartaoId);
-
-            return Ok("Arquivo importado com sucesso.");
+            try
+            {
+                using var stream = arquivo.OpenReadStream();
+                await _importarExtratoUseCase.ExecutarAsync(stream, categoriaPadraoId, contaId, cartaoId);
+                return Ok("Arquivo importado com sucesso.");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("excluir-muitas")]

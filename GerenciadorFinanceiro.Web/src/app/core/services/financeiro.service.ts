@@ -34,12 +34,13 @@ export class FinanceiroService {
     return this.http.delete(`${this.apiUrl}/transacoes/excluir-muitas`, { body: ids });
   }
 
-  importarExtrato(arquivo: File, categoriaId: string, contaId?: string, cartaoId?: string): Observable<any> {
+  importarExtrato(arquivo: File, categoriaId?: string, contaId?: string, cartaoId?: string): Observable<any> {
     const formData = new FormData();
     formData.append('arquivo', arquivo);
     
-    let url = `${this.apiUrl}/transacoes/importar?categoriaPadraoId=${categoriaId}`;
-    if (contaId) url += `&contaId=${contaId}`;
+    let url = `${this.apiUrl}/transacoes/importar?`;
+    if (categoriaId) url += `categoriaPadraoId=${categoriaId}&`;
+    if (contaId) url += `contaId=${contaId}&`;
     if (cartaoId) url += `&cartaoId=${cartaoId}`;
 
     return this.http.post(url, formData, { responseType: 'text' });

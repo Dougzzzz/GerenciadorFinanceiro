@@ -80,32 +80,33 @@ import { FormsModule } from '@angular/forms';
           
           <div class="form-row">
             <div class="form-group">
-              <label>Categoria Padrão</label>
-              <select [(ngModel)]="importConfig.categoriaId">
-                <option *ngFor="let c of categorias()" [value]="c.id">{{ c.nome }}</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Conta Bancária (Opcional)</label>
-              <select [(ngModel)]="importConfig.contaId">
+              <label>Conta Bancária</label>
+              <select [(ngModel)]="importConfig.contaId" (change)="importConfig.cartaoId = undefined">
                 <option [value]="undefined">Nenhuma</option>
                 <option *ngFor="let c of contas()" [value]="c.id">{{ c.nomeBanco }}</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label>Cartão de Crédito (Opcional)</label>
-              <select [(ngModel)]="importConfig.cartaoId">
+              <label>ou Cartão de Crédito</label>
+              <select [(ngModel)]="importConfig.cartaoId" (change)="importConfig.contaId = undefined">
                 <option [value]="undefined">Nenhum</option>
                 <option *ngFor="let c of cartoes()" [value]="c.id">{{ c.nome }}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Categoria Padrão (Opcional)</label>
+              <select [(ngModel)]="importConfig.categoriaId">
+                <option [value]="''">Nenhuma (Usar 'Outros')</option>
+                <option *ngFor="let c of categorias()" [value]="c.id">{{ c.nome }}</option>
               </select>
             </div>
           </div>
 
           <div class="form-actions">
             <app-button variant="outline" (onClick)="mostrarImportacao.set(false)">Cancelar</app-button>
-            <app-button [disabled]="!selectedFile || !importConfig.categoriaId" (onClick)="importar()">
+            <app-button [disabled]="!selectedFile || (!importConfig.contaId && !importConfig.cartaoId)" (onClick)="importar()">
               Processar Arquivo
             </app-button>
           </div>

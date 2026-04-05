@@ -164,7 +164,7 @@ namespace GerenciadorFinanceiro.Tests
             using var stream = new MemoryStream(bytes);
 
             // Act
-            await useCase.ExecutarAsync(stream, Guid.NewGuid(), null, null);
+            await useCase.ExecutarAsync(stream, Guid.NewGuid(), Guid.NewGuid(), null);
 
             // Assert
             var todas = await repository.ObterTodasAsync();
