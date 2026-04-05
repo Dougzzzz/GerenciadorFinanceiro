@@ -151,12 +151,14 @@ namespace GerenciadorFinanceiro.Tests
 
             using var contexto = new AppDbContext(options);
             var repository = new TransacaoRepository(contexto);
+            var categoriaRepository = new CategoriaRepository(contexto);
+            var cartaoRepository = new CartaoCreditoRepository(contexto);
             var reader = new CsvExtratoReader();
-            var useCase = new ImportarExtratoUseCase(repository, reader);
+            var useCase = new ImportarExtratoUseCase(repository, categoriaRepository, cartaoRepository, reader);
 
             var csv = new StringBuilder();
             csv.AppendLine("Data de Compra;Nome no Cartão;Final do Cartão;Categoria;Descrição;Parcela;Valor (em US$);Cotação (em R$);Valor (em R$)");
-            csv.AppendLine("12/12/2025;ANA;1111;Servico;PAGAMENTO;1/1;0;0;200,00");
+            csv.AppendLine("12/12/2025;CartaoInexistente;1111;CategoriaInexistente;PAGAMENTO;1/1;0;0;200,00");
 
             var bytes = Encoding.Default.GetBytes(csv.ToString());
             using var stream = new MemoryStream(bytes);
@@ -167,9 +169,17 @@ namespace GerenciadorFinanceiro.Tests
             // Assert
             var todas = await repository.ObterTodasAsync();
             Assert.Single(todas);
+
+            var todasCategorias = await categoriaRepository.ObterTodasAsync();
+            Assert.Contains(todasCategorias, c => c.Nome == "CategoriaInexistente");
+
+            var todosCartoes = await cartaoRepository.ObterTodosAsync();
+            Assert.Contains(todosCartoes, c => c.Nome == "CartaoInexistente");
+
             var salva = todas.First();
             Assert.Equal(200.00m, salva.Valor);
-            Assert.Equal("Servico", salva.Categoria);
+            Assert.Equal("CategoriaInexistente", salva.Categoria);
+            Assert.Equal("CartaoInexistente", salva.NomeCartao);
         }
     }
 }

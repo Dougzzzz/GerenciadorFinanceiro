@@ -16,6 +16,9 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
 
         public async Task<IEnumerable<Categoria>> ObterTodasAsync() => await _context.Categorias.ToListAsync();
 
+        public async Task<Categoria?> ObterPorNomeAsync(string nome, TipoTransacao tipo) => await _context.Categorias
+                .FirstOrDefaultAsync(c => c.Nome.Equals(nome, StringComparison.CurrentCultureIgnoreCase) && c.Tipo == tipo);
+
         public async Task AdicionarAsync(Categoria categoria)
         {
             await _context.Categorias.AddAsync(categoria);

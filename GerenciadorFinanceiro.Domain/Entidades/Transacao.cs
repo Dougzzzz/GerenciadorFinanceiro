@@ -54,5 +54,22 @@ namespace GerenciadorFinanceiro.Domain.Entidades
         }
 
         protected Transacao() { }
+
+        public void Atualizar(DateTime data, string descricao, decimal valor, Guid categoriaId, Guid? contaBancariaId, Guid? cartaoCreditoId,
+            string categoria, string nomeCartao, string finalCartao, string parcela, decimal cotacao)
+        {
+            Data = data;
+            Descricao = descricao;
+            Valor = valor;
+            Tipo = valor < 0 ? TipoTransacao.Despesa : TipoTransacao.Receita;
+            CategoriaId = categoriaId;
+            ContaBancariaId = contaBancariaId;
+            CartaoCreditoId = cartaoCreditoId;
+            Categoria = categoria ?? string.Empty;
+            NomeCartao = nomeCartao ?? string.Empty;
+            FinalCartao = finalCartao ?? string.Empty;
+            Parcela = parcela ?? string.Empty;
+            Cotacao = cotacao;
+        }
     }
 }

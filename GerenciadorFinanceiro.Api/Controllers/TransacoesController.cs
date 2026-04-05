@@ -1,3 +1,4 @@
+using GerenciadorFinanceiro.Application.DTOs;
 using GerenciadorFinanceiro.Application.UseCases;
 using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Interfaces;
@@ -38,15 +39,65 @@ namespace GerenciadorFinanceiro.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Transacao>> Post([FromBody] Transacao transacao)
+        public async Task<ActionResult<Transacao>> Post([FromBody] SaveTransacaoDto dto)
         {
-            if (transacao == null)
+            if (dto == null)
             {
                 return BadRequest();
             }
 
+            var contaId = ParseGuid(dto.contaBancariaId);
+            var cartaoId = ParseGuid(dto.cartaoCreditoId);
+
+            var transacao = new Transacao(
+                dto.data,
+                dto.descricao,
+                dto.valor,
+                dto.categoriaId,
+                contaId,
+                cartaoId,
+                dto.categoria,
+                dto.nomeCartao,
+                dto.finalCartao,
+                dto.parcela,
+                dto.cotacao);
+
             await _repository.AdicionarAsync(transacao);
             return CreatedAtAction(nameof(Get), new { id = transacao.Id }, transacao);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(Guid id, [FromBody] SaveTransacaoDto dto)
+        {
+            if (id != dto.id)
+            {
+                return BadRequest("ID da URL não coincide com ID do corpo.");
+            }
+
+            var existente = await _repository.ObterPorIdAsync(id);
+            if (existente == null)
+            {
+                return NotFound();
+            }
+
+            var contaId = ParseGuid(dto.contaBancariaId);
+            var cartaoId = ParseGuid(dto.cartaoCreditoId);
+
+            existente.Atualizar(
+                dto.data,
+                dto.descricao,
+                dto.valor,
+                dto.categoriaId,
+                contaId,
+                cartaoId,
+                dto.categoria,
+                dto.nomeCartao,
+                dto.finalCartao,
+                dto.parcela,
+                dto.cotacao);
+
+            await _repository.AtualizarAsync(existente);
+            return NoContent();
         }
 
         [HttpPost("importar")]
@@ -73,6 +124,27 @@ namespace GerenciadorFinanceiro.Api.Controllers
 
             await _repository.ExcluirMuitasAsync(ids);
             return NoContent();
+        }
+
+        private static Guid? ParseGuid(object? value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            var str = value.ToString();
+            if (string.IsNullOrWhiteSpace(str) || str.Equals("undefined", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            if (Guid.TryParse(str, out var result))
+            {
+                return result;
+            }
+
+            return null;
         }
     }
 }

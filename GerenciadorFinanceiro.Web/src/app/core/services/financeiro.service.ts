@@ -24,6 +24,12 @@ export class FinanceiroService {
     return this.http.post<Transacao>(`${this.apiUrl}/transacoes`, transacao);
   }
 
+  atualizarTransacao(transacao: Transacao): Observable<any> {
+    // Garante que a data está em UTC
+    const body = { ...transacao, data: new Date(transacao.data).toISOString() };
+    return this.http.put(`${this.apiUrl}/transacoes/${transacao.id}`, body);
+  }
+
   excluirTransacoes(ids: string[]): Observable<any> {
     return this.http.delete(`${this.apiUrl}/transacoes/excluir-muitas`, { body: ids });
   }

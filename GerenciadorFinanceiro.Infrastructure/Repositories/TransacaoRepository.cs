@@ -20,6 +20,12 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task AtualizarAsync(Transacao transacao)
+        {
+            _context.Transacoes.Update(transacao);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<IEnumerable<Transacao>> ObterTodasAsync() => await _context.Transacoes.AsNoTracking().ToListAsync();
 
         public async Task<Transacao?> ObterPorIdAsync(Guid id) => await _context.Transacoes.FindAsync(id);

@@ -65,6 +65,25 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
             Assert.Equal(t3.Id, restantes[0].Id);
         }
 
+        [Fact]
+        public async Task AtualizarAsync_DevePersistirAlteracoes()
+        {
+            // Arrange
+            using var context = CriarContextoEmMemoria();
+            var repository = new TransacaoRepository(context);
+            var transacao = new Transacao(DateTime.Now, "Original", 100, Guid.NewGuid(), null, null);
+            context.Transacoes.Add(transacao);
+            await context.SaveChangesAsync();
+
+            // Act
+            typeof(Transacao).GetProperty("Descricao")?.SetValue(transacao, "Editado");
+            await repository.AtualizarAsync(transacao);
+
+            // Assert
+            var salva = await context.Transacoes.FindAsync(transacao.Id);
+            Assert.Equal("Editado", salva?.Descricao);
+        }
+
         // Cria um banco de dados na memória limpo para cada teste
         private static AppDbContext CriarContextoEmMemoria()
         {
