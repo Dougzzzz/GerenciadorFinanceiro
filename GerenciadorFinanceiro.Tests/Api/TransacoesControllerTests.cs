@@ -1,6 +1,7 @@
 using GerenciadorFinanceiro.Api.Controllers;
 using GerenciadorFinanceiro.Application.Interfaces;
 using GerenciadorFinanceiro.Application.UseCases;
+using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
@@ -16,7 +17,9 @@ namespace GerenciadorFinanceiro.Tests.Api
         public TransacoesControllerTests()
         {
             _repository = Substitute.For<ITransacaoRepository>();
-            _useCase = Substitute.For<ImportarExtratoUseCase>(_repository, Substitute.For<IExtratoReader>());
+            var categoriaRepository = Substitute.For<ICategoriaRepository>();
+            var cartaoRepository = Substitute.For<ICartaoCreditoRepository>();
+            _useCase = Substitute.For<ImportarExtratoUseCase>(_repository, categoriaRepository, cartaoRepository, Substitute.For<IExtratoReader>());
             _controller = new TransacoesController(_repository, _useCase);
         }
 
@@ -43,6 +46,26 @@ namespace GerenciadorFinanceiro.Tests.Api
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
             await _repository.DidNotReceiveWithAnyArgs().ExcluirMuitasAsync(default!);
+        }
+
+        [Fact]
+        public async Task Put_ComDadosValidos_DeveRetornarNoContent()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var transacao = new Transacao(DateTime.Now, "Update", 100, Guid.NewGuid(), null, null);
+
+            // Use reflection or constructor to set the same ID
+            typeof(Transacao).GetProperty("Id")?.SetValue(transacao, id);
+
+            _repository.ObterPorIdAsync(id).Returns(transacao);
+
+            // Act
+            var result = await _controller.Put(id, transacao);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+            await _repository.Received(1).AtualizarAsync(transacao);
         }
     }
 }

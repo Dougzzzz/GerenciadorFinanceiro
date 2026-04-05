@@ -122,24 +122,71 @@ import { FormsModule } from '@angular/forms';
               <th>Categoria</th>
               <th>Cartão/Conta</th>
               <th class="text-right">Valor</th>
+              <th width="80">Ações</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let t of transacoes()">
+              <!-- Seleção -->
               <td>
                 <input type="checkbox" [checked]="selecionadas().has(t.id)" (change)="toggleSelecionada(t.id)">
               </td>
-              <td>{{ t.data | date:'dd/MM/yyyy' }}</td>
+
+              <!-- Data -->
               <td>
-                <div class="desc-cell">
+                <input *ngIf="editandoId() === t.id" type="date" [(ngModel)]="tempEdit().data" class="edit-input">
+                <span *ngIf="editandoId() !== t.id">{{ t.data | date:'dd/MM/yyyy' }}</span>
+              </td>
+
+              <!-- Descrição -->
+              <td>
+                <div *ngIf="editandoId() === t.id" class="edit-group">
+                  <input type="text" [(ngModel)]="tempEdit().descricao" class="edit-input">
+                </div>
+                <div *ngIf="editandoId() !== t.id" class="desc-cell">
                   <strong>{{ t.descricao }}</strong>
                   <small *ngIf="t.parcela">{{ t.parcela }}</small>
                 </div>
               </td>
-              <td><span class="badge">{{ t.categoria }}</span></td>
-              <td>{{ t.nomeCartao || 'Conta' }}</td>
-              <td class="text-right" [class.income]="t.valor > 0" [class.expense]="t.valor < 0">
-                {{ t.valor | currency:'BRL' }}
+
+              <!-- Categoria -->
+              <td>
+                <select *ngIf="editandoId() === t.id" [(ngModel)]="tempEdit().categoriaId" class="edit-input">
+                  <option *ngFor="let c of categorias()" [value]="c.id">{{ c.nome }}</option>
+                </select>
+                <span *ngIf="editandoId() !== t.id" class="badge">{{ t.categoria }}</span>
+              </td>
+
+              <!-- Destino -->
+              <td>
+                <div *ngIf="editandoId() === t.id" class="edit-group">
+                  <select [(ngModel)]="tempEdit().contaBancariaId" class="edit-input">
+                    <option [value]="undefined">Nenhuma</option>
+                    <option *ngFor="let c of contas()" [value]="c.id">{{ c.nomeBanco }}</option>
+                  </select>
+                  <select [(ngModel)]="tempEdit().cartaoCreditoId" class="edit-input">
+                    <option [value]="undefined">Nenhum</option>
+                    <option *ngFor="let c of cartoes()" [value]="c.id">{{ c.nome }}</option>
+                  </select>
+                </div>
+                <span *ngIf="editandoId() !== t.id">{{ t.nomeCartao || 'Conta' }}</span>
+              </td>
+
+              <!-- Valor -->
+              <td class="text-right">
+                <input *ngIf="editandoId() === t.id" type="number" step="0.01" [(ngModel)]="tempEdit().valor" class="edit-input text-right">
+                <span *ngIf="editandoId() !== t.id" [class.income]="t.valor > 0" [class.expense]="t.valor < 0">
+                  {{ t.valor | currency:'BRL' }}
+                </span>
+              </td>
+
+              <!-- Ações da Linha -->
+              <td>
+                <div class="row-actions">
+                  <button *ngIf="editandoId() !== t.id" (click)="iniciarEdicao(t)" class="btn-icon">✏️</button>
+                  <button *ngIf="editandoId() === t.id" (click)="salvarEdicao()" class="btn-icon success">✅</button>
+                  <button *ngIf="editandoId() === t.id" (click)="cancelarEdicao()" class="btn-icon danger">❌</button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -148,78 +195,31 @@ import { FormsModule } from '@angular/forms';
     </div>
   `,
   styles: [`
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--spacing-xl);
-    }
-
-    .import-form {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-lg);
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--spacing-md);
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-xs);
-    }
-
-    .form-group label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--color-text-secondary);
-    }
-
-    select, input, input[type="file"] {
-      padding: var(--spacing-sm);
-      border-radius: var(--border-radius);
-      border: 1px solid #e2e8f0;
-      background: white;
-    }
-
-    .form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: var(--spacing-md);
-      margin-top: var(--spacing-md);
-    }
-
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl); }
+    .import-form { display: flex; flex-direction: column; gap: var(--spacing-lg); }
+    .form-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-md); }
+    .form-group { display: flex; flex-direction: column; gap: var(--spacing-xs); }
+    .form-group label { font-size: 0.875rem; font-weight: 500; color: var(--color-text-secondary); }
+    select, input, .edit-input { padding: var(--spacing-sm); border-radius: var(--border-radius); border: 1px solid #e2e8f0; background: white; font-size: 0.875rem; }
+    .edit-input { width: 100%; padding: 4px; }
+    .form-actions { display: flex; justify-content: flex-end; gap: var(--spacing-md); margin-top: var(--spacing-md); }
     .table { width: 100%; border-collapse: collapse; }
     .table th { text-align: left; padding: var(--spacing-md); border-bottom: 2px solid #f1f5f9; }
-    .table td { padding: var(--spacing-md); border-bottom: 1px solid #f1f5f9; }
-    .table th input[type="checkbox"], .table td input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
+    .table td { padding: var(--spacing-md); border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
     .text-right { text-align: right; }
     .income { color: var(--color-income); font-weight: 600; }
     .expense { color: var(--color-expense); font-weight: 600; }
     .desc-cell { display: flex; flex-direction: column; }
     .desc-cell small { color: var(--color-text-secondary); font-size: 0.75rem; }
     .badge { background: #f1f5f9; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: var(--spacing-md);
-    }
-
-    .form-actions-full {
-      grid-column: 1 / -1;
-      display: flex;
-      justify-content: flex-end;
-      margin-top: var(--spacing-md);
-    }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md); }
+    .form-actions-full { grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: var(--spacing-md); }
+    .row-actions { display: flex; gap: 8px; }
+    .btn-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 4px; border-radius: 4px; transition: background 0.2s; }
+    .btn-icon:hover { background: #f1f5f9; }
+    .btn-icon.success:hover { background: #dcfce7; }
+    .btn-icon.danger:hover { background: #fee2e2; }
+    .edit-group { display: flex; flex-direction: column; gap: 4px; }
   `]
 })
 export class TransacoesComponent implements OnInit {
@@ -231,6 +231,10 @@ export class TransacoesComponent implements OnInit {
   selecionadas = signal<Set<string>>(new Set());
   mostrarImportacao = signal(false);
   mostrarNovo = signal(false);
+
+  // Estado de edição
+  editandoId = signal<string | null>(null);
+  tempEdit = signal<any>(null);
 
   selectedFile: File | null = null;
   importConfig = {
@@ -268,6 +272,33 @@ export class TransacoesComponent implements OnInit {
     });
     this.financeiroService.getContas().subscribe(data => this.contas.set(data));
     this.financeiroService.getCartoes().subscribe(data => this.cartoes.set(data));
+  }
+
+  // Lógica de Edição
+  iniciarEdicao(t: Transacao) {
+    this.editandoId.set(t.id);
+    // Cria uma cópia profunda para edição
+    this.tempEdit.set({
+      ...t,
+      data: new Date(t.data).toISOString().split('T')[0] // Converte para input date
+    });
+  }
+
+  cancelarEdicao() {
+    this.editandoId.set(null);
+    this.tempEdit.set(null);
+  }
+
+  salvarEdicao() {
+    const editada = this.tempEdit();
+    this.financeiroService.atualizarTransacao(editada).subscribe({
+      next: () => {
+        this.cancelarEdicao();
+        this.carregarDados();
+        alert('Transação atualizada!');
+      },
+      error: (err) => alert('Erro ao atualizar: ' + err.message)
+    });
   }
 
   toggleSelecionada(id: string) {

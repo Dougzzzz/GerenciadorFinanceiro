@@ -49,6 +49,24 @@ namespace GerenciadorFinanceiro.Api.Controllers
             return CreatedAtAction(nameof(Get), new { id = transacao.Id }, transacao);
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(Guid id, [FromBody] Transacao transacao)
+        {
+            if (id != transacao.Id)
+            {
+                return BadRequest("ID da URL não coincide com ID do corpo.");
+            }
+
+            var existente = await _repository.ObterPorIdAsync(id);
+            if (existente == null)
+            {
+                return NotFound();
+            }
+
+            await _repository.AtualizarAsync(transacao);
+            return NoContent();
+        }
+
         [HttpPost("importar")]
         public async Task<IActionResult> Importar(IFormFile arquivo, [FromQuery] Guid categoriaPadraoId, [FromQuery] Guid? contaId, [FromQuery] Guid? cartaoId)
         {
