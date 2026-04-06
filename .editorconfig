@@ -35,6 +35,7 @@ dotnet_diagnostic.SA1201.severity = none       # Ordem de elementos (ex: enum ap
 dotnet_diagnostic.SA1502.severity = none       # Elementos em uma única linha
 dotnet_diagnostic.SA1117.severity = none       # Parâmetros na mesma linha ou linhas separadas
 dotnet_diagnostic.SA1208.severity = none       # Ordem de usings do sistema
+dotnet_diagnostic.SA1000.severity = none       # Keyword 'new' followed by space (conflita com target-typed new)
 
 # Regras do IDE (Microsoft)
 dotnet_diagnostic.IDE0008.severity = none       # Preferir var ou tipo explícito
@@ -54,6 +55,11 @@ dotnet_naming_rule.interface_should_be_begun_with_i.style = begun_with_i
 dotnet_naming_symbols.interface.applicable_kinds = interface
 dotnet_naming_style.begun_with_i.required_prefix = I
 dotnet_naming_style.begun_with_i.capitalization = pascal_case
+
+# Conflitos com Entity Framework (Comparações de String em LINQ)
+dotnet_diagnostic.CA1862.severity = none       # Prefira Equals com StringComparison
+dotnet_diagnostic.CA1304.severity = none       # ToLower sem CultureInfo
+dotnet_diagnostic.CA1311.severity = none       # Specify culture for string conversion
 
 # Severidade de Estilo
 dotnet_analyzer_diagnostic.category-Style.severity = warning
