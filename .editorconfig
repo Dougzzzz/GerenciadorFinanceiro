@@ -35,6 +35,7 @@ dotnet_diagnostic.SA1201.severity = none       # Ordem de elementos (ex: enum ap
 dotnet_diagnostic.SA1502.severity = none       # Elementos em uma única linha
 dotnet_diagnostic.SA1117.severity = none       # Parâmetros na mesma linha ou linhas separadas
 dotnet_diagnostic.SA1208.severity = none       # Ordem de usings do sistema
+dotnet_diagnostic.SA1000.severity = none       # Keyword 'new' followed by space (conflita com target-typed new)
 
 # Regras do IDE (Microsoft)
 dotnet_diagnostic.IDE0008.severity = none       # Preferir var ou tipo explícito
