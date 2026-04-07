@@ -1,4 +1,5 @@
 using GerenciadorFinanceiro.Domain.Entidades;
+using GerenciadorFinanceiro.Domain.Filtros;
 
 namespace GerenciadorFinanceiro.Domain.Interfaces
 {
@@ -6,7 +7,7 @@ namespace GerenciadorFinanceiro.Domain.Interfaces
     {
         Task AdicionarAsync(Transacao transacao);
         Task AtualizarAsync(Transacao transacao);
-        Task<IEnumerable<Transacao>> ObterTodasAsync();
+        Task<IEnumerable<Transacao>> ObterTodasAsync(FiltroTransacao? filtro = null);
         Task<Transacao?> ObterPorIdAsync(Guid id);
         Task ExcluirMuitasAsync(IEnumerable<Guid> ids);
         Task<bool> PossuiTransacoesPorCategoriaAsync(Guid categoriaId);

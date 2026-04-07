@@ -1,6 +1,5 @@
 using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Filtros;
-using Xunit;
 
 namespace GerenciadorFinanceiro.Tests.Domain
 {
