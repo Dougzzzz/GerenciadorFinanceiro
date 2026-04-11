@@ -66,8 +66,16 @@ export class TransacoesFormComponent {
   @Input() cartoes: CartaoCredito[] = [];
   @Output() onSave = new EventEmitter<any>();
 
+  // Helper para pegar a data atual no fuso horário local formatada para o input (yyyy-MM-dd)
+  private getDataAtualLocal(): string {
+    const d = new Date();
+    // Ajusta o offset do fuso horário manualmente para pegar a data "civil" local
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().split('T')[0];
+  }
+
   dados = {
-    data: new Date().toISOString().split('T')[0],
+    data: this.getDataAtualLocal(),
     descricao: '',
     valor: 0,
     categoriaId: '',
@@ -78,7 +86,7 @@ export class TransacoesFormComponent {
   salvar() {
     this.onSave.emit(this.dados);
     this.dados = {
-      data: new Date().toISOString().split('T')[0],
+      data: this.getDataAtualLocal(),
       descricao: '',
       valor: 0,
       categoriaId: '',

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Transacao, Categoria, ContaBancaria, CartaoCredito, TipoTransacao } from '../models/financeiro.model';
+import { FiltroTransacao } from '../models/filtros.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +13,35 @@ export class FinanceiroService {
   constructor(private http: HttpClient) {}
 
   // Transações
-  getTransacoes(): Observable<Transacao[]> {
-    return this.http.get<Transacao[]>(`${this.apiUrl}/transacoes`);
+
+  /**
+   * Obtém as transações aplicando filtros e ordenação opcionais.
+   * @param filtro Objeto contendo os critérios de filtro (data, tipo, categoria, etc.)
+   */
+  getTransacoes(filtro?: FiltroTransacao): Observable<Transacao[]> {
+    let params = new HttpParams();
+
+    if (filtro) {
+      // Loop pelas chaves do filtro para preencher os HttpParams dinamicamente
+      Object.keys(filtro).forEach(key => {
+        let value = (filtro as any)[key];
+        
+        // Ignoramos valores nulos, indefinidos ou vazios
+        if (value !== null && value !== undefined && value !== '') {
+          // Se for uma string de data do input type="date" (yyyy-mm-dd), ou um objeto Date
+          if (value instanceof Date) {
+            params = params.set(key, value.toISOString().split('T')[0]);
+          } else if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            // Se já for uma string ISO do input date, enviamos como está
+            params = params.set(key, value);
+          } else {
+            params = params.set(key, value.toString());
+          }
+        }
+      });
+    }
+
+    return this.http.get<Transacao[]>(`${this.apiUrl}/transacoes`, { params });
   }
 
   criarTransacao(transacao: Partial<Transacao>): Observable<Transacao> {

@@ -14,11 +14,17 @@ import { Transacao, Categoria, ContaBancaria, CartaoCredito } from '../../core/m
         <thead>
           <tr>
             <th width="40"><input type="checkbox" (change)="onSelectAll.emit($event)"></th>
-            <th>Data</th>
-            <th>Descrição</th>
+            <th class="sortable" (click)="toggleSort('Data')">
+              Data {{ getSortIcon('Data') }}
+            </th>
+            <th class="sortable" (click)="toggleSort('Descricao')">
+              Descrição {{ getSortIcon('Descricao') }}
+            </th>
             <th>Categoria</th>
             <th>Cartão/Conta</th>
-            <th class="text-right">Valor</th>
+            <th class="text-right sortable" (click)="toggleSort('Valor')">
+              Valor {{ getSortIcon('Valor') }}
+            </th>
             <th width="80">Ações</th>
           </tr>
         </thead>
@@ -75,6 +81,8 @@ import { Transacao, Categoria, ContaBancaria, CartaoCredito } from '../../core/m
     .table { width: 100%; border-collapse: collapse; }
     .table th { text-align: left; padding: var(--spacing-md); border-bottom: 2px solid #f1f5f9; }
     .table td { padding: var(--spacing-md); border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .sortable { cursor: pointer; user-select: none; transition: background 0.2s; }
+    .sortable:hover { background: #f8fafc; }
     .text-right { text-align: right; }
     .income { color: var(--color-income); font-weight: 600; }
     .expense { color: var(--color-expense); font-weight: 600; }
@@ -98,10 +106,33 @@ export class TransacoesListComponent {
   @Input() selecionadas = new Set<string>();
   @Input() editandoId: string | null = null;
   @Input() tempEdit: any = null;
+  
+  // Informação de ordenação atual (recebida do pai)
+  @Input() ordenarPor: string = 'Data';
+  @Input() direcao: 'Asc' | 'Desc' = 'Desc';
 
   @Output() onSelect = new EventEmitter<string>();
   @Output() onSelectAll = new EventEmitter<any>();
   @Output() onEdit = new EventEmitter<Transacao>();
   @Output() onSaveEdit = new EventEmitter<void>();
   @Output() onCancelEdit = new EventEmitter<void>();
+  
+  // Novo evento de ordenação
+  @Output() onSort = new EventEmitter<{coluna: string, direcao: 'Asc' | 'Desc'}>();
+
+  toggleSort(coluna: string) {
+    let novaDirecao: 'Asc' | 'Desc' = 'Asc';
+    
+    // Se clicou na mesma coluna que já estava ordenada, inverte a direção
+    if (this.ordenarPor === coluna) {
+      novaDirecao = this.direcao === 'Asc' ? 'Desc' : 'Asc';
+    }
+    
+    this.onSort.emit({ coluna, direcao: novaDirecao });
+  }
+
+  getSortIcon(coluna: string): string {
+    if (this.ordenarPor !== coluna) return '↕️';
+    return this.direcao === 'Asc' ? '🔼' : '🔽';
+  }
 }

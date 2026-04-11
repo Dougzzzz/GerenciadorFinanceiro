@@ -3,6 +3,7 @@ using GerenciadorFinanceiro.Application.DTOs;
 using GerenciadorFinanceiro.Application.Interfaces;
 using GerenciadorFinanceiro.Application.UseCases;
 using GerenciadorFinanceiro.Domain.Entidades;
+using GerenciadorFinanceiro.Domain.Filtros;
 using GerenciadorFinanceiro.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
@@ -22,6 +23,50 @@ namespace GerenciadorFinanceiro.Tests.Api
             var cartaoRepository = Substitute.For<ICartaoCreditoRepository>();
             _useCase = Substitute.For<ImportarExtratoUseCase>(_repository, categoriaRepository, cartaoRepository, Substitute.For<IExtratoReader>());
             _controller = new TransacoesController(_repository, _useCase);
+        }
+
+        [Fact]
+        public async Task Get_ComFiltros_DeveChamarRepositorioComFiltroERetornarOk()
+        {
+            // Arrange
+            var filtro = new FiltroTransacao
+            {
+                DataInicial = DateTime.Now.AddDays(-7),
+                Tipo = TipoTransacao.Despesa,
+                OrdenarPor = "Valor",
+                Direcao = "Asc",
+            };
+
+            var transacoesMock = new List<Transacao>
+            {
+                new(DateTime.Now, "Teste", -100, Guid.NewGuid(), null, null),
+            };
+
+            _repository.ObterTodasAsync(filtro).Returns(transacoesMock);
+
+            // Act
+            var result = await _controller.Get(filtro);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var model = Assert.IsAssignableFrom<IEnumerable<Transacao>>(okResult.Value);
+            Assert.Single(model);
+            await _repository.Received(1).ObterTodasAsync(filtro);
+        }
+
+        [Fact]
+        public async Task Get_SemFiltros_DeveChamarRepositorioComFiltroVazioERetornarOk()
+        {
+            // Arrange
+            var filtroVazio = new FiltroTransacao();
+            _repository.ObterTodasAsync(Arg.Any<FiltroTransacao>()).Returns([]);
+
+            // Act
+            var result = await _controller.Get(filtroVazio);
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result.Result);
+            await _repository.Received(1).ObterTodasAsync(filtroVazio);
         }
 
         [Fact]

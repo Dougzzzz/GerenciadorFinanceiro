@@ -1,6 +1,7 @@
 using GerenciadorFinanceiro.Application.DTOs;
 using GerenciadorFinanceiro.Application.UseCases;
 using GerenciadorFinanceiro.Domain.Entidades;
+using GerenciadorFinanceiro.Domain.Filtros;
 using GerenciadorFinanceiro.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,9 +21,9 @@ namespace GerenciadorFinanceiro.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Transacao>>> Get()
+        public async Task<ActionResult<IEnumerable<Transacao>>> Get([FromQuery] FiltroTransacao filtro)
         {
-            var transacoes = await _repository.ObterTodasAsync();
+            var transacoes = await _repository.ObterTodasAsync(filtro);
             return Ok(transacoes);
         }
 
