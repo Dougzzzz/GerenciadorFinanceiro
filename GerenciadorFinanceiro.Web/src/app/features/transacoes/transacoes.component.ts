@@ -170,7 +170,10 @@ export class TransacoesComponent implements OnInit {
 
   iniciarEdicao(t: Transacao) {
     this.editandoId.set(t.id);
-    this.tempEdit.set({ ...t, data: new Date(t.data).toISOString().split('T')[0] });
+    // Garantir que a data seja formatada como yyyy-MM-dd para o input type="date"
+    const data = new Date(t.data);
+    const dataFormatada = data.toISOString().split('T')[0];
+    this.tempEdit.set({ ...t, data: dataFormatada });
   }
 
   cancelarEdicao() { this.editandoId.set(null); this.tempEdit.set(null); }

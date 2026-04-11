@@ -22,12 +22,24 @@ namespace GerenciadorFinanceiro.Domain.Filtros
             // 1. Aplicar Filtros (Where)
             if (DataInicial.HasValue)
             {
-                query = query.Where(t => t.Data >= DataInicial.Value);
+                // Compara apenas a Data, ignorando horas
+                var dataInicio = DataInicial.Value.Date;
+                var dataUtc = dataInicio.Kind == DateTimeKind.Unspecified 
+                    ? DateTime.SpecifyKind(dataInicio, DateTimeKind.Utc) 
+                    : dataInicio.ToUniversalTime();
+                
+                query = query.Where(t => t.Data.Date >= dataUtc.Date);
             }
 
             if (DataFinal.HasValue)
             {
-                query = query.Where(t => t.Data <= DataFinal.Value);
+                // Compara apenas a Data, ignorando horas
+                var dataFim = DataFinal.Value.Date;
+                var dataUtc = dataFim.Kind == DateTimeKind.Unspecified 
+                    ? DateTime.SpecifyKind(dataFim, DateTimeKind.Utc) 
+                    : dataFim.ToUniversalTime();
+                
+                query = query.Where(t => t.Data.Date <= dataUtc.Date);
             }
 
             if (Tipo.HasValue)

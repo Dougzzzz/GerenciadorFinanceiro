@@ -24,13 +24,16 @@ export class FinanceiroService {
     if (filtro) {
       // Loop pelas chaves do filtro para preencher os HttpParams dinamicamente
       Object.keys(filtro).forEach(key => {
-        const value = (filtro as any)[key];
+        let value = (filtro as any)[key];
         
         // Ignoramos valores nulos, indefinidos ou vazios
         if (value !== null && value !== undefined && value !== '') {
-          // Se for uma data, garantimos o formato ISO (YYYY-MM-DD) para a API
+          // Se for uma string de data do input type="date" (yyyy-mm-dd), ou um objeto Date
           if (value instanceof Date) {
             params = params.set(key, value.toISOString().split('T')[0]);
+          } else if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            // Se já for uma string ISO do input date, enviamos como está
+            params = params.set(key, value);
           } else {
             params = params.set(key, value.toString());
           }

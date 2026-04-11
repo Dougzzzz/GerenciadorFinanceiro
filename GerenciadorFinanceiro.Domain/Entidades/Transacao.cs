@@ -29,7 +29,12 @@ namespace GerenciadorFinanceiro.Domain.Entidades
         public Transacao(DateTime data, string descricao, decimal valor, Guid categoriaId, Guid? contaBancariaId, Guid? cartaoCreditoId)
         {
             Id = Guid.NewGuid();
-            Data = data;
+            
+            // Sanitização para garantir UTC (PostgreSQL compatibility)
+            Data = data.Kind == DateTimeKind.Unspecified 
+                ? DateTime.SpecifyKind(data, DateTimeKind.Utc) 
+                : data.ToUniversalTime();
+
             Descricao = descricao;
             Valor = valor;
             Tipo = valor < 0 ? TipoTransacao.Despesa : TipoTransacao.Receita;
@@ -63,7 +68,11 @@ namespace GerenciadorFinanceiro.Domain.Entidades
         public void Atualizar(DateTime data, string descricao, decimal valor, Guid categoriaId, Guid? contaBancariaId, Guid? cartaoCreditoId,
             string categoria, string nomeCartao, string finalCartao, string parcela, decimal cotacao)
         {
-            Data = data;
+            // Sanitização para garantir UTC
+            Data = data.Kind == DateTimeKind.Unspecified 
+                ? DateTime.SpecifyKind(data, DateTimeKind.Utc) 
+                : data.ToUniversalTime();
+
             Descricao = descricao;
             Valor = valor;
             Tipo = valor < 0 ? TipoTransacao.Despesa : TipoTransacao.Receita;
