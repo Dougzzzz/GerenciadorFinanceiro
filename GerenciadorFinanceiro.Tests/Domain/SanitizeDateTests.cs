@@ -1,6 +1,5 @@
 using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Filtros;
-using Xunit;
 
 namespace GerenciadorFinanceiro.Tests.Domain
 {
@@ -43,17 +42,17 @@ namespace GerenciadorFinanceiro.Tests.Domain
             // Arrange
             var dataInicialLocal = new DateTime(2023, 01, 01, 0, 0, 0, DateTimeKind.Unspecified);
             var dataFinalLocal = new DateTime(2023, 12, 31, 23, 59, 59, DateTimeKind.Unspecified);
-            
+
             var filtro = new FiltroTransacao
             {
                 DataInicial = dataInicialLocal,
-                DataFinal = dataFinalLocal
+                DataFinal = dataFinalLocal,
             };
 
             // Criamos uma lista mock para testar o IQueryable
             var transacoes = new List<Transacao>
             {
-                new Transacao(new DateTime(2023, 06, 15, 0, 0, 0, DateTimeKind.Utc), "Dentro", -50m, Guid.NewGuid(), null, null)
+                new(new DateTime(2023, 06, 15, 0, 0, 0, DateTimeKind.Utc), "Dentro", -50m, Guid.NewGuid(), null, null),
             }.AsQueryable();
 
             // Act
@@ -71,17 +70,17 @@ namespace GerenciadorFinanceiro.Tests.Domain
         {
             // Arrange
             var dia = new DateTime(2026, 05, 05, 0, 0, 0, DateTimeKind.Unspecified);
-            
+
             var filtro = new FiltroTransacao
             {
                 DataInicial = dia,
-                DataFinal = dia
+                DataFinal = dia,
             };
 
             var transacoes = new List<Transacao>
             {
                 // Transação às 15:30 do mesmo dia
-                new Transacao(new DateTime(2026, 05, 05, 15, 30, 0, DateTimeKind.Utc), "Almoço", -50m, Guid.NewGuid(), null, null)
+                new(new DateTime(2026, 05, 05, 15, 30, 0, DateTimeKind.Utc), "Almoço", -50m, Guid.NewGuid(), null, null),
             }.AsQueryable();
 
             // Act
