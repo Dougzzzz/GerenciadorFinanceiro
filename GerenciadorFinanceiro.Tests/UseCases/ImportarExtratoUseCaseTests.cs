@@ -13,6 +13,8 @@ namespace GerenciadorFinanceiro.Tests.UseCases
         private readonly ITransacaoRepository _repository;
         private readonly ICategoriaRepository _categoriaRepository;
         private readonly ICartaoCreditoRepository _cartaoRepository;
+        private readonly IContaBancariaRepository _contaRepository;
+        private readonly IExtratoReaderFactory _readerFactory;
         private readonly IExtratoReader _reader;
         private readonly ImportarExtratoUseCase _useCase;
 
@@ -21,8 +23,13 @@ namespace GerenciadorFinanceiro.Tests.UseCases
             _repository = Substitute.For<ITransacaoRepository>();
             _categoriaRepository = Substitute.For<ICategoriaRepository>();
             _cartaoRepository = Substitute.For<ICartaoCreditoRepository>();
+            _contaRepository = Substitute.For<IContaBancariaRepository>();
+            _readerFactory = Substitute.For<IExtratoReaderFactory>();
             _reader = Substitute.For<IExtratoReader>();
-            _useCase = new ImportarExtratoUseCase(_repository, _categoriaRepository, _cartaoRepository, _reader);
+
+            _readerFactory.ObterReader(Arg.Any<ProvedorExtrato>()).Returns(_reader);
+
+            _useCase = new ImportarExtratoUseCase(_repository, _categoriaRepository, _cartaoRepository, _contaRepository, _readerFactory);
         }
 
         [Fact]

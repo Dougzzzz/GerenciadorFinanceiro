@@ -76,11 +76,16 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
                 TryParseDecimalFlex(Obter(idxCotacao), out decimal cotacao);
 #pragma warning restore CA1806
 
+                // Hook para subclasses tratarem o valor (ex: inversão de sinal)
+                valor = ProcessarValor(valor);
+
                 transacoes.Add(new TransacaoDto(data, descricao, valor, categoria, nomeCartao, finalCartao, parcela, cotacao));
             }
 
             return transacoes;
         }
+
+        protected virtual decimal ProcessarValor(decimal valor) => valor;
 
         private static bool TryParseDecimalFlex(string text, out decimal result)
         {

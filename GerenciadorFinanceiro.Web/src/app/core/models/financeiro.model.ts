@@ -3,6 +3,13 @@ export enum TipoTransacao {
   Despesa = 1
 }
 
+export enum ProvedorExtrato {
+  Generico = 0,
+  C6Bank = 1,
+  Nubank = 2,
+  Inter = 3
+}
+
 export interface Transacao {
   id: string;
   data: string;
@@ -26,6 +33,7 @@ export interface ContaBancaria {
   id: string;
   nomeBanco: string;
   saldoAtual: number;
+  provedor: ProvedorExtrato;
 }
 
 export interface CartaoCredito {
@@ -34,6 +42,7 @@ export interface CartaoCredito {
   limite: number;
   diaFechamento: number;
   diaVencimento: number;
+  provedor: ProvedorExtrato;
 }
 
 export interface Categoria {

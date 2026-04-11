@@ -23,9 +23,9 @@ namespace GerenciadorFinanceiro.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ContaBancaria>> Post(string nomeBanco, decimal saldoInicial = 0)
+        public async Task<ActionResult<ContaBancaria>> Post(string nomeBanco, decimal saldoInicial = 0, ProvedorExtrato provedor = ProvedorExtrato.Generico)
         {
-            var conta = new ContaBancaria(nomeBanco, saldoInicial);
+            var conta = new ContaBancaria(nomeBanco, saldoInicial, provedor);
             await _repository.AdicionarAsync(conta);
             return Ok(conta);
         }

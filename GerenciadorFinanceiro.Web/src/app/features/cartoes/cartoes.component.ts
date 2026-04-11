@@ -35,7 +35,7 @@ export class CartoesComponent implements OnInit {
   }
 
   salvar(dados: any) {
-    this.service.criarCartao(dados.nome, dados.limite, dados.diaFechamento, dados.diaVencimento).subscribe(() => {
+    this.service.criarCartao(dados.nome, dados.limite, dados.diaFechamento, dados.diaVencimento, dados.provedor).subscribe(() => {
       this.carregar();
     });
   }
