@@ -82,9 +82,10 @@ namespace GerenciadorFinanceiro.Tests.UseCases
                 new("Lazer", TipoTransacao.Despesa),
             };
 
-            // Forçando IDs para o mock
-            typeof(Categoria).GetProperty("Id") !.SetValue(categorias[0], cat1Id);
-            typeof(Categoria).GetProperty("Id") !.SetValue(categorias[1], cat2Id);
+            // Forçando IDs para o mock via reflexão
+            var idProperty = typeof(Categoria).GetProperty("Id");
+            idProperty?.SetValue(categorias[0], cat1Id);
+            idProperty?.SetValue(categorias[1], cat2Id);
 
             var metas = new List<MetaGasto>
             {
