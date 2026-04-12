@@ -8,6 +8,7 @@ namespace GerenciadorFinanceiro.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<ImportarExtratoUseCase>();
+            services.AddScoped<ValidarMetaGastoUseCase>();
 
             return services;
         }
