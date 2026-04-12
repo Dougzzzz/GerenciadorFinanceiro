@@ -15,9 +15,24 @@ namespace GerenciadorFinanceiro.Infrastructure.Data
         public DbSet<CartaoCredito> CartoesDeCredito { get; set; } = null!;
         public DbSet<Categoria> Categorias { get; set; } = null!;
 
+        public DbSet<MetaGasto> MetasGastos { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<MetaGasto>(entity =>
+            {
+                entity.ToTable("MetasGastos");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.ValorLimite).HasPrecision(18, 2).IsRequired();
+
+                // Relacionamento com Categoria
+                entity.HasOne<Categoria>()
+                      .WithMany()
+                      .HasForeignKey(e => e.CategoriaId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
 
             // Configuração Global para DateTime (PostgreSQL UTC Fix)
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())

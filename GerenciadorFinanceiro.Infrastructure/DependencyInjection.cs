@@ -14,7 +14,7 @@ namespace GerenciadorFinanceiro.Infrastructure
             services.AddScoped<ICategoriaRepository, CategoriaRepository>();
             services.AddScoped<IContaBancariaRepository, ContaBancariaRepository>();
             services.AddScoped<ICartaoCreditoRepository, CartaoCreditoRepository>();
-
+            services.AddScoped<IMetaGastoRepository, MetaGastoRepository>();
             services.AddScoped<IExtratoReaderFactory, ExtratoReaderFactory>();
 
             return services;
