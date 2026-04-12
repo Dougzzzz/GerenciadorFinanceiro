@@ -83,8 +83,8 @@ namespace GerenciadorFinanceiro.Tests.UseCases
             };
 
             // Forçando IDs para o mock
-            typeof(Categoria).GetProperty("Id")!.SetValue(categorias[0], cat1Id);
-            typeof(Categoria).GetProperty("Id")!.SetValue(categorias[1], cat2Id);
+            typeof(Categoria).GetProperty("Id") !.SetValue(categorias[0], cat1Id);
+            typeof(Categoria).GetProperty("Id") !.SetValue(categorias[1], cat2Id);
 
             var metas = new List<MetaGasto>
             {
@@ -94,12 +94,11 @@ namespace GerenciadorFinanceiro.Tests.UseCases
 
             _categoriaRepository.ObterTodasAsync().Returns(categorias);
             _metaRepository.ObterTodasAsync().Returns(metas);
-            
+
             // Mock de gastos individuais para o ExecutarAsync interno
             _metaRepository.ObterEspecificaPorCategoriaAsync(cat1Id, mes, ano).Returns((MetaGasto?)null);
             _metaRepository.ObterRecorrentePorCategoriaAsync(cat1Id).Returns(metas[0]);
             _metaRepository.ObterEspecificaPorCategoriaAsync(cat2Id, mes, ano).Returns(metas[1]);
-
             // Act
             var resultado = await _useCase.ExecutarResumoMensalAsync(mes, ano);
 
@@ -107,16 +106,16 @@ namespace GerenciadorFinanceiro.Tests.UseCases
             Assert.NotNull(resultado);
             var lista = resultado.ToList();
             Assert.Equal(2, lista.Count);
-            Assert.Contains(lista, r => r.Categoria == "Alimentação" && r.Meta == 1000m);
-            Assert.Contains(lista, r => r.Categoria == "Lazer" && r.Meta == 500m);
+            Assert.Contains(lista, r => r.categoria == "Alimentação" && r.meta == 1000m);
+            Assert.Contains(lista, r => r.categoria == "Lazer" && r.meta == 500m);
         }
 
         [Fact]
         public async Task ExecutarResumoMensalAsync_SemMetas_DeveRetornarListaVazia()
         {
             // Arrange
-            _metaRepository.ObterTodasAsync().Returns(new List<MetaGasto>());
-            _categoriaRepository.ObterTodasAsync().Returns(new List<Categoria>());
+            _metaRepository.ObterTodasAsync().Returns([]);
+            _categoriaRepository.ObterTodasAsync().Returns([]);
 
             // Act
             var resultado = await _useCase.ExecutarResumoMensalAsync(4, 2026);
