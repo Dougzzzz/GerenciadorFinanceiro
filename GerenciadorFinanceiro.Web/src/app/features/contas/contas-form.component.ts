@@ -19,6 +19,15 @@ import { ButtonComponent } from '../../shared/components/button/button.component
           <label>Saldo Inicial (R$)</label>
           <input type="number" step="0.01" [(ngModel)]="novo.saldoInicial" name="saldoInicial">
         </div>
+        <div class="form-group">
+          <label>Provedor de Extrato</label>
+          <select [(ngModel)]="novo.provedor" name="provedor">
+            <option [value]="0">Genérico / Padrão</option>
+            <option [value]="1">C6 Bank</option>
+            <option [value]="2">Nubank</option>
+            <option [value]="3">Inter</option>
+          </select>
+        </div>
         <app-button type="submit" [disabled]="!novo.nomeBanco">Salvar</app-button>
       </form>
     </app-card>
@@ -26,16 +35,16 @@ import { ButtonComponent } from '../../shared/components/button/button.component
   styles: [`
     .form { display: flex; flex-direction: column; gap: var(--spacing-md); }
     .form-group { display: flex; flex-direction: column; gap: 4px; }
-    input { padding: 8px; border: 1px solid #e2e8f0; border-radius: var(--border-radius); }
+    input, select { padding: 8px; border: 1px solid #e2e8f0; border-radius: var(--border-radius); }
   `]
 })
 export class ContasFormComponent {
-  @Output() onSalvar = new EventEmitter<{ nomeBanco: string, saldoInicial: number }>();
+  @Output() onSalvar = new EventEmitter<{ nomeBanco: string, saldoInicial: number, provedor: number }>();
 
-  novo = { nomeBanco: '', saldoInicial: 0 };
+  novo = { nomeBanco: '', saldoInicial: 0, provedor: 0 };
 
   salvar() {
     this.onSalvar.emit({ ...this.novo });
-    this.novo = { nomeBanco: '', saldoInicial: 0 };
+    this.novo = { nomeBanco: '', saldoInicial: 0, provedor: 0 };
   }
 }

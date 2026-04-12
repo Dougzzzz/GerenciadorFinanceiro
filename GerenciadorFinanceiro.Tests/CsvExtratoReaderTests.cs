@@ -153,8 +153,9 @@ namespace GerenciadorFinanceiro.Tests
             var repository = new TransacaoRepository(contexto);
             var categoriaRepository = new CategoriaRepository(contexto);
             var cartaoRepository = new CartaoCreditoRepository(contexto);
-            var reader = new CsvExtratoReader();
-            var useCase = new ImportarExtratoUseCase(repository, categoriaRepository, cartaoRepository, reader);
+            var contaRepository = new ContaBancariaRepository(contexto);
+            var readerFactory = new ExtratoReaderFactory();
+            var useCase = new ImportarExtratoUseCase(repository, categoriaRepository, cartaoRepository, contaRepository, readerFactory);
 
             var csv = new StringBuilder();
             csv.AppendLine("Data de Compra;Nome no Cartão;Final do Cartão;Categoria;Descrição;Parcela;Valor (em US$);Cotação (em R$);Valor (em R$)");

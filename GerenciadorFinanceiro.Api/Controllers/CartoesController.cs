@@ -23,9 +23,9 @@ namespace GerenciadorFinanceiro.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<CartaoCredito>> Post(string nome, decimal limite, int diaFechamento, int diaVencimento)
+        public async Task<ActionResult<CartaoCredito>> Post(string nome, decimal limite, int diaFechamento, int diaVencimento, ProvedorExtrato provedor = ProvedorExtrato.Generico)
         {
-            var cartao = new CartaoCredito(nome, limite, diaFechamento, diaVencimento);
+            var cartao = new CartaoCredito(nome, limite, diaFechamento, diaVencimento, provedor);
             await _repository.AdicionarAsync(cartao);
             return Ok(cartao);
         }

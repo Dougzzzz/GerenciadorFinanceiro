@@ -14,6 +14,8 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
             _context = context;
         }
 
+        public async Task<ContaBancaria?> ObterPorIdAsync(Guid id) => await _context.ContasBancarias.FindAsync(id);
+
         public async Task<IEnumerable<ContaBancaria>> ObterTodasAsync() => await _context.ContasBancarias.ToListAsync();
 
         public async Task AdicionarAsync(ContaBancaria conta)

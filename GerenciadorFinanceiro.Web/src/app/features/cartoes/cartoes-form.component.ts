@@ -29,6 +29,15 @@ import { ButtonComponent } from '../../shared/components/button/button.component
             <input type="number" [(ngModel)]="novo.diaVencimento" name="diaVencimento">
           </div>
         </div>
+        <div class="form-group">
+          <label>Provedor de Extrato</label>
+          <select [(ngModel)]="novo.provedor" name="provedor">
+            <option [value]="0">Genérico / Padrão</option>
+            <option [value]="1">C6 Bank</option>
+            <option [value]="2">Nubank</option>
+            <option [value]="3">Inter</option>
+          </select>
+        </div>
         <app-button type="submit" [disabled]="!novo.nome">Salvar</app-button>
       </form>
     </app-card>
@@ -37,16 +46,16 @@ import { ButtonComponent } from '../../shared/components/button/button.component
     .form { display: flex; flex-direction: column; gap: var(--spacing-md); }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); }
     .form-group { display: flex; flex-direction: column; gap: 4px; }
-    input { padding: 8px; border: 1px solid #e2e8f0; border-radius: var(--border-radius); }
+    input, select { padding: 8px; border: 1px solid #e2e8f0; border-radius: var(--border-radius); }
   `]
 })
 export class CartoesFormComponent {
   @Output() onSalvar = new EventEmitter<any>();
 
-  novo = { nome: '', limite: 0, diaFechamento: 1, diaVencimento: 10 };
+  novo = { nome: '', limite: 0, diaFechamento: 1, diaVencimento: 10, provedor: 0 };
 
   salvar() {
     this.onSalvar.emit({ ...this.novo });
-    this.novo = { nome: '', limite: 0, diaFechamento: 1, diaVencimento: 10 };
+    this.novo = { nome: '', limite: 0, diaFechamento: 1, diaVencimento: 10, provedor: 0 };
   }
 }

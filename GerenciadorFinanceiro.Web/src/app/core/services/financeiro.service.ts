@@ -96,8 +96,8 @@ export class FinanceiroService {
     return this.http.get<ContaBancaria[]>(`${this.apiUrl}/contas`);
   }
 
-  criarConta(nomeBanco: string, saldoInicial: number): Observable<ContaBancaria> {
-    return this.http.post<ContaBancaria>(`${this.apiUrl}/contas?nomeBanco=${nomeBanco}&saldoInicial=${saldoInicial}`, {});
+  criarConta(nomeBanco: string, saldoInicial: number, provedor: number = 0): Observable<ContaBancaria> {
+    return this.http.post<ContaBancaria>(`${this.apiUrl}/contas?nomeBanco=${nomeBanco}&saldoInicial=${saldoInicial}&provedor=${provedor}`, {});
   }
 
   // Cartões
@@ -105,7 +105,7 @@ export class FinanceiroService {
     return this.http.get<CartaoCredito[]>(`${this.apiUrl}/cartoes`);
   }
 
-  criarCartao(nome: string, limite: number, diaFechamento: number, diaVencimento: number): Observable<CartaoCredito> {
-    return this.http.post<CartaoCredito>(`${this.apiUrl}/cartoes?nome=${nome}&limite=${limite}&diaFechamento=${diaFechamento}&diaVencimento=${diaVencimento}`, {});
+  criarCartao(nome: string, limite: number, diaFechamento: number, diaVencimento: number, provedor: number = 0): Observable<CartaoCredito> {
+    return this.http.post<CartaoCredito>(`${this.apiUrl}/cartoes?nome=${nome}&limite=${limite}&diaFechamento=${diaFechamento}&diaVencimento=${diaVencimento}&provedor=${provedor}`, {});
   }
 }

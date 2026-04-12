@@ -34,8 +34,8 @@ export class ContasComponent implements OnInit {
     this.service.getContas().subscribe(data => this.contas.set(data)); 
   }
 
-  salvar(dados: { nomeBanco: string, saldoInicial: number }) {
-    this.service.criarConta(dados.nomeBanco, dados.saldoInicial).subscribe(() => {
+  salvar(dados: { nomeBanco: string, saldoInicial: number, provedor: number }) {
+    this.service.criarConta(dados.nomeBanco, dados.saldoInicial, dados.provedor).subscribe(() => {
       this.carregar();
     });
   }

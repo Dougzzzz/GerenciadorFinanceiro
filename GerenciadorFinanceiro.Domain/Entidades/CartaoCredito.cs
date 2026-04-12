@@ -7,14 +7,16 @@ namespace GerenciadorFinanceiro.Domain.Entidades
         public decimal Limite { get; private set; }
         public int DiaFechamento { get; private set; }
         public int DiaVencimento { get; private set; }
+        public ProvedorExtrato Provedor { get; private set; } = ProvedorExtrato.Generico;
 
-        public CartaoCredito(string nome, decimal limite, int diaFechamento, int diaVencimento)
+        public CartaoCredito(string nome, decimal limite, int diaFechamento, int diaVencimento, ProvedorExtrato provedor = ProvedorExtrato.Generico)
         {
             Id = Guid.NewGuid();
             Nome = nome;
             Limite = limite;
             DiaFechamento = diaFechamento;
             DiaVencimento = diaVencimento;
+            Provedor = provedor;
         }
 
         protected CartaoCredito() { }

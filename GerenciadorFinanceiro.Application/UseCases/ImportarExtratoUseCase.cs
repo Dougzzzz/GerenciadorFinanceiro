@@ -9,18 +9,21 @@ namespace GerenciadorFinanceiro.Application.UseCases
         private readonly ITransacaoRepository _repository;
         private readonly ICategoriaRepository _categoriaRepository;
         private readonly ICartaoCreditoRepository _cartaoRepository;
-        private readonly IExtratoReader _reader;
+        private readonly IContaBancariaRepository _contaRepository;
+        private readonly IExtratoReaderFactory _readerFactory;
 
         public ImportarExtratoUseCase(
             ITransacaoRepository repository,
             ICategoriaRepository categoriaRepository,
             ICartaoCreditoRepository cartaoRepository,
-            IExtratoReader reader)
+            IContaBancariaRepository contaRepository,
+            IExtratoReaderFactory readerFactory)
         {
             _repository = repository;
             _categoriaRepository = categoriaRepository;
             _cartaoRepository = cartaoRepository;
-            _reader = reader;
+            _contaRepository = contaRepository;
+            _readerFactory = readerFactory;
         }
 
         public async Task ExecutarAsync(Stream arquivo, Guid? categoriaPadraoId, Guid? contaId, Guid? cartaoId)
@@ -30,7 +33,27 @@ namespace GerenciadorFinanceiro.Application.UseCases
                 throw new ArgumentException("É necessário informar uma Conta Bancária ou um Cartão de Crédito para a importação.");
             }
 
-            var dtos = await _reader.LerArquivoAsync(arquivo);
+            // Determina o provedor com base na conta ou cartão
+            ProvedorExtrato provedor = ProvedorExtrato.Generico;
+            if (cartaoId.HasValue)
+            {
+                var cartao = await _cartaoRepository.ObterPorIdAsync(cartaoId.Value);
+                if (cartao != null)
+                {
+                    provedor = cartao.Provedor;
+                }
+            }
+            else if (contaId.HasValue)
+            {
+                var conta = await _contaRepository.ObterPorIdAsync(contaId.Value);
+                if (conta != null)
+                {
+                    provedor = conta.Provedor;
+                }
+            }
+
+            var reader = _readerFactory.ObterReader(provedor);
+            var dtos = await reader.LerArquivoAsync(arquivo);
 
             // Busca ou cria a categoria de fallback "Outros"
             var categoriaOutros = await _categoriaRepository.ObterPorNomeAsync("Outros", TipoTransacao.Despesa);

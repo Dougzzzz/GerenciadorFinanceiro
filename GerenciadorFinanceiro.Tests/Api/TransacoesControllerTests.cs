@@ -21,7 +21,10 @@ namespace GerenciadorFinanceiro.Tests.Api
             _repository = Substitute.For<ITransacaoRepository>();
             var categoriaRepository = Substitute.For<ICategoriaRepository>();
             var cartaoRepository = Substitute.For<ICartaoCreditoRepository>();
-            _useCase = Substitute.For<ImportarExtratoUseCase>(_repository, categoriaRepository, cartaoRepository, Substitute.For<IExtratoReader>());
+            var contaRepository = Substitute.For<IContaBancariaRepository>();
+            var readerFactory = Substitute.For<IExtratoReaderFactory>();
+
+            _useCase = Substitute.For<ImportarExtratoUseCase>(_repository, categoriaRepository, cartaoRepository, contaRepository, readerFactory);
             _controller = new TransacoesController(_repository, _useCase);
         }
 
