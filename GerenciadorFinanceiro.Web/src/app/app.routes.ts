@@ -11,5 +11,6 @@ export const routes: Routes = [
   { path: 'categorias', component: CategoriasComponent },
   { path: 'contas', component: ContasComponent },
   { path: 'cartoes', component: CartoesComponent },
+  { path: 'metas-gastos', loadComponent: () => import('./features/metas-gastos/metas-gastos.component').then(m => m.MetasGastosComponent) },
   { path: '**', redirectTo: '' }
 ];

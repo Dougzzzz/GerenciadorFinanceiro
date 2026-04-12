@@ -18,6 +18,7 @@ import { RouterModule } from '@angular/router';
           <li><a routerLink="/categorias" routerLinkActive="active">Categorias</a></li>
           <li><a routerLink="/contas" routerLinkActive="active">Contas</a></li>
           <li><a routerLink="/cartoes" routerLinkActive="active">Cartões</a></li>
+          <li><a routerLink="/metas-gastos" routerLinkActive="active">Metas de Gastos</a></li>
         </ul>
       </nav>
     </aside>

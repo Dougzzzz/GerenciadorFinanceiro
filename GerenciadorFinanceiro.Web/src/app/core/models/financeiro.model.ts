@@ -50,3 +50,19 @@ export interface Categoria {
   nome: string;
   tipo: TipoTransacao;
 }
+
+export interface MetaGasto {
+  id: string;
+  categoriaId: string;
+  valorLimite: number;
+  mes?: number;
+  ano?: number;
+  ehRecorrente: boolean;
+}
+
+export interface ResultadoValidacaoMeta {
+  excedeu: boolean;
+  valorLimite: number;
+  totalGasto: number;
+  percentualUso: number;
+}
