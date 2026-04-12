@@ -66,3 +66,10 @@ export interface ResultadoValidacaoMeta {
   totalGasto: number;
   percentualUso: number;
 }
+
+export interface MetaResumo {
+  categoria: string;
+  meta: number;
+  gastoAtual: number;
+  percentual: number;
+}

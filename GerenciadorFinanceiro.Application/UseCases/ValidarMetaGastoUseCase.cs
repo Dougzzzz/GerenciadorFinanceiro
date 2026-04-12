@@ -1,3 +1,4 @@
+using GerenciadorFinanceiro.Application.DTOs;
 using GerenciadorFinanceiro.Domain.Filtros;
 using GerenciadorFinanceiro.Domain.Interfaces;
 
@@ -19,16 +20,22 @@ namespace GerenciadorFinanceiro.Application.UseCases
     {
         private readonly IMetaGastoRepository _metaRepository;
         private readonly ITransacaoRepository _transacaoRepository;
+        private readonly ICategoriaRepository _categoriaRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidarMetaGastoUseCase"/> class.
         /// </summary>
         /// <param name="metaRepository">O repositório de metas.</param>
         /// <param name="transacaoRepository">O repositório de transações.</param>
-        public ValidarMetaGastoUseCase(IMetaGastoRepository metaRepository, ITransacaoRepository transacaoRepository)
+        /// <param name="categoriaRepository">O repositório de categorias.</param>
+        public ValidarMetaGastoUseCase(
+            IMetaGastoRepository metaRepository,
+            ITransacaoRepository transacaoRepository,
+            ICategoriaRepository categoriaRepository)
         {
             _metaRepository = metaRepository;
             _transacaoRepository = transacaoRepository;
+            _categoriaRepository = categoriaRepository;
         }
 
         /// <summary>
@@ -72,6 +79,38 @@ namespace GerenciadorFinanceiro.Application.UseCases
             decimal percentual = totalGastoNoMes / meta.ValorLimite;
 
             return new ResultadoValidacaoMeta(excedeu, meta.ValorLimite, totalGastoNoMes, percentual);
+        }
+
+        /// <summary>
+        /// Obtém o resumo de todas as metas para o mês e ano informados.
+        /// </summary>
+        /// <param name="mes">Mês de referência.</param>
+        /// <param name="ano">Ano de referência.</param>
+        /// <returns>Uma lista de resumos por categoria.</returns>
+        public async Task<IEnumerable<MetaResumoDto>> ExecutarResumoMensalAsync(int mes, int ano)
+        {
+            var todasMetas = await _metaRepository.ObterTodasAsync();
+            var categorias = await _categoriaRepository.ObterTodasAsync();
+
+            var resumos = new List<MetaResumoDto>();
+
+            // Filtrar metas relevantes para o mês (específicas do mês ou recorrentes que não tenham específica)
+            var metasNoMes = todasMetas
+                .GroupBy(m => m.CategoriaId)
+                .Select(g => g.FirstOrDefault(m => m.Mes == mes && m.Ano == ano) ?? g.FirstOrDefault(m => m.EhRecorrente))
+                .Where(m => m != null)
+                .ToList();
+
+            foreach (var meta in metasNoMes)
+            {
+                var resultado = await ExecutarAsync(meta!.CategoriaId, mes, ano, 0);
+                var categoria = categorias.FirstOrDefault(c => c.Id == meta.CategoriaId);
+                var nomeCategoria = categoria?.Nome ?? "Sem Categoria";
+
+                resumos.Add(new MetaResumoDto(nomeCategoria, resultado.valorLimite, resultado.totalGasto, resultado.percentualUso));
+            }
+
+            return resumos;
         }
     }
 }

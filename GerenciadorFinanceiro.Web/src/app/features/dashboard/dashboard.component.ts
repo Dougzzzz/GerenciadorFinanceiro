@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FinanceiroService } from '../../core/services/financeiro.service';
-import { Transacao } from '../../core/models/financeiro.model';
+import { Transacao, MetaResumo } from '../../core/models/financeiro.model';
 import { DashboardSummaryComponent } from './dashboard-summary.component';
 import { DashboardRecentTransactionsComponent } from './dashboard-recent-transactions.component';
 import { DashboardSpendingChartComponent } from './dashboard-spending-chart.component';
@@ -34,7 +34,7 @@ import { DashboardSpendingChartComponent } from './dashboard-spending-chart.comp
         </app-dashboard-recent-transactions>
 
         <app-dashboard-spending-chart
-          [gastos]="gastosPorCategoria()">
+          [metasResumo]="metasResumo()">
         </app-dashboard-spending-chart>
       </div>
     </div>
@@ -59,6 +59,7 @@ import { DashboardSpendingChartComponent } from './dashboard-spending-chart.comp
 })
 export class DashboardComponent implements OnInit {
   transacoes = signal<Transacao[]>([]);
+  metasResumo = signal<MetaResumo[]>([]);
 
   totalReceitas = computed(() => 
     this.transacoes()
@@ -80,27 +81,6 @@ export class DashboardComponent implements OnInit {
       .slice(0, 5)
   );
 
-  gastosPorCategoria = computed(() => {
-    const despesas = this.transacoes().filter(t => t.valor < 0);
-    const total = Math.abs(despesas.reduce((acc, t) => acc + t.valor, 0));
-    
-    if (total === 0) return [];
-
-    const grupos: Record<string, number> = {};
-    despesas.forEach(t => {
-      const cat = t.categoriaNavigation?.nome || t.categoria || 'Sem Categoria';
-      grupos[cat] = (grupos[cat] || 0) + Math.abs(t.valor);
-    });
-
-    return Object.entries(grupos)
-      .map(([categoria, valor]) => ({
-        categoria,
-        valor,
-        percentual: (valor / total) * 100
-      }))
-      .sort((a, b) => b.valor - a.valor);
-  });
-
   constructor(private financeiroService: FinanceiroService) {}
 
   ngOnInit(): void {
@@ -110,6 +90,11 @@ export class DashboardComponent implements OnInit {
   carregarDados(): void {
     this.financeiroService.getTransacoes().subscribe(data => {
       this.transacoes.set(data);
+    });
+
+    const hoje = new Date();
+    this.financeiroService.getResumoMetas(hoje.getMonth() + 1, hoje.getFullYear()).subscribe(data => {
+      this.metasResumo.set(data);
     });
   }
 }

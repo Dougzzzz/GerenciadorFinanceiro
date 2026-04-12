@@ -10,13 +10,15 @@ namespace GerenciadorFinanceiro.Tests.UseCases
     {
         private readonly IMetaGastoRepository _metaRepository;
         private readonly ITransacaoRepository _transacaoRepository;
+        private readonly ICategoriaRepository _categoriaRepository;
         private readonly ValidarMetaGastoUseCase _useCase;
 
         public ValidarMetaGastoUseCaseTests()
         {
             _metaRepository = Substitute.For<IMetaGastoRepository>();
             _transacaoRepository = Substitute.For<ITransacaoRepository>();
-            _useCase = new ValidarMetaGastoUseCase(_metaRepository, _transacaoRepository);
+            _categoriaRepository = Substitute.For<ICategoriaRepository>();
+            _useCase = new ValidarMetaGastoUseCase(_metaRepository, _transacaoRepository, _categoriaRepository);
         }
 
         [Fact]
@@ -63,6 +65,65 @@ namespace GerenciadorFinanceiro.Tests.UseCases
             // Assert
             Assert.False(resultado.excedeu);
             Assert.Equal(0, resultado.percentualUso);
+        }
+
+        [Fact]
+        public async Task ExecutarResumoMensalAsync_DeveRetornarResumoDeTodasAsMetas()
+        {
+            // Arrange
+            var cat1Id = Guid.NewGuid();
+            var cat2Id = Guid.NewGuid();
+            var mes = 4;
+            var ano = 2026;
+
+            var categorias = new List<Categoria>
+            {
+                new("Alimentação", TipoTransacao.Despesa),
+                new("Lazer", TipoTransacao.Despesa),
+            };
+
+            // Forçando IDs para o mock via reflexão
+            var idProperty = typeof(Categoria).GetProperty("Id");
+            idProperty?.SetValue(categorias[0], cat1Id);
+            idProperty?.SetValue(categorias[1], cat2Id);
+
+            var metas = new List<MetaGasto>
+            {
+                new(cat1Id, 1000m), // Recorrente
+                new(cat2Id, 500m, mes, ano), // Específica para este mês
+            };
+
+            _categoriaRepository.ObterTodasAsync().Returns(categorias);
+            _metaRepository.ObterTodasAsync().Returns(metas);
+
+            // Mock de gastos individuais para o ExecutarAsync interno
+            _metaRepository.ObterEspecificaPorCategoriaAsync(cat1Id, mes, ano).Returns((MetaGasto?)null);
+            _metaRepository.ObterRecorrentePorCategoriaAsync(cat1Id).Returns(metas[0]);
+            _metaRepository.ObterEspecificaPorCategoriaAsync(cat2Id, mes, ano).Returns(metas[1]);
+
+            // Act
+            var resultado = await _useCase.ExecutarResumoMensalAsync(mes, ano);
+
+            // Assert
+            Assert.NotNull(resultado);
+            var lista = resultado.ToList();
+            Assert.Equal(2, lista.Count);
+            Assert.Contains(lista, r => r.categoria == "Alimentação" && r.meta == 1000m);
+            Assert.Contains(lista, r => r.categoria == "Lazer" && r.meta == 500m);
+        }
+
+        [Fact]
+        public async Task ExecutarResumoMensalAsync_SemMetas_DeveRetornarListaVazia()
+        {
+            // Arrange
+            _metaRepository.ObterTodasAsync().Returns([]);
+            _categoriaRepository.ObterTodasAsync().Returns([]);
+
+            // Act
+            var resultado = await _useCase.ExecutarResumoMensalAsync(4, 2026);
+
+            // Assert
+            Assert.Empty(resultado);
         }
     }
 }
