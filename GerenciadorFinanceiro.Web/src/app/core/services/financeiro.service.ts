@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Transacao, Categoria, ContaBancaria, CartaoCredito, TipoTransacao } from '../models/financeiro.model';
+import { Transacao, Categoria, ContaBancaria, CartaoCredito, TipoTransacao, MetaGasto, ResultadoValidacaoMeta } from '../models/financeiro.model';
 import { FiltroTransacao } from '../models/filtros.model';
 
 @Injectable({
@@ -10,7 +10,28 @@ import { FiltroTransacao } from '../models/filtros.model';
 export class FinanceiroService {
   private apiUrl = '/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
+
+  // Metas de Gastos
+  getMetas(): Observable<MetaGasto[]> {
+    return this.http.get<MetaGasto[]>(`${this.apiUrl}/MetasGastos`);
+  }
+
+  criarMeta(meta: Partial<MetaGasto>): Observable<MetaGasto> {
+    return this.http.post<MetaGasto>(`${this.apiUrl}/MetasGastos`, meta);
+  }
+
+  atualizarMeta(id: string, novoValor: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/MetasGastos/${id}`, novoValor);
+  }
+
+  excluirMeta(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/MetasGastos/${id}`);
+  }
+
+  validarMeta(categoriaId: string, mes: number, ano: number): Observable<ResultadoValidacaoMeta> {
+    return this.http.get<ResultadoValidacaoMeta>(`${this.apiUrl}/MetasGastos/validar/${categoriaId}?mes=${mes}&ano=${ano}`);
+  }
 
   // Transações
 
