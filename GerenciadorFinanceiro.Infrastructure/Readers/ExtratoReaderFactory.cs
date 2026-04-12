@@ -8,9 +8,9 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
         public IExtratoReader ObterReader(ProvedorExtrato provedor) => provedor switch
         {
             ProvedorExtrato.C6Bank => new C6CsvExtratoReader(),
-            ProvedorExtrato.Generico => throw new NotImplementedException(),
-            ProvedorExtrato.Nubank => throw new NotImplementedException(),
-            ProvedorExtrato.Inter => throw new NotImplementedException(),
+            ProvedorExtrato.Nubank => new CsvExtratoReader(), // Implementação futura específica
+            ProvedorExtrato.Inter => new CsvExtratoReader(), // Implementação futura específica
+            ProvedorExtrato.Generico => new CsvExtratoReader(),
             _ => new CsvExtratoReader(),
         };
     }
