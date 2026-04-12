@@ -99,6 +99,7 @@ namespace GerenciadorFinanceiro.Tests.UseCases
             _metaRepository.ObterEspecificaPorCategoriaAsync(cat1Id, mes, ano).Returns((MetaGasto?)null);
             _metaRepository.ObterRecorrentePorCategoriaAsync(cat1Id).Returns(metas[0]);
             _metaRepository.ObterEspecificaPorCategoriaAsync(cat2Id, mes, ano).Returns(metas[1]);
+
             // Act
             var resultado = await _useCase.ExecutarResumoMensalAsync(mes, ano);
 
