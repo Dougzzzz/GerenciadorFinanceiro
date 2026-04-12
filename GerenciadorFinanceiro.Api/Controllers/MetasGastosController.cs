@@ -98,6 +98,19 @@ namespace GerenciadorFinanceiro.Api.Controllers
         }
 
         /// <summary>
+        /// Obtém o resumo de todas as metas de gastos para um mês e ano específicos.
+        /// </summary>
+        /// <param name="mes">Mês de referência.</param>
+        /// <param name="ano">Ano de referência.</param>
+        /// <returns>Uma lista de resumos por categoria.</returns>
+        [HttpGet("resumo")]
+        public async Task<ActionResult<IEnumerable<MetaResumoDto>>> GetResumo([FromQuery] int mes, [FromQuery] int ano)
+        {
+            var resumo = await _validarUseCase.ExecutarResumoMensalAsync(mes, ano);
+            return Ok(resumo);
+        }
+
+        /// <summary>
         /// Verifica o status atual de uma meta (quanto já foi gasto no mês).
         /// </summary>
         /// <param name="categoriaId">ID da categoria.</param>
