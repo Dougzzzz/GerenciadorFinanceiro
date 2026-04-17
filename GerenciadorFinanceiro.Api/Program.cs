@@ -1,3 +1,4 @@
+using GerenciadorFinanceiro.Api.Middleware;
 using GerenciadorFinanceiro.Application;
 using GerenciadorFinanceiro.Infrastructure;
 using GerenciadorFinanceiro.Infrastructure.Data;
@@ -26,6 +27,8 @@ builder.Services.AddInfrastructure();
 builder.Services.AddApplication();
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configura o ambiente de desenvolvimento
 if (app.Environment.IsDevelopment())
