@@ -5,6 +5,7 @@ using GerenciadorFinanceiro.Application.UseCases;
 using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Filtros;
 using GerenciadorFinanceiro.Domain.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 
@@ -70,6 +71,71 @@ namespace GerenciadorFinanceiro.Tests.Api
             // Assert
             Assert.IsType<OkObjectResult>(result.Result);
             await _repository.Received(1).ObterTodasAsync(filtroVazio);
+        }
+
+        [Fact]
+        public async Task Post_ComContaBancariaUndefined_DeveSalvarComContaNula()
+        {
+            // Arrange
+            var categoriaId = Guid.NewGuid();
+            var dto = new SaveTransacaoDto(Guid.NewGuid(), DateTime.Now, "Compra", -50, categoriaId, "undefined", null);
+
+            // Act
+            var result = await _controller.Post(dto);
+
+            // Assert
+            Assert.IsType<CreatedAtActionResult>(result.Result);
+            await _repository.Received(1).AdicionarAsync(Arg.Is<Transacao>(t =>
+                t.CategoriaId == categoriaId &&
+                t.ContaBancariaId == null &&
+                t.CartaoCreditoId == null));
+        }
+
+        [Fact]
+        public async Task Put_ComIdDiferenteDoCorpo_DeveRetornarBadRequest()
+        {
+            // Arrange
+            var idUrl = Guid.NewGuid();
+            var dto = new SaveTransacaoDto(Guid.NewGuid(), DateTime.Now, "Compra", -50, Guid.NewGuid(), null, null);
+
+            // Act
+            var result = await _controller.Put(idUrl, dto);
+
+            // Assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("ID da URL não coincide com ID do corpo.", badRequest.Value);
+            await _repository.DidNotReceiveWithAnyArgs().AtualizarAsync(default!);
+        }
+
+        [Fact]
+        public async Task Importar_ComArquivoVazio_DeveRetornarBadRequest()
+        {
+            // Arrange
+            var arquivo = Substitute.For<IFormFile>();
+            arquivo.Length.Returns(0);
+
+            // Act
+            var result = await _controller.Importar(arquivo, null, Guid.NewGuid(), null);
+
+            // Assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Arquivo inválido.", badRequest.Value);
+        }
+
+        [Fact]
+        public async Task Importar_QuandoUseCaseLancarArgumentException_DeveRetornarBadRequestComMensagem()
+        {
+            // Arrange
+            var arquivo = Substitute.For<IFormFile>();
+            arquivo.Length.Returns(10);
+            arquivo.OpenReadStream().Returns(new MemoryStream([1, 2, 3]));
+
+            // Act
+            var result = await _controller.Importar(arquivo, null, null, null);
+
+            // Assert
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("É necessário informar uma Conta Bancária ou um Cartão de Crédito para a importação.", badRequest.Value);
         }
 
         [Fact]
