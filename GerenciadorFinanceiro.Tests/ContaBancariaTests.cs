@@ -38,5 +38,18 @@ namespace GerenciadorFinanceiro.Tests
 
             Assert.Equal(70m, conta.SaldoAtual);
         }
+
+        [Fact]
+        public void Deve_Permitir_Saldo_Negativo_Ao_Atualizar()
+        {
+            // Arrange
+            var conta = new ContaBancaria("Inter", 100);
+
+            // Act
+            conta.AtualizarSaldo(-150);
+
+            // Assert
+            Assert.Equal(-50, conta.SaldoAtual);
+        }
     }
 }
