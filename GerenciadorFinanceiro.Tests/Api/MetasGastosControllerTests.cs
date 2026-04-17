@@ -5,7 +5,6 @@ using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
-using Xunit;
 
 namespace GerenciadorFinanceiro.Tests.Api
 {
@@ -25,7 +24,7 @@ namespace GerenciadorFinanceiro.Tests.Api
         [Fact]
         public async Task Get_Deve_Retornar_Ok_Com_Lista()
         {
-            _repoMock.ObterTodasAsync().Returns(new List<MetaGasto>());
+            _repoMock.ObterTodasAsync().Returns([]);
             var result = await _controller.Get();
             Assert.IsType<OkObjectResult>(result.Result);
         }
@@ -50,7 +49,7 @@ namespace GerenciadorFinanceiro.Tests.Api
         public async Task GetResumo_Deve_Retornar_Ok()
         {
             _useCaseMock.ExecutarResumoMensalAsync(Arg.Any<int>(), Arg.Any<int>())
-                .Returns(new List<MetaResumoDto>());
+                .Returns([]);
             var result = await _controller.GetResumo(4, 2026);
             Assert.IsType<OkObjectResult>(result.Result);
         }

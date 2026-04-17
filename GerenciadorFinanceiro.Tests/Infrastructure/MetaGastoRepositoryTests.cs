@@ -2,7 +2,6 @@ using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Infrastructure.Data;
 using GerenciadorFinanceiro.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 
 namespace GerenciadorFinanceiro.Tests.Infrastructure
 {
@@ -17,7 +16,7 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
             var catId = Guid.NewGuid();
             var metaRecorrente = new MetaGasto(catId, 500);
             var metaEspecifica = new MetaGasto(catId, 600, 4, 2026);
-            
+
             await repository.AdicionarAsync(metaRecorrente);
             await repository.AdicionarAsync(metaEspecifica);
 

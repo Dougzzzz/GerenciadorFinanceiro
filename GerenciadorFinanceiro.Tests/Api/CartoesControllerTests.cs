@@ -3,7 +3,6 @@ using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
-using Xunit;
 
 namespace GerenciadorFinanceiro.Tests.Api
 {
@@ -22,7 +21,7 @@ namespace GerenciadorFinanceiro.Tests.Api
         public async Task Get_Deve_Retornar_Ok_Com_Lista()
         {
             // Arrange
-            var cartoes = new List<CartaoCredito> { new CartaoCredito("Visa", 1000, 1, 10) };
+            var cartoes = new List<CartaoCredito> { new("Visa", 1000, 1, 10) };
             _repoMock.ObterTodosAsync().Returns(cartoes);
 
             // Act

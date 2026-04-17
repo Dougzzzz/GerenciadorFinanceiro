@@ -2,7 +2,6 @@ using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Infrastructure.Data;
 using GerenciadorFinanceiro.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 
 namespace GerenciadorFinanceiro.Tests.Infrastructure
 {

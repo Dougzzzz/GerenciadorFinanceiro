@@ -38,6 +38,7 @@ namespace GerenciadorFinanceiro.Tests
 
             Assert.Equal(70m, conta.SaldoAtual);
         }
+
         [Fact]
         public void Deve_Permitir_Saldo_Negativo_Ao_Atualizar()
         {
