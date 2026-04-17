@@ -1,59 +1,65 @@
-# GerenciadorFinanceiroWeb
+# GerenciadorFinanceiro.Web
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.4.
+Frontend Angular do projeto de controle financeiro.
 
-## Development server
+## Comandos
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Para subir o front em desenvolvimento:
 
 ```bash
-ng generate component component-name
+npm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Para gerar build:
 
 ```bash
-ng generate --help
+npm run build
 ```
 
-## Building
-
-To build the project run:
+Para rodar os testes em modo interativo:
 
 ```bash
-ng build
+npm test
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+Para rodar os testes uma vez em `ChromeHeadless`:
 
 ```bash
-ng test
+npm run test:ci
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+Para rodar os testes com cobertura:
 
 ```bash
-ng e2e
+npm run test:coverage
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+O relatório HTML de cobertura fica em `coverage/gerenciador-financeiro.web/index.html`.
 
-## Additional Resources
+## Estratégia de testes
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Hoje o projeto usa `Jasmine + Karma`, que já vem integrado ao Angular CLI e tem o menor atrito para manter a base evoluindo.
+
+Os testes seguem este modelo:
+
+- `services`: validar chamadas HTTP, query params e transformação de dados
+- componentes visuais: validar renderização, classes CSS e estados vazios
+- componentes de formulário: validar `Input`, `Output`, habilitação de botão e reset
+- componentes container: mockar services e validar carregamento, filtros e ações da tela
+
+## Exemplos no projeto
+
+Você pode usar estes arquivos como referência:
+
+- `src/app/core/services/financeiro.service.spec.ts`
+- `src/app/features/transacoes/transacoes.component.spec.ts`
+- `src/app/features/transacoes/transacoes-form.component.spec.ts`
+- `src/app/features/dashboard/dashboard.component.spec.ts`
+
+## Fluxo recomendado para novos testes
+
+1. Criar o arquivo `*.spec.ts` ao lado do componente ou service testado.
+2. Cobrir primeiro o comportamento mais importante para o usuário ou regra de negócio.
+3. Mockar dependências externas, principalmente `FinanceiroService`.
+4. Rodar `npm run test:ci` antes de subir a alteração.
+5. Quando quiser avaliar evolução da cobertura, rodar `npm run test:coverage`.

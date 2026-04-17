@@ -1,4 +1,4 @@
-name: .NET CI
+name: CI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
-  build-and-test:
+  backend:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,3 +29,39 @@ jobs:
 
     - name: Test
       run: dotnet test GerenciadorFinanceiro.sln --no-build --configuration Release --verbosity normal
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: GerenciadorFinanceiro.Web
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: npm
+        cache-dependency-path: GerenciadorFinanceiro.Web/package-lock.json
+
+    - name: Setup Chrome
+      id: setup-chrome
+      uses: browser-actions/setup-chrome@v1
+
+    - name: Install frontend dependencies
+      run: npm ci
+
+    - name: Run frontend tests
+      env:
+        CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
+      run: npm run test:coverage
+
+    - name: Upload frontend coverage
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-coverage
+        path: GerenciadorFinanceiro.Web/coverage
+        if-no-files-found: warn
