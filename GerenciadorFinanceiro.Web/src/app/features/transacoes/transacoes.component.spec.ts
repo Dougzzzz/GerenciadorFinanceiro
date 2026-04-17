@@ -189,6 +189,42 @@ describe('TransacoesComponent', () => {
     expect(component.selecionadas().size).toBe(1);
   });
 
+  it('deve alternar a visibilidade do formulario de nova transacao', () => {
+    expect(component.mostrarNovo()).toBeFalse();
+    component.mostrarNovo.set(true);
+    expect(component.mostrarNovo()).toBeTrue();
+  });
+
+  it('deve alternar a visibilidade do formulario de importacao', () => {
+    expect(component.mostrarImportacao()).toBeFalse();
+    component.mostrarImportacao.set(true);
+    expect(component.mostrarImportacao()).toBeTrue();
+  });
+
+  it('deve atualizar o formulario e recarregar ao ordenar', () => {
+    fixture.detectChanges();
+    financeiroService.getTransacoes.calls.reset();
+    
+    component.aoOrdenar({ coluna: 'Valor', direcao: 'Asc' });
+    
+    expect(component.filterForm.get('ordenarPor')?.value).toBe('Valor');
+    expect(component.filterForm.get('direcao')?.value).toBe('Asc');
+    expect(financeiroService.getTransacoes).toHaveBeenCalled();
+  });
+
+  it('deve chamar importar e recarregar dados', () => {
+    spyOn(window, 'alert');
+    fixture.detectChanges();
+    financeiroService.getTransacoes.calls.reset();
+    const event = { file: new File([], 'test.csv'), config: { categoriaId: '1', contaId: '1' } };
+    
+    component.importar(event);
+    
+    expect(financeiroService.importarExtrato).toHaveBeenCalled();
+    expect(component.mostrarImportacao()).toBeFalse();
+    expect(financeiroService.getTransacoes).toHaveBeenCalled();
+  });
+
   it('deve alertar quando salvar nova transacao falhar', () => {
     spyOn(window, 'alert');
     financeiroService.criarTransacao.and.returnValue(

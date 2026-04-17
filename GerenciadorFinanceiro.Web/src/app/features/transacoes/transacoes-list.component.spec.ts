@@ -1,70 +1,87 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TransacoesListComponent } from './transacoes-list.component';
+import { FormsModule } from '@angular/forms';
 import { TipoTransacao } from '../../core/models/financeiro.model';
+import { By } from '@angular/platform-browser';
 
 describe('TransacoesListComponent', () => {
-  let fixture: ComponentFixture<TransacoesListComponent>;
   let component: TransacoesListComponent;
+  let fixture: ComponentFixture<TransacoesListComponent>;
+
+  const mockTransacoes = [
+    {
+      id: '1',
+      data: '2026-04-17T00:00:00Z',
+      descricao: 'Teste',
+      valor: 100,
+      tipo: TipoTransacao.Receita,
+      categoriaId: 'cat-1'
+    } as any
+  ];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TransacoesListComponent],
+      imports: [TransacoesListComponent, FormsModule]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TransacoesListComponent);
     component = fixture.componentInstance;
-    component.transacoes = [
-      {
-        id: 'transacao-1',
-        data: '2026-04-10T00:00:00Z',
-        descricao: 'Mercado',
-        valor: -150,
-        tipo: TipoTransacao.Despesa,
-        categoriaId: 'cat-1',
-        categoria: 'Alimentacao',
-        nomeCartao: '',
-        finalCartao: '',
-        parcela: '',
-        cotacao: 1,
-      },
-    ];
+    component.transacoes = mockTransacoes;
+    component.selecionadas = new Set();
     fixture.detectChanges();
   });
 
-  it('deve emitir ordenacao ascendente ao clicar em uma nova coluna', () => {
-    spyOn(component.onSort, 'emit');
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
 
+  it('should emit onSort with Asc when clicking new column', () => {
+    spyOn(component.onSort, 'emit');
+    component.ordenarPor = 'Descricao';
+    component.direcao = 'Desc';
+    
+    component.toggleSort('Data');
+    
+    expect(component.onSort.emit).toHaveBeenCalledWith({ coluna: 'Data', direcao: 'Asc' });
+  });
+
+  it('should emit onSort with inverted direction when clicking same column', () => {
+    spyOn(component.onSort, 'emit');
     component.ordenarPor = 'Data';
     component.direcao = 'Desc';
-
-    component.toggleSort('Valor');
-
-    expect(component.onSort.emit).toHaveBeenCalledWith({ coluna: 'Valor', direcao: 'Asc' });
+    
+    component.toggleSort('Data');
+    
+    expect(component.onSort.emit).toHaveBeenCalledWith({ coluna: 'Data', direcao: 'Asc' });
   });
 
-  it('deve inverter a direcao ao clicar novamente na mesma coluna', () => {
-    spyOn(component.onSort, 'emit');
-
-    component.ordenarPor = 'Valor';
+  it('should return correct sort icon', () => {
+    component.ordenarPor = 'Data';
+    component.direcao = 'Desc';
+    
+    expect(component.getSortIcon('Data')).toBe('🔽');
+    expect(component.getSortIcon('Descricao')).toBe('↕️');
+    
     component.direcao = 'Asc';
-
-    component.toggleSort('Valor');
-
-    expect(component.onSort.emit).toHaveBeenCalledWith({ coluna: 'Valor', direcao: 'Desc' });
+    expect(component.getSortIcon('Data')).toBe('🔼');
   });
 
-  it('deve retornar o icone correto para a coluna ordenada', () => {
-    component.ordenarPor = 'Valor';
-    component.direcao = 'Asc';
+  it('should render edit inputs when editandoId matches', async () => {
+    component.editandoId = '1';
+    component.tempEdit = { ...mockTransacoes[0], data: '2026-04-17' };
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
 
-    expect(component.getSortIcon('Valor')).toBe('🔼');
-    expect(component.getSortIcon('Data')).toBe('↕️');
+    const input = fixture.debugElement.query(By.css('input[type="text"]'));
+    expect(input).toBeTruthy();
+    expect(input.nativeElement.value).toBe('Teste');
   });
 
-  it('deve renderizar a descricao e a categoria da transacao', () => {
-    const text = fixture.nativeElement.textContent as string;
-
-    expect(text).toContain('Mercado');
-    expect(text).toContain('Alimentacao');
+  it('should emit onEdit when edit button is clicked', () => {
+    spyOn(component.onEdit, 'emit');
+    const editBtn = fixture.debugElement.query(By.css('.btn-icon'));
+    editBtn.nativeElement.click();
+    expect(component.onEdit.emit).toHaveBeenCalledWith(mockTransacoes[0]);
   });
 });
