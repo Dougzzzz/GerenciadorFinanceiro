@@ -125,6 +125,14 @@ export class FinanceiroService {
     return this.http.post<ContaBancaria>(`${this.apiUrl}/contas?nomeBanco=${nomeBanco}&saldoInicial=${saldoInicial}&provedor=${provedor}`, {});
   }
 
+  atualizarConta(id: string, nomeBanco: string, saldoAtual: number, provedor: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/contas/${id}?nomeBanco=${nomeBanco}&saldoAtual=${saldoAtual}&provedor=${provedor}`, {});
+  }
+
+  excluirConta(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/contas/${id}`);
+  }
+
   // Cartões
   getCartoes(): Observable<CartaoCredito[]> {
     return this.http.get<CartaoCredito[]>(`${this.apiUrl}/cartoes`);
