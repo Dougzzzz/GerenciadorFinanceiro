@@ -47,10 +47,10 @@ namespace GerenciadorFinanceiro.Api.Middleware
         {
             ArgumentException => (StatusCodes.Status400BadRequest, exception.Message),
             KeyNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
-            DbUpdateException => (StatusCodes.Status500InternalServerError, "Nao foi possivel salvar os dados no banco."),
-            DbException => (StatusCodes.Status503ServiceUnavailable, "Nao foi possivel conectar ao banco de dados."),
-            TimeoutException => (StatusCodes.Status503ServiceUnavailable, "A operacao demorou mais do que o esperado. Tente novamente."),
-            _ => (StatusCodes.Status500InternalServerError, "Ocorreu um erro interno ao processar a solicitacao.")
+            DbUpdateException => (StatusCodes.Status500InternalServerError, "Não foi possível salvar os dados no banco."),
+            DbException => (StatusCodes.Status503ServiceUnavailable, "Não foi possível conectar ao banco de dados."),
+            TimeoutException => (StatusCodes.Status503ServiceUnavailable, "A operação demorou mais do que o esperado. Tente novamente."),
+            _ => (StatusCodes.Status500InternalServerError, "Ocorreu um erro interno ao processar a solicitação.")
         };
 
         private async Task WriteErrorResponseAsync(HttpContext context, Exception exception)

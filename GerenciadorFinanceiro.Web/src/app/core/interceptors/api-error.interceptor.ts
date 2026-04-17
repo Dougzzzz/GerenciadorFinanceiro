@@ -34,6 +34,7 @@ export const apiErrorInterceptor: HttpInterceptorFn = (_req, next) =>
   next(_req).pipe(
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse) {
+        console.error('API Error:', error);
         return throwError(() => new Error(extractMessage(error)));
       }
 

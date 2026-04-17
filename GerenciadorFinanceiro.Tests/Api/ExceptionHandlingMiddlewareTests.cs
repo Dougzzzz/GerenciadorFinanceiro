@@ -16,14 +16,14 @@ namespace GerenciadorFinanceiro.Tests.Api
         public async Task InvokeAsync_QuandoReceberArgumentException_DeveRetornarBadRequestComMensagemOriginal()
         {
             var context = CreateHttpContext();
-            var middleware = CreateMiddleware(_ => throw new ArgumentException("Nao foi possivel salvar uma transacao."));
+            var middleware = CreateMiddleware(_ => throw new ArgumentException("Não foi possível salvar uma transação."));
 
             await middleware.InvokeAsync(context);
 
             var response = await ReadResponseAsync(context);
 
             Assert.Equal(StatusCodes.Status400BadRequest, context.Response.StatusCode);
-            Assert.Equal("Nao foi possivel salvar uma transacao.", response.Message);
+            Assert.Equal("Não foi possível salvar uma transação.", response.Message);
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace GerenciadorFinanceiro.Tests.Api
             var response = await ReadResponseAsync(context);
 
             Assert.Equal(StatusCodes.Status500InternalServerError, context.Response.StatusCode);
-            Assert.Equal("Nao foi possivel salvar os dados no banco.", response.Message);
+            Assert.Equal("Não foi possível salvar os dados no banco.", response.Message);
         }
 
         [Fact]
@@ -51,21 +51,21 @@ namespace GerenciadorFinanceiro.Tests.Api
             var response = await ReadResponseAsync(context);
 
             Assert.Equal(StatusCodes.Status503ServiceUnavailable, context.Response.StatusCode);
-            Assert.Equal("Nao foi possivel conectar ao banco de dados.", response.Message);
+            Assert.Equal("Não foi possível conectar ao banco de dados.", response.Message);
         }
 
         [Fact]
         public async Task InvokeAsync_QuandoReceberKeyNotFoundException_DeveRetornarNotFound()
         {
             var context = CreateHttpContext();
-            var middleware = CreateMiddleware(_ => throw new KeyNotFoundException("Transacao nao encontrada."));
+            var middleware = CreateMiddleware(_ => throw new KeyNotFoundException("Transação não encontrada."));
 
             await middleware.InvokeAsync(context);
 
             var response = await ReadResponseAsync(context);
 
             Assert.Equal(StatusCodes.Status404NotFound, context.Response.StatusCode);
-            Assert.Equal("Transacao nao encontrada.", response.Message);
+            Assert.Equal("Transação não encontrada.", response.Message);
         }
 
         [Fact]
@@ -79,7 +79,7 @@ namespace GerenciadorFinanceiro.Tests.Api
             var response = await ReadResponseAsync(context);
 
             Assert.Equal(StatusCodes.Status503ServiceUnavailable, context.Response.StatusCode);
-            Assert.Equal("A operacao demorou mais do que o esperado. Tente novamente.", response.Message);
+            Assert.Equal("A operação demorou mais do que o esperado. Tente novamente.", response.Message);
         }
 
         [Fact]
@@ -93,7 +93,7 @@ namespace GerenciadorFinanceiro.Tests.Api
             var response = await ReadResponseAsync(context);
 
             Assert.Equal(StatusCodes.Status500InternalServerError, context.Response.StatusCode);
-            Assert.Equal("Ocorreu um erro interno ao processar a solicitacao.", response.Message);
+            Assert.Equal("Ocorreu um erro interno ao processar a solicitação.", response.Message);
         }
 
         [Fact]
