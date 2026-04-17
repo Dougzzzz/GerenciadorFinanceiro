@@ -7,5 +7,7 @@ namespace GerenciadorFinanceiro.Domain.Interfaces
         Task<ContaBancaria?> ObterPorIdAsync(Guid id);
         Task<IEnumerable<ContaBancaria>> ObterTodasAsync();
         Task AdicionarAsync(ContaBancaria conta);
+        Task AtualizarAsync(ContaBancaria conta);
+        Task ExcluirAsync(Guid id);
     }
 }

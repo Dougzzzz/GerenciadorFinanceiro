@@ -18,5 +18,12 @@ namespace GerenciadorFinanceiro.Domain.Entidades
         protected ContaBancaria() { }
 
         public void AtualizarSaldo(decimal valor) => SaldoAtual += valor;
+
+        public void AtualizarDados(string nomeBanco, decimal saldoAtual, ProvedorExtrato provedor)
+        {
+            NomeBanco = nomeBanco;
+            SaldoAtual = saldoAtual;
+            Provedor = provedor;
+        }
     }
 }

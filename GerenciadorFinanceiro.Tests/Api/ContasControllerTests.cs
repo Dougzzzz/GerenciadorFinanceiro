@@ -46,5 +46,45 @@ namespace GerenciadorFinanceiro.Tests.Api
             Assert.Equal(500, value.SaldoAtual);
             await _repoMock.Received(1).AdicionarAsync(Arg.Any<ContaBancaria>());
         }
+
+        [Fact]
+        public async Task Put_Deve_Retornar_NoContent_Quando_Sucesso()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var conta = new ContaBancaria("Teste");
+            _repoMock.ObterPorIdAsync(id).Returns(conta);
+
+            // Act
+            var result = await _controller.Put(id, "Novo Nome", 1000, ProvedorExtrato.C6Bank);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+            await _repoMock.Received(1).AtualizarAsync(Arg.Any<ContaBancaria>());
+        }
+
+        [Fact]
+        public async Task Put_Deve_Retornar_NotFound_Quando_Inexistente()
+        {
+            // Arrange
+            _repoMock.ObterPorIdAsync(Arg.Any<Guid>()).Returns((ContaBancaria?)null);
+
+            // Act
+            var result = await _controller.Put(Guid.NewGuid(), "Nome", 0, ProvedorExtrato.Generico);
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Delete_Deve_Retornar_NoContent_Quando_Sucesso()
+        {
+            // Act
+            var result = await _controller.Delete(Guid.NewGuid());
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+            await _repoMock.Received(1).ExcluirAsync(Arg.Any<Guid>());
+        }
     }
 }
