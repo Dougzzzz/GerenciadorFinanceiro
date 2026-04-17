@@ -40,6 +40,44 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
             Assert.Equal(2, todas.Count());
         }
 
+        [Fact]
+        public async Task AtualizarAsync_Deve_Persistir_Alteracoes()
+        {
+            // Arrange
+            using var context = CriarContexto();
+            var repository = new ContaBancariaRepository(context);
+            var conta = new ContaBancaria("Original", 100);
+            await repository.AdicionarAsync(conta);
+
+            // Act
+            conta.AtualizarDados("Alterada", 200, ProvedorExtrato.C6Bank);
+            await repository.AtualizarAsync(conta);
+
+            // Assert
+            var noDb = await repository.ObterPorIdAsync(conta.Id);
+            Assert.NotNull(noDb);
+            Assert.Equal("Alterada", noDb.NomeBanco);
+            Assert.Equal(200, noDb.SaldoAtual);
+            Assert.Equal(ProvedorExtrato.C6Bank, noDb.Provedor);
+        }
+
+        [Fact]
+        public async Task ExcluirAsync_Deve_Remover_Conta()
+        {
+            // Arrange
+            using var context = CriarContexto();
+            var repository = new ContaBancariaRepository(context);
+            var conta = new ContaBancaria("Para Deletar");
+            await repository.AdicionarAsync(conta);
+
+            // Act
+            await repository.ExcluirAsync(conta.Id);
+
+            // Assert
+            var noDb = await repository.ObterPorIdAsync(conta.Id);
+            Assert.Null(noDb);
+        }
+
         private static AppDbContext CriarContexto()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()

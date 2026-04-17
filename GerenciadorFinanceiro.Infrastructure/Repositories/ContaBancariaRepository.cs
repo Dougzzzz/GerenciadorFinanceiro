@@ -23,5 +23,21 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
             await _context.ContasBancarias.AddAsync(conta);
             await _context.SaveChangesAsync();
         }
+
+        public async Task AtualizarAsync(ContaBancaria conta)
+        {
+            _context.ContasBancarias.Update(conta);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ExcluirAsync(Guid id)
+        {
+            var conta = await _context.ContasBancarias.FindAsync(id);
+            if (conta != null)
+            {
+                _context.ContasBancarias.Remove(conta);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

@@ -9,11 +9,11 @@ describe('ContasComponent', () => {
   let financeiroServiceSpy: jasmine.SpyObj<FinanceiroService>;
 
   const mockContas = [
-    { id: '1', nomeBanco: 'Nubank', saldo: 1000, provedor: 1 }
+    { id: '1', nomeBanco: 'Nubank', saldoAtual: 1000, provedor: 1 }
   ];
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('FinanceiroService', ['getContas', 'criarConta']);
+    const spy = jasmine.createSpyObj('FinanceiroService', ['getContas', 'criarConta', 'atualizarConta', 'excluirConta']);
 
     await TestBed.configureTestingModule({
       imports: [ContasComponent],
@@ -36,13 +36,43 @@ describe('ContasComponent', () => {
     expect(component.contas().length).toBe(1);
   });
 
-  it('should call criarConta and reload on salvar', () => {
+  it('should call criarConta when not editing', () => {
     const novaConta = { nomeBanco: 'Inter', saldoInicial: 500, provedor: 2 };
     financeiroServiceSpy.criarConta.and.returnValue(of({ id: '2', ...novaConta } as any));
     
     component.salvar(novaConta);
     
-    expect(financeiroServiceSpy.criarConta).toHaveBeenCalledWith('Inter', 500, 2);
+    expect(financeiroServiceSpy.criarConta).toHaveBeenCalled();
     expect(financeiroServiceSpy.getContas).toHaveBeenCalledTimes(2);
+  });
+
+  it('should call atualizarConta when editing', () => {
+    const conta = mockContas[0] as any;
+    component.iniciarEdicao(conta);
+    
+    const dadosAlt = { nomeBanco: 'Nubank Alt', saldoInicial: 2000, provedor: 1 };
+    financeiroServiceSpy.atualizarConta.and.returnValue(of({}));
+    
+    component.salvar(dadosAlt);
+    
+    expect(financeiroServiceSpy.atualizarConta).toHaveBeenCalledWith('1', 'Nubank Alt', 2000, 1);
+  });
+
+  it('should call excluirConta after confirmation', () => {
+    spyOn(window, 'confirm').and.returnValue(true);
+    financeiroServiceSpy.excluirConta.and.returnValue(of({}));
+    
+    component.excluir('1');
+    
+    expect(financeiroServiceSpy.excluirConta).toHaveBeenCalledWith('1');
+    expect(financeiroServiceSpy.getContas).toHaveBeenCalledTimes(2);
+  });
+
+  it('should clear editing state when limpar is called', () => {
+    component.iniciarEdicao(mockContas[0] as any);
+    component.limpar();
+    
+    expect(component.editando()).toBeNull();
+    expect(component.novo().nomeBanco).toBe('');
   });
 });

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ContasListComponent } from './contas-list.component';
+import { By } from '@angular/platform-browser';
 
 describe('ContasListComponent', () => {
   let component: ContasListComponent;
@@ -25,6 +26,18 @@ describe('ContasListComponent', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.item')).toBeTruthy();
-    expect(compiled.querySelector('span')?.textContent).toContain('Nubank');
+    expect(compiled.querySelector('strong')?.textContent).toContain('Nubank');
+  });
+
+  it('should emit onIniciarEdicao when edit button is clicked', () => {
+    spyOn(component.onIniciarEdicao, 'emit');
+    const mockConta = { id: '1', nomeBanco: 'Nubank' } as any;
+    component.contas = [mockConta];
+    fixture.detectChanges();
+    
+    const editBtn = fixture.debugElement.query(By.css('.btn-icon'));
+    editBtn.nativeElement.click();
+    
+    expect(component.onIniciarEdicao.emit).toHaveBeenCalledWith(mockConta);
   });
 });

@@ -29,5 +29,26 @@ namespace GerenciadorFinanceiro.Api.Controllers
             await _repository.AdicionarAsync(conta);
             return Ok(conta);
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(Guid id, string nomeBanco, decimal saldoAtual, ProvedorExtrato provedor)
+        {
+            var conta = await _repository.ObterPorIdAsync(id);
+            if (conta == null)
+            {
+                return NotFound();
+            }
+
+            conta.AtualizarDados(nomeBanco, saldoAtual, provedor);
+            await _repository.AtualizarAsync(conta);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            await _repository.ExcluirAsync(id);
+            return NoContent();
+        }
     }
 }
