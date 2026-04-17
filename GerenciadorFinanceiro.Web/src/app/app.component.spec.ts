@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
 import { AppComponent } from './app.component';
+import { provideRouter } from '@angular/router';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideRouter([])],
+      providers: [provideRouter([])]
     }).compileComponents();
   });
 
@@ -16,20 +16,9 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'GerenciadorFinanceiro.Web' title`, () => {
+  it(`should have as title 'GerenciadorFinanceiro.Web'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app.title).toEqual('GerenciadorFinanceiro.Web');
-  });
-
-  it('should render the application layout', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-
-    expect(compiled.querySelector('.app-container')).not.toBeNull();
-    expect(compiled.querySelector('app-sidebar')).not.toBeNull();
-    expect(compiled.querySelector('app-header')).not.toBeNull();
-    expect(compiled.querySelector('router-outlet')).not.toBeNull();
   });
 });

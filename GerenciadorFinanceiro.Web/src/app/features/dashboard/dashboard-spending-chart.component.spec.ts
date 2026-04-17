@@ -63,4 +63,16 @@ describe('DashboardSpendingChartComponent', () => {
     expect(actualBar.classList.contains('exceeded')).toBeTrue();
     expect(actualBar.style.width).toBe('100%');
   });
+
+  it('deve calcular largura zero se meta for zero', () => {
+    const width = component.calculateWidth({ meta: 0, gastoAtual: 100 } as any);
+    expect(width).toBe(0);
+  });
+
+  it('deve mostrar percentual excedido na classe CSS', () => {
+    component.metasResumo = [{ categoria: 'C', meta: 100, gastoAtual: 200, percentual: 2 }];
+    fixture.detectChanges();
+    const percent = fixture.nativeElement.querySelector('.usage-percent');
+    expect(percent.classList).toContain('exceeded');
+  });
 });

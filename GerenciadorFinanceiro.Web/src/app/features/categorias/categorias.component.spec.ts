@@ -75,6 +75,17 @@ describe('CategoriasComponent', () => {
     expect(component.selecionadas().size).toBe(0);
   });
 
+  it('should call excluirCategorias for multiple selected', () => {
+    spyOn(window, 'confirm').and.returnValue(true);
+    spyOn(window, 'alert');
+    component.selecionadas.set(new Set(['1', '2']));
+    financeiroServiceSpy.excluirCategorias.and.returnValue(of({}));
+    
+    component.excluirSelecionadas();
+    
+    expect(financeiroServiceSpy.excluirCategorias).toHaveBeenCalledWith(['1', '2']);
+  });
+
   it('should call criarCategoria on salvar when not editing', () => {
     component.novo = { nome: 'Nova', tipo: TipoTransacao.Despesa };
     financeiroServiceSpy.criarCategoria.and.returnValue(of({ id: '3', ...component.novo }));
