@@ -16,7 +16,7 @@ namespace GerenciadorFinanceiro.Application.UseCases
     /// <summary>
     /// Caso de uso para validar se um novo gasto ultrapassa o limite da categoria.
     /// </summary>
-    public class ValidarMetaGastoUseCase
+    public class ValidarMetaGastoUseCase : IValidarMetaGastoUseCase
     {
         private readonly IMetaGastoRepository _metaRepository;
         private readonly ITransacaoRepository _transacaoRepository;

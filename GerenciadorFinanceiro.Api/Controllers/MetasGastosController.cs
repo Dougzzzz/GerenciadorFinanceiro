@@ -14,14 +14,14 @@ namespace GerenciadorFinanceiro.Api.Controllers
     public class MetasGastosController : ControllerBase
     {
         private readonly IMetaGastoRepository _repository;
-        private readonly ValidarMetaGastoUseCase _validarUseCase;
+        private readonly IValidarMetaGastoUseCase _validarUseCase;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MetasGastosController"/> class.
         /// </summary>
         /// <param name="repository">O repositório de metas.</param>
         /// <param name="validarUseCase">O caso de uso de validação de metas.</param>
-        public MetasGastosController(IMetaGastoRepository repository, ValidarMetaGastoUseCase validarUseCase)
+        public MetasGastosController(IMetaGastoRepository repository, IValidarMetaGastoUseCase validarUseCase)
         {
             _repository = repository;
             _validarUseCase = validarUseCase;
