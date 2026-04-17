@@ -1,0 +1,30 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CartoesListComponent } from './cartoes-list.component';
+
+describe('CartoesListComponent', () => {
+  let component: CartoesListComponent;
+  let fixture: ComponentFixture<CartoesListComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [CartoesListComponent]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CartoesListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should render cards list', () => {
+    component.cartoes = [{ id: '1', nome: 'Mastercard', limite: 5000, diaVencimento: 15, provedor: 2 } as any];
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.item')).toBeTruthy();
+    expect(compiled.querySelector('strong')?.textContent).toContain('Mastercard');
+  });
+});

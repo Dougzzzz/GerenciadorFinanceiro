@@ -1,0 +1,55 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CategoriasFormComponent } from './categorias-form.component';
+import { FormsModule } from '@angular/forms';
+import { TipoTransacao } from '../../core/models/financeiro.model';
+import { By } from '@angular/platform-browser';
+
+describe('CategoriasFormComponent', () => {
+  let component: CategoriasFormComponent;
+  let fixture: ComponentFixture<CategoriasFormComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [CategoriasFormComponent, FormsModule]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CategoriasFormComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should emit onSalvar when form is submitted', () => {
+    spyOn(component.onSalvar, 'emit');
+    component.novo = { nome: 'Teste', tipo: TipoTransacao.Despesa };
+    fixture.detectChanges();
+
+    const form = fixture.nativeElement.querySelector('form');
+    form.dispatchEvent(new Event('submit'));
+
+    expect(component.onSalvar.emit).toHaveBeenCalledWith(component.novo);
+  });
+
+  it('should emit onLimpar when cancel button is clicked', () => {
+    spyOn(component.onLimpar, 'emit');
+    component.editando = true;
+    fixture.detectChanges();
+
+    const cancelBtn = fixture.debugElement.query(By.css('app-button[variant="outline"]'));
+    cancelBtn.triggerEventHandler('onClick', null);
+
+    expect(component.onLimpar.emit).toHaveBeenCalled();
+  });
+
+  it('should disable submit button when name is empty', () => {
+    component.novo = { nome: '', tipo: TipoTransacao.Despesa };
+    fixture.detectChanges();
+
+    const submitBtn = fixture.nativeElement.querySelector('app-button[type="submit"]');
+    // Como o app-button tem uma propriedade disabled interna
+    expect(submitBtn.getAttribute('ng-reflect-disabled')).toBe('true');
+  });
+});
