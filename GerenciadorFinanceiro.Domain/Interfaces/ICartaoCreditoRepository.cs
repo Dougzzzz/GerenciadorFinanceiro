@@ -8,5 +8,7 @@ namespace GerenciadorFinanceiro.Domain.Interfaces
         Task<IEnumerable<CartaoCredito>> ObterTodosAsync();
         Task<CartaoCredito?> ObterPorNomeAsync(string nome);
         Task AdicionarAsync(CartaoCredito cartao);
+        Task AtualizarAsync(CartaoCredito cartao);
+        Task RemoverAsync(Guid id);
     }
 }
