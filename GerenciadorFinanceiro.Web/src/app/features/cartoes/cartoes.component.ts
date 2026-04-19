@@ -14,8 +14,16 @@ import { CartoesListComponent } from './cartoes-list.component';
       <h1>Cartões de Crédito</h1>
       
       <div class="grid">
-        <app-cartoes-form (onSalvar)="salvar($event)"></app-cartoes-form>
-        <app-cartoes-list [cartoes]="cartoes()"></app-cartoes-list>
+        <app-cartoes-form 
+          [cartao]="cartaoParaEditar()" 
+          (onSalvar)="salvar($event)"
+          (onCancelar)="cancelarEdicao()">
+        </app-cartoes-form>
+        <app-cartoes-list 
+          [cartoes]="cartoes()" 
+          (onEditar)="editar($event)" 
+          (onExcluir)="excluir($event)">
+        </app-cartoes-list>
       </div>
     </div>
   `,
@@ -25,6 +33,7 @@ import { CartoesListComponent } from './cartoes-list.component';
 })
 export class CartoesComponent implements OnInit {
   cartoes = signal<CartaoCredito[]>([]);
+  cartaoParaEditar = signal<CartaoCredito | null>(null);
 
   constructor(private service: FinanceiroService) {}
 
@@ -34,9 +43,32 @@ export class CartoesComponent implements OnInit {
     this.service.getCartoes().subscribe(data => this.cartoes.set(data)); 
   }
 
-  salvar(dados: any) {
-    this.service.criarCartao(dados.nome, dados.limite, dados.diaFechamento, dados.diaVencimento, dados.provedor).subscribe(() => {
-      this.carregar();
-    });
+  editar(cartao: CartaoCredito) {
+    this.cartaoParaEditar.set(cartao);
+  }
+
+  cancelarEdicao() {
+    this.cartaoParaEditar.set(null);
+  }
+
+  excluir(id: string) {
+    if (confirm('Deseja realmente excluir este cartão?')) {
+      this.service.excluirCartao(id).subscribe(() => this.carregar());
+    }
+  }
+
+  salvar(dados: Partial<CartaoCredito>) {
+    const editando = this.cartaoParaEditar();
+    
+    if (editando) {
+      this.service.atualizarCartao(editando.id, dados).subscribe(() => {
+        this.cartaoParaEditar.set(null);
+        this.carregar();
+      });
+    } else {
+      this.service.criarCartao(dados).subscribe(() => {
+        this.carregar();
+      });
+    }
   }
 }

@@ -26,5 +26,21 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
             await _context.CartoesDeCredito.AddAsync(cartao);
             await _context.SaveChangesAsync();
         }
+
+        public async Task AtualizarAsync(CartaoCredito cartao)
+        {
+            _context.CartoesDeCredito.Update(cartao);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoverAsync(Guid id)
+        {
+            var cartao = await ObterPorIdAsync(id);
+            if (cartao != null)
+            {
+                _context.CartoesDeCredito.Remove(cartao);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

@@ -19,6 +19,15 @@ namespace GerenciadorFinanceiro.Domain.Entidades
             Provedor = provedor;
         }
 
+        public void Atualizar(string nome, decimal limite, int diaFechamento, int diaVencimento, ProvedorExtrato provedor)
+        {
+            Nome = nome;
+            Limite = limite;
+            DiaFechamento = diaFechamento;
+            DiaVencimento = diaVencimento;
+            Provedor = provedor;
+        }
+
         protected CartaoCredito() { }
     }
 }
