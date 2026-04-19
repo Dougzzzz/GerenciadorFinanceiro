@@ -8,9 +8,12 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configurando o banco de dados PostgreSQL
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+// 1. Configurando o banco de dados (Apenas se não for ambiente de Teste)
+if (builder.Environment.EnvironmentName != "Testing")
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
 
 // Adiciona os serviços para os Controllers da API
 builder.Services.AddControllers();
@@ -78,3 +81,8 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 app.Run();
+
+/// <summary>
+/// Necessário para WebApplicationFactory aceder à classe Program em testes de integração.
+/// </summary>
+public partial class Program { }

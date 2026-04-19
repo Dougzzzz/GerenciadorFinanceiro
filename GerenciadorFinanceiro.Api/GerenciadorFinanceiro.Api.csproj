@@ -24,4 +24,8 @@
     <ProjectReference Include="..\GerenciadorFinanceiro.Infrastructure\GerenciadorFinanceiro.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="GerenciadorFinanceiro.Tests" />
+  </ItemGroup>
+
 </Project>
