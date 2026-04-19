@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClient, provideHttpClient, withInterceptors, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptors, HttpRequest, HttpHandlerFn } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { apiErrorInterceptor } from './api-error.interceptor';
 
@@ -72,15 +72,9 @@ describe('apiErrorInterceptor', () => {
   });
 
   it('deve repassar erros que nao sao HttpErrorResponse', (done) => {
-    // Para este caso, precisamos simular um erro que não é HttpErrorResponse 
-    // O interceptor faz: if (error instanceof HttpErrorResponse)
-    // Erros manuais no pipe de um observable poderiam testar isso, mas aqui focamos no InterceptorFn
-    
-    // Teste de cobertura para o 'return throwError(() => error);' final
-    // Como interceptamos o 'next', vamos simular o throw direto
-    const nextFn: any = () => { throw 'Erro que nao e HTTP'; };
+    const nextFn = () => { throw 'Erro que nao e HTTP'; };
     try {
-        apiErrorInterceptor(null as any, nextFn).subscribe();
+        apiErrorInterceptor(null as unknown as HttpRequest<unknown>, nextFn as unknown as HttpHandlerFn).subscribe();
     } catch (e) {
         expect(e).toBe('Erro que nao e HTTP');
         done();

@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { TransacoesImportComponent } from './transacoes-import.component';
+import { TipoTransacao, ProvedorExtrato } from '../../core/models/financeiro.model';
 
 describe('TransacoesImportComponent', () => {
   let fixture: ComponentFixture<TransacoesImportComponent>;
@@ -14,9 +15,9 @@ describe('TransacoesImportComponent', () => {
 
     fixture = TestBed.createComponent(TransacoesImportComponent);
     component = fixture.componentInstance;
-    component.categorias = [{ id: 'cat-1', nome: 'Outros', tipo: 1 }];
-    component.contas = [{ id: 'conta-1', nomeBanco: 'Inter', saldoAtual: 1000, provedor: 0 }];
-    component.cartoes = [{ id: 'cartao-1', nome: 'Nubank', limite: 5000, diaFechamento: 10, diaVencimento: 20, provedor: 2 }];
+    component.categorias = [{ id: 'cat-1', nome: 'Outros', tipo: TipoTransacao.Despesa }];
+    component.contas = [{ id: 'conta-1', nomeBanco: 'Inter', saldoAtual: 1000, provedor: ProvedorExtrato.Generico }];
+    component.cartoes = [{ id: 'cartao-1', nome: 'Nubank', limite: 5000, diaFechamento: 10, diaVencimento: 20, provedor: ProvedorExtrato.Nubank }];
     fixture.detectChanges();
   });
 
@@ -47,14 +48,14 @@ describe('TransacoesImportComponent', () => {
       target: {
         files: [file],
       },
-    });
+    } as unknown as Event);
 
     expect(component.selectedFile).toBe(file);
   });
 
   it('deve emitir o evento de importacao com arquivo e configuracao', () => {
     const file = new File(['conteudo'], 'extrato.csv', { type: 'text/csv' });
-    spyOn(component.onImport, 'emit');
+    spyOn(component.imported, 'emit');
 
     component.selectedFile = file;
     component.config = {
@@ -65,7 +66,7 @@ describe('TransacoesImportComponent', () => {
 
     component.confirmarImportacao();
 
-    expect(component.onImport.emit).toHaveBeenCalledWith({
+    expect(component.imported.emit).toHaveBeenCalledWith({
       file,
       config: {
         categoriaId: 'cat-1',
@@ -76,12 +77,12 @@ describe('TransacoesImportComponent', () => {
   });
 
   it('nao deve emitir importacao quando nenhum arquivo estiver selecionado', () => {
-    spyOn(component.onImport, 'emit');
+    spyOn(component.imported, 'emit');
     component.config.contaId = 'conta-1';
 
     component.confirmarImportacao();
 
-    expect(component.onImport.emit).not.toHaveBeenCalled();
+    expect(component.imported.emit).not.toHaveBeenCalled();
   });
 
   it('deve habilitar o botao de verificar quando houver arquivo e destino selecionados', () => {

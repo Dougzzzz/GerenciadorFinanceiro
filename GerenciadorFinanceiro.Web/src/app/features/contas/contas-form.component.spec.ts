@@ -21,23 +21,23 @@ describe('ContasFormComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit onSalvar when salvar is called', () => {
-    spyOn(component.onSalvar, 'emit');
+  it('should emit saved when salvar is called', () => {
+    spyOn(component.saved, 'emit');
     component.novo = { nomeBanco: 'Inter', saldoInicial: 100, provedor: 3 };
     
     component.salvar();
     
-    expect(component.onSalvar.emit).toHaveBeenCalledWith({ nomeBanco: 'Inter', saldoInicial: 100, provedor: 3 });
+    expect(component.saved.emit).toHaveBeenCalledWith({ nomeBanco: 'Inter', saldoInicial: 100, provedor: 3 });
   });
 
-  it('should emit onLimpar when cancel button is clicked', () => {
-    spyOn(component.onLimpar, 'emit');
+  it('should emit cleared when cancel button is clicked', () => {
+    spyOn(component.cleared, 'emit');
     component.editando = true;
     fixture.detectChanges();
     
     const cancelBtn = fixture.debugElement.queryAll(By.css('app-button'))[1]; // Segundo botão (Cancelar)
-    cancelBtn.triggerEventHandler('onClick', null);
+    cancelBtn.triggerEventHandler('clicked', null);
     
-    expect(component.onLimpar.emit).toHaveBeenCalled();
+    expect(component.cleared.emit).toHaveBeenCalled();
   });
 });

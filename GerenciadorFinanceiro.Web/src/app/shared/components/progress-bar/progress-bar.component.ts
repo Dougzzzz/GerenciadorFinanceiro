@@ -30,6 +30,6 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class ProgressBarComponent {
-  @Input() value: number = 0;
-  @Input() color: string = 'var(--color-primary)';
+  @Input() value = 0;
+  @Input() color = 'var(--color-primary)';
 }

@@ -20,41 +20,35 @@ describe('ButtonComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should apply variant and size classes', () => {
+  it('should render correct variant class', () => {
     component.variant = 'outline';
+    fixture.detectChanges();
+    const btn = fixture.debugElement.query(By.css('button')).nativeElement;
+    expect(btn.classList).toContain('btn-outline');
+  });
+
+  it('should render correct size class', () => {
     component.size = 'sm';
     fixture.detectChanges();
-
-    const button = fixture.debugElement.query(By.css('button')).nativeElement;
-    expect(button.classList).toContain('btn-outline');
-    expect(button.classList).toContain('btn-sm');
+    const btn = fixture.debugElement.query(By.css('button')).nativeElement;
+    expect(btn.classList).toContain('btn-sm');
   });
 
-  it('should be disabled when input is true', () => {
+  it('should emit clicked event on click', () => {
+    spyOn(component.clicked, 'emit');
+    const btn = fixture.debugElement.query(By.css('button'));
+    btn.nativeElement.click();
+    expect(component.clicked.emit).toHaveBeenCalled();
+  });
+
+  it('should be disabled when input is set', () => {
     component.disabled = true;
     fixture.detectChanges();
+    const btn = fixture.debugElement.query(By.css('button')).nativeElement;
+    expect(btn.disabled).toBeTrue();
 
-    const button = fixture.debugElement.query(By.css('button')).nativeElement;
-    expect(button.disabled).toBeTrue();
-  });
-
-  it('should emit onClick event when clicked', () => {
-    spyOn(component.onClick, 'emit');
-    const button = fixture.debugElement.query(By.css('button'));
-    
-    button.nativeElement.click();
-    
-    expect(component.onClick.emit).toHaveBeenCalled();
-  });
-
-  it('should not emit onClick event when disabled', () => {
-    spyOn(component.onClick, 'emit');
-    component.disabled = true;
-    fixture.detectChanges();
-    
-    const button = fixture.debugElement.query(By.css('button'));
-    button.nativeElement.click();
-    
-    expect(component.onClick.emit).not.toHaveBeenCalled();
+    spyOn(component.clicked, 'emit');
+    btn.click();
+    expect(component.clicked.emit).not.toHaveBeenCalled();
   });
 });

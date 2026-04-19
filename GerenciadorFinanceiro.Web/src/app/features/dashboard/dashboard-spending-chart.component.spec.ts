@@ -65,7 +65,7 @@ describe('DashboardSpendingChartComponent', () => {
   });
 
   it('deve calcular largura zero se meta for zero', () => {
-    const width = component.calculateWidth({ meta: 0, gastoAtual: 100 } as any);
+    const width = component.calculateWidth({ categoria: 'T', meta: 0, gastoAtual: 100, percentual: 0 });
     expect(width).toBe(0);
   });
 

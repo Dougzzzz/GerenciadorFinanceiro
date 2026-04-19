@@ -5,8 +5,8 @@ import { FinanceiroService } from '../../core/services/financeiro.service';
 import { Transacao, Categoria, ContaBancaria, CartaoCredito } from '../../core/models/financeiro.model';
 import { FiltroTransacao } from '../../core/models/filtros.model';
 import { ButtonComponent } from '../../shared/components/button/button.component';
-import { TransacoesFormComponent } from './transacoes-form.component';
-import { TransacoesImportComponent } from './transacoes-import.component';
+import { TransacoesFormComponent, SaveTransacaoData } from './transacoes-form.component';
+import { TransacoesImportComponent, ImportConfig } from './transacoes-import.component';
 import { TransacoesListComponent } from './transacoes-list.component';
 
 @Component({
@@ -18,13 +18,13 @@ import { TransacoesListComponent } from './transacoes-list.component';
       <header class="page-header">
         <h1>Transações</h1>
         <div class="actions">
-          <app-button *ngIf="selecionadas().size > 0" variant="ghost" (onClick)="excluirSelecionadas()">
+          <app-button *ngIf="selecionadas().size > 0" variant="ghost" (clicked)="excluirSelecionadas()">
             Excluir ({{ selecionadas().size }})
           </app-button>
-          <app-button variant="outline" (onClick)="mostrarNovo.set(!mostrarNovo())">
+          <app-button variant="outline" (clicked)="mostrarNovo.set(!mostrarNovo())">
             {{ mostrarNovo() ? 'Fechar' : 'Nova Transação' }}
           </app-button>
-          <app-button (onClick)="mostrarImportacao.set(!mostrarImportacao())">
+          <app-button (clicked)="mostrarImportacao.set(!mostrarImportacao())">
             {{ mostrarImportacao() ? 'Fechar' : 'Importar Extrato' }}
           </app-button>
         </div>
@@ -34,52 +34,52 @@ import { TransacoesListComponent } from './transacoes-list.component';
       <section class="filters-section">
         <form [formGroup]="filterForm" (ngSubmit)="aplicarFiltro()" class="filter-form">
           <div class="filter-group">
-            <label>Início</label>
-            <input type="date" formControlName="dataInicial">
+            <label for="dataInicial">Início</label>
+            <input type="date" id="dataInicial" formControlName="dataInicial">
           </div>
           <div class="filter-group">
-            <label>Fim</label>
-            <input type="date" formControlName="dataFinal">
+            <label for="dataFinal">Fim</label>
+            <input type="date" id="dataFinal" formControlName="dataFinal">
           </div>
           <div class="filter-group">
-            <label>Tipo</label>
-            <select formControlName="tipo">
+            <label for="tipo">Tipo</label>
+            <select id="tipo" formControlName="tipo">
               <option [value]="null">Todos</option>
               <option [value]="0">Receita</option>
               <option [value]="1">Despesa</option>
             </select>
           </div>
           <div class="filter-group">
-            <label>Categoria</label>
-            <select formControlName="categoriaId">
+            <label for="categoriaId">Categoria</label>
+            <select id="categoriaId" formControlName="categoriaId">
               <option [value]="null">Todas</option>
               <option *ngFor="let cat of categorias()" [value]="cat.id">{{ cat.nome }}</option>
             </select>
           </div>
           <div class="filter-actions">
             <app-button type="submit" size="sm">Filtrar</app-button>
-            <app-button type="button" variant="ghost" size="sm" (onClick)="limparFiltros()">Limpar</app-button>
+            <app-button type="button" variant="ghost" size="sm" (clicked)="limparFiltros()">Limpar</app-button>
           </div>
         </form>
       </section>
 
       <app-transacoes-form *ngIf="mostrarNovo()" 
         [categorias]="categorias()" [contas]="contas()" [cartoes]="cartoes()"
-        (onSave)="salvarNovaTransacao($event)">
+        (saved)="salvarNovaTransacao($event)">
       </app-transacoes-form>
 
       <app-transacoes-import *ngIf="mostrarImportacao()"
         [categorias]="categorias()" [contas]="contas()" [cartoes]="cartoes()"
-        (onImport)="importar($event)" (onCancel)="mostrarImportacao.set(false)">
+        (imported)="importar($event)" (canceled)="mostrarImportacao.set(false)">
       </app-transacoes-import>
 
       <app-transacoes-list
         [transacoes]="transacoes()" [categorias]="categorias()" [contas]="contas()" [cartoes]="cartoes()"
         [selecionadas]="selecionadas()" [editandoId]="editandoId()" [tempEdit]="tempEdit()"
         [ordenarPor]="filterForm.get('ordenarPor')?.value" [direcao]="filterForm.get('direcao')?.value"
-        (onSelect)="toggleSelecionada($event)" (onSelectAll)="toggleTodas($event)"
-        (onEdit)="iniciarEdicao($event)" (onSaveEdit)="salvarEdicao()" (onCancelEdit)="cancelarEdicao()"
-        (onSort)="aoOrdenar($event)">
+        (selected)="toggleSelecionada($event)" (selectAll)="toggleTodas($event)"
+        (edit)="iniciarEdicao($event)" (saveEdit)="salvarEdicao()" (cancelEdit)="cancelarEdicao()"
+        (sort)="aoOrdenar($event)">
       </app-transacoes-list>
     </div>
   `,
@@ -103,7 +103,7 @@ export class TransacoesComponent implements OnInit {
   mostrarImportacao = signal(false);
   mostrarNovo = signal(false);
   editandoId = signal<string | null>(null);
-  tempEdit = signal<any>(null);
+  tempEdit = signal<Transacao | null>(null);
 
   filterForm: FormGroup;
 
@@ -154,17 +154,17 @@ export class TransacoesComponent implements OnInit {
     this.carregarDados();
   }
 
-  salvarNovaTransacao(dados: any): void {
+  salvarNovaTransacao(dados: SaveTransacaoData): void {
     this.financeiroService.criarTransacao(dados).subscribe({
       next: () => { this.mostrarNovo.set(false); this.carregarDados(this.filterForm.value); alert('Transação salva!'); },
-      error: (err) => alert('Erro ao salvar: ' + err.message)
+      error: (err: Error) => alert('Erro ao salvar: ' + err.message)
     });
   }
 
-  importar(event: {file: File, config: any}): void {
+  importar(event: {file: File, config: ImportConfig}): void {
     this.financeiroService.importarExtrato(event.file, event.config.categoriaId, event.config.contaId, event.config.cartaoId).subscribe({
       next: () => { this.mostrarImportacao.set(false); this.carregarDados(this.filterForm.value); alert('Importado!'); },
-      error: (err) => alert('Erro: ' + err.message)
+      error: (err: Error) => alert('Erro: ' + err.message)
     });
   }
 
@@ -179,9 +179,12 @@ export class TransacoesComponent implements OnInit {
   cancelarEdicao() { this.editandoId.set(null); this.tempEdit.set(null); }
 
   salvarEdicao() {
-    this.financeiroService.atualizarTransacao(this.tempEdit()).subscribe({
+    const edit = this.tempEdit();
+    if (!edit) return;
+
+    this.financeiroService.atualizarTransacao(edit).subscribe({
       next: () => { this.cancelarEdicao(); this.carregarDados(this.filterForm.value); alert('Atualizada!'); },
-      error: (err) => alert('Erro: ' + err.message)
+      error: (err: Error) => alert('Erro: ' + err.message)
     });
   }
 
@@ -191,15 +194,16 @@ export class TransacoesComponent implements OnInit {
     this.selecionadas.set(s);
   }
 
-  toggleTodas(event: any) {
-    this.selecionadas.set(event.target.checked ? new Set(this.transacoes().map(t => t.id)) : new Set());
+  toggleTodas(event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+    this.selecionadas.set(checkbox.checked ? new Set(this.transacoes().map(t => t.id)) : new Set());
   }
 
   excluirSelecionadas() {
     if (!confirm('Excluir selecionadas?')) return;
     this.financeiroService.excluirTransacoes(Array.from(this.selecionadas())).subscribe({
       next: () => { this.selecionadas.set(new Set()); this.carregarDados(this.filterForm.value); },
-      error: (err) => alert('Erro: ' + err.message)
+      error: (err: Error) => alert('Erro: ' + err.message)
     });
   }
 }

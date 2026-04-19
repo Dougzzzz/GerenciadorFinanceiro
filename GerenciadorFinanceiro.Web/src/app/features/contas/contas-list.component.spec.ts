@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ContasListComponent } from './contas-list.component';
 import { By } from '@angular/platform-browser';
+import { ContaBancaria } from '../../core/models/financeiro.model';
 
 describe('ContasListComponent', () => {
   let component: ContasListComponent;
@@ -21,7 +22,7 @@ describe('ContasListComponent', () => {
   });
 
   it('should render account list', () => {
-    component.contas = [{ id: '1', nomeBanco: 'Nubank', saldoAtual: 500, provedor: 2 } as any];
+    component.contas = [{ id: '1', nomeBanco: 'Nubank', saldoAtual: 500, provedor: 2 }];
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
@@ -29,15 +30,15 @@ describe('ContasListComponent', () => {
     expect(compiled.querySelector('strong')?.textContent).toContain('Nubank');
   });
 
-  it('should emit onIniciarEdicao when edit button is clicked', () => {
-    spyOn(component.onIniciarEdicao, 'emit');
-    const mockConta = { id: '1', nomeBanco: 'Nubank' } as any;
+  it('should emit edit when edit button is clicked', () => {
+    spyOn(component.edit, 'emit');
+    const mockConta: ContaBancaria = { id: '1', nomeBanco: 'Nubank', saldoAtual: 500, provedor: 2 };
     component.contas = [mockConta];
     fixture.detectChanges();
     
-    const editBtn = fixture.debugElement.query(By.css('.btn-icon'));
+    const editBtn = fixture.debugElement.query(By.css('button[title="Editar"]'));
     editBtn.nativeElement.click();
     
-    expect(component.onIniciarEdicao.emit).toHaveBeenCalledWith(mockConta);
+    expect(component.edit.emit).toHaveBeenCalledWith(mockConta);
   });
 });

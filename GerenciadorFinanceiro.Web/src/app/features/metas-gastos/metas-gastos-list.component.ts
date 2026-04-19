@@ -10,14 +10,16 @@ import { CardComponent } from '../../shared/components/card/card.component';
   template: `
     <app-card title="Metas Cadastradas">
       <div class="list-header" *ngIf="metas.length > 0">
-        <input type="checkbox" (change)="onToggleTodas.emit($event)">
-        <small>Selecionar Todas</small>
+        <label class="checkbox-label">
+          <input type="checkbox" (change)="allSelectedToggled.emit($event)">
+          <small>Selecionar Todas</small>
+        </label>
       </div>
       
       <ul class="list">
         <li *ngFor="let meta of metas" class="item">
           <div class="item-info">
-            <input type="checkbox" [checked]="selecionadas.has(meta.id)" (change)="onToggleSelecionada.emit(meta.id)">
+            <input type="checkbox" [checked]="selecionadas.has(meta.id)" (change)="selectionToggled.emit(meta.id)">
             <div class="meta-details">
               <strong>{{ getCategoriaNome(meta.categoriaId) }}</strong>
               <div class="meta-meta">
@@ -29,8 +31,8 @@ import { CardComponent } from '../../shared/components/card/card.component';
             </div>
           </div>
           <div class="item-actions">
-            <button (click)="onIniciarEdicao.emit(meta)" class="btn-icon">✏️</button>
-            <button (click)="onExcluirUma.emit(meta)" class="btn-icon danger">🗑️</button>
+            <button (click)="editClicked.emit(meta)" class="btn-icon" title="Editar">✏️</button>
+            <button (click)="deleteClicked.emit(meta)" class="btn-icon danger" title="Excluir">🗑️</button>
           </div>
         </li>
       </ul>
@@ -43,6 +45,7 @@ import { CardComponent } from '../../shared/components/card/card.component';
   styles: [`
     .list { display: flex; flex-direction: column; gap: 8px; }
     .list-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
+    .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
     .item { display: flex; justify-content: space-between; align-items: center; padding: 12px 8px; border-bottom: 1px solid #f1f5f9; }
     .item-info { display: flex; align-items: center; gap: var(--spacing-md); }
     .meta-details { display: flex; flex-direction: column; gap: 4px; }
@@ -64,10 +67,10 @@ export class MetasGastosListComponent {
   @Input() categorias: Categoria[] = [];
   @Input() selecionadas = new Set<string>();
   
-  @Output() onIniciarEdicao = new EventEmitter<MetaGasto>();
-  @Output() onExcluirUma = new EventEmitter<MetaGasto>();
-  @Output() onToggleSelecionada = new EventEmitter<string>();
-  @Output() onToggleTodas = new EventEmitter<any>();
+  @Output() editClicked = new EventEmitter<MetaGasto>();
+  @Output() deleteClicked = new EventEmitter<MetaGasto>();
+  @Output() selectionToggled = new EventEmitter<string>();
+  @Output() allSelectedToggled = new EventEmitter<Event>();
 
   getCategoriaNome(id: string): string {
     return this.categorias.find(c => c.id === id)?.nome || 'Desconhecida';

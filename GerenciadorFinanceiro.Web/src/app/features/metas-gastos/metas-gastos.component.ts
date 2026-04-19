@@ -16,7 +16,7 @@ import { forkJoin } from 'rxjs';
       <header class="page-header">
         <h1>Metas de Gastos</h1>
         <div class="actions">
-          <app-button *ngIf="selecionadas().size > 0" variant="ghost" (onClick)="excluirSelecionadas()">
+          <app-button *ngIf="selecionadas().size > 0" variant="ghost" (clicked)="excluirSelecionadas()">
             Excluir ({{ selecionadas().size }})
           </app-button>
         </div>
@@ -27,18 +27,18 @@ import { forkJoin } from 'rxjs';
           [categorias]="categoriasDespesa"
           [editando]="!!editando()"
           [novo]="novo"
-          (onSalvar)="onSave($event)"
-          (onLimpar)="limpar()">
+          (saved)="onSave($event)"
+          (cleared)="limpar()">
         </app-metas-gastos-form>
 
         <app-metas-gastos-list
           [metas]="metas()"
           [categorias]="categorias"
           [selecionadas]="selecionadas()"
-          (onIniciarEdicao)="iniciarEdicao($event)"
-          (onExcluirUma)="onDelete($event)"
-          (onToggleSelecionada)="toggleSelecionada($event)"
-          (onToggleTodas)="toggleTodas($event)">
+          (editClicked)="iniciarEdicao($event)"
+          (deleteClicked)="onDelete($event)"
+          (selectionToggled)="toggleSelecionada($event)"
+          (allSelectedToggled)="toggleTodas($event)">
         </app-metas-gastos-list>
       </div>
     </div>
@@ -99,7 +99,7 @@ export class MetasGastosComponent implements OnInit {
         this.limpar();
         this.carregarDados();
       },
-      error: (err) => alert('Erro ao salvar meta: ' + (err.error?.message || err.message))
+      error: (err: Error) => alert('Erro ao salvar meta: ' + err.message)
     });
   }
 
@@ -125,8 +125,9 @@ export class MetasGastosComponent implements OnInit {
     this.selecionadas.set(s);
   }
 
-  toggleTodas(event: any) {
-    this.selecionadas.set(event.target.checked ? new Set(this.metas().map(m => m.id)) : new Set());
+  toggleTodas(event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+    this.selecionadas.set(checkbox.checked ? new Set(this.metas().map(m => m.id)) : new Set());
   }
 
   private getCategoriaNome(id: string): string {

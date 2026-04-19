@@ -21,11 +21,11 @@ export class FinanceiroService {
     return this.http.post<MetaGasto>(`${this.apiUrl}/MetasGastos`, meta);
   }
 
-  atualizarMeta(id: string, novoValor: number): Observable<any> {
+  atualizarMeta(id: string, novoValor: number): Observable<unknown> {
     return this.http.put(`${this.apiUrl}/MetasGastos/${id}`, novoValor);
   }
 
-  excluirMeta(id: string): Observable<any> {
+  excluirMeta(id: string): Observable<unknown> {
     return this.http.delete(`${this.apiUrl}/MetasGastos/${id}`);
   }
 
@@ -47,9 +47,9 @@ export class FinanceiroService {
     let params = new HttpParams();
 
     if (filtro) {
-      // Loop pelas chaves do filtro para preencher os HttpParams dinamicamente
-      Object.keys(filtro).forEach(key => {
-        let value = (filtro as any)[key];
+      const filtroObj = filtro as unknown as Record<string, string | number | Date | null | undefined>;
+      Object.keys(filtroObj).forEach(key => {
+        const value = filtroObj[key];
         
         // Ignoramos valores nulos, indefinidos ou vazios
         if (value !== null && value !== undefined && value !== '') {
@@ -77,17 +77,17 @@ export class FinanceiroService {
     return this.http.post<Transacao>(`${this.apiUrl}/transacoes`, transacao);
   }
 
-  atualizarTransacao(transacao: Transacao): Observable<any> {
+  atualizarTransacao(transacao: Transacao): Observable<unknown> {
     // Garante que a data está em UTC
     const body = { ...transacao, data: new Date(transacao.data).toISOString() };
     return this.http.put(`${this.apiUrl}/transacoes/${transacao.id}`, body);
   }
 
-  excluirTransacoes(ids: string[]): Observable<any> {
+  excluirTransacoes(ids: string[]): Observable<unknown> {
     return this.http.delete(`${this.apiUrl}/transacoes/excluir-muitas`, { body: ids });
   }
 
-  importarExtrato(arquivo: File, categoriaId?: string, contaId?: string, cartaoId?: string): Observable<any> {
+  importarExtrato(arquivo: File, categoriaId?: string, contaId?: string, cartaoId?: string): Observable<string> {
     const formData = new FormData();
     formData.append('arquivo', arquivo);
     
@@ -108,11 +108,11 @@ export class FinanceiroService {
     return this.http.post<Categoria>(`${this.apiUrl}/categorias`, { nome, tipo });
   }
 
-  atualizarCategoria(categoria: Categoria): Observable<any> {
+  atualizarCategoria(categoria: Categoria): Observable<unknown> {
     return this.http.put(`${this.apiUrl}/categorias/${categoria.id}`, categoria);
   }
 
-  excluirCategorias(ids: string[]): Observable<any> {
+  excluirCategorias(ids: string[]): Observable<unknown> {
     return this.http.delete(`${this.apiUrl}/categorias/excluir-muitas`, { body: ids });
   }
 
@@ -121,15 +121,15 @@ export class FinanceiroService {
     return this.http.get<ContaBancaria[]>(`${this.apiUrl}/contas`);
   }
 
-  criarConta(nomeBanco: string, saldoInicial: number, provedor: number = 0): Observable<ContaBancaria> {
+  criarConta(nomeBanco: string, saldoInicial: number, provedor = 0): Observable<ContaBancaria> {
     return this.http.post<ContaBancaria>(`${this.apiUrl}/contas?nomeBanco=${nomeBanco}&saldoInicial=${saldoInicial}&provedor=${provedor}`, {});
   }
 
-  atualizarConta(id: string, nomeBanco: string, saldoAtual: number, provedor: number): Observable<any> {
+  atualizarConta(id: string, nomeBanco: string, saldoAtual: number, provedor: number): Observable<unknown> {
     return this.http.put(`${this.apiUrl}/contas/${id}?nomeBanco=${nomeBanco}&saldoAtual=${saldoAtual}&provedor=${provedor}`, {});
   }
 
-  excluirConta(id: string): Observable<any> {
+  excluirConta(id: string): Observable<unknown> {
     return this.http.delete(`${this.apiUrl}/contas/${id}`);
   }
 
@@ -146,11 +146,11 @@ export class FinanceiroService {
     return this.http.post<CartaoCredito>(`${this.apiUrl}/cartoes`, cartao);
   }
 
-  atualizarCartao(id: string, cartao: Partial<CartaoCredito>): Observable<any> {
+  atualizarCartao(id: string, cartao: Partial<CartaoCredito>): Observable<unknown> {
     return this.http.put(`${this.apiUrl}/cartoes/${id}`, cartao);
   }
 
-  excluirCartao(id: string): Observable<any> {
+  excluirCartao(id: string): Observable<unknown> {
     return this.http.delete(`${this.apiUrl}/cartoes/${id}`);
   }
 }

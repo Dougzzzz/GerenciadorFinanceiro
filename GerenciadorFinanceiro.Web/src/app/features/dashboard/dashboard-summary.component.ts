@@ -62,7 +62,7 @@ import { CardComponent } from '../../shared/components/card/card.component';
   `]
 })
 export class DashboardSummaryComponent {
-  @Input() totalReceitas: number = 0;
-  @Input() totalDespesas: number = 0;
-  @Input() saldo: number = 0;
+  @Input() totalReceitas = 0;
+  @Input() totalDespesas = 0;
+  @Input() saldo = 0;
 }

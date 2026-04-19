@@ -11,33 +11,33 @@ import { Categoria, MetaGasto } from '../../core/models/financeiro.model';
   imports: [CommonModule, CardComponent, ButtonComponent, FormsModule],
   template: `
     <app-card [title]="editando ? 'Editar Meta' : 'Nova Meta'">
-      <form (ngSubmit)="onSalvar.emit(novo)" #metaForm="ngForm" class="form">
+      <form (ngSubmit)="saved.emit(novo)" #metaForm="ngForm" class="form">
         <div class="form-group">
-          <label>Categoria</label>
-          <select [(ngModel)]="novo.categoriaId" name="categoriaId" required [disabled]="editando">
+          <label for="categoriaId">Categoria</label>
+          <select id="categoriaId" [(ngModel)]="novo.categoriaId" name="categoriaId" required [disabled]="editando">
             <option value="" disabled>Selecione uma categoria</option>
             <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nome }}</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label>Valor Limite</label>
-          <input type="number" [(ngModel)]="novo.valorLimite" name="valorLimite" required min="0.01" placeholder="0,00">
+          <label for="valorLimite">Valor Limite</label>
+          <input type="number" id="valorLimite" [(ngModel)]="novo.valorLimite" name="valorLimite" required min="0.01" placeholder="0,00">
         </div>
 
         <div class="row g-2">
           <div class="col-6 form-group">
-            <label>Mês (Opcional)</label>
-            <input type="number" [(ngModel)]="novo.mes" name="mes" min="1" max="12" placeholder="1-12" [disabled]="editando">
+            <label for="mes">Mês (Opcional)</label>
+            <input type="number" id="mes" [(ngModel)]="novo.mes" name="mes" min="1" max="12" placeholder="1-12" [disabled]="editando">
           </div>
           <div class="col-6 form-group">
-            <label>Ano (Opcional)</label>
-            <input type="number" [(ngModel)]="novo.ano" name="ano" min="2024" placeholder="Ex: 2026" [disabled]="editando">
+            <label for="ano">Ano (Opcional)</label>
+            <input type="number" id="ano" [(ngModel)]="novo.ano" name="ano" min="2024" placeholder="Ex: 2026" [disabled]="editando">
           </div>
         </div>
 
         <div class="form-actions">
-          <app-button variant="outline" (onClick)="onLimpar.emit()">
+          <app-button variant="outline" (clicked)="cleared.emit()">
             {{ editando ? 'Cancelar' : 'Limpar' }}
           </app-button>
           <app-button type="submit" [disabled]="!metaForm.form.valid || !novo.categoriaId">
@@ -56,7 +56,7 @@ import { Categoria, MetaGasto } from '../../core/models/financeiro.model';
   `]
 })
 export class MetasGastosFormComponent {
-  @Input() editando: boolean = false;
+  @Input() editando = false;
   @Input() categorias: Categoria[] = [];
   @Input() novo: Partial<MetaGasto> = {
     categoriaId: '',
@@ -65,6 +65,6 @@ export class MetasGastosFormComponent {
     ano: undefined
   };
   
-  @Output() onSalvar = new EventEmitter<Partial<MetaGasto>>();
-  @Output() onLimpar = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<Partial<MetaGasto>>();
+  @Output() cleared = new EventEmitter<void>();
 }

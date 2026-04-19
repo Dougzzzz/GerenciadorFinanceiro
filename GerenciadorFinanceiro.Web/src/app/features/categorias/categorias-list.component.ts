@@ -31,7 +31,7 @@ import { CardComponent } from '../../shared/components/card/card.component';
         <li *ngFor="let c of categoriasFiltradas" class="item" [class.selected]="selecionadas.has(c.id)">
           <div class="item-info">
             <label class="checkbox-container">
-              <input type="checkbox" [checked]="selecionadas.has(c.id)" (change)="onToggleSelecionada.emit(c.id)">
+              <input type="checkbox" [checked]="selecionadas.has(c.id)" (change)="selectionToggled.emit(c.id)">
               <span class="checkmark"></span>
             </label>
             <span class="nome">{{ c.nome }}</span>
@@ -40,8 +40,8 @@ import { CardComponent } from '../../shared/components/card/card.component';
             </span>
           </div>
           <div class="item-actions">
-            <button (click)="onIniciarEdicao.emit(c)" class="btn-icon" title="Editar">✏️</button>
-            <button (click)="onExcluirUma.emit(c)" class="btn-icon danger" title="Excluir">🗑️</button>
+            <button (click)="editClicked.emit(c)" class="btn-icon" title="Editar">✏️</button>
+            <button (click)="deleteClicked.emit(c)" class="btn-icon danger" title="Excluir">🗑️</button>
           </div>
         </li>
       </ul>
@@ -89,10 +89,10 @@ export class CategoriasListComponent implements OnChanges {
   @Input() categorias: Categoria[] = [];
   @Input() selecionadas = new Set<string>();
   
-  @Output() onIniciarEdicao = new EventEmitter<Categoria>();
-  @Output() onExcluirUma = new EventEmitter<Categoria>();
-  @Output() onToggleSelecionada = new EventEmitter<string>();
-  @Output() onToggleTodas = new EventEmitter<string[]>();
+  @Output() editClicked = new EventEmitter<Categoria>();
+  @Output() deleteClicked = new EventEmitter<Categoria>();
+  @Output() selectionToggled = new EventEmitter<string>();
+  @Output() allSelectedToggled = new EventEmitter<string[]>();
 
   filtro = '';
   categoriasFiltradas: Categoria[] = [];
@@ -123,9 +123,10 @@ export class CategoriasListComponent implements OnChanges {
     return count > 0 && count < this.categoriasFiltradas.length;
   }
 
-  toggleTodas(event: any) {
-    const checked = event.target.checked;
+  toggleTodas(event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+    const checked = checkbox.checked;
     const ids = checked ? this.categoriasFiltradas.map(c => c.id) : [];
-    this.onToggleTodas.emit(ids);
+    this.allSelectedToggled.emit(ids);
   }
 }

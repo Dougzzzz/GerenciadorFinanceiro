@@ -15,7 +15,7 @@ import { CategoriasListComponent } from './categorias-list.component';
       <header class="page-header">
         <h1>Categorias</h1>
         <div class="actions">
-          <app-button *ngIf="selecionadas().size > 0" variant="ghost" (onClick)="excluirSelecionadas()">
+          <app-button *ngIf="selecionadas().size > 0" variant="ghost" (clicked)="excluirSelecionadas()">
             Excluir ({{ selecionadas().size }})
           </app-button>
         </div>
@@ -25,17 +25,17 @@ import { CategoriasListComponent } from './categorias-list.component';
         <app-categorias-form
           [editando]="!!editando()"
           [novo]="novo"
-          (onSalvar)="salvar()"
-          (onLimpar)="limpar()">
+          (saved)="salvar()"
+          (cleared)="limpar()">
         </app-categorias-form>
 
         <app-categorias-list
           [categorias]="categorias()"
           [selecionadas]="selecionadas()"
-          (onIniciarEdicao)="iniciarEdicao($event)"
-          (onExcluirUma)="excluirUma($event)"
-          (onToggleSelecionada)="toggleSelecionada($event)"
-          (onToggleTodas)="toggleTodas($event)">
+          (editClicked)="iniciarEdicao($event)"
+          (deleteClicked)="excluirUma($event)"
+          (selectionToggled)="toggleSelecionada($event)"
+          (allSelectedToggled)="toggleTodas($event)">
         </app-categorias-list>
       </div>
     </div>

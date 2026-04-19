@@ -1,22 +1,27 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TransacoesListComponent } from './transacoes-list.component';
 import { FormsModule } from '@angular/forms';
-import { TipoTransacao } from '../../core/models/financeiro.model';
+import { TipoTransacao, Transacao } from '../../core/models/financeiro.model';
 import { By } from '@angular/platform-browser';
 
 describe('TransacoesListComponent', () => {
   let component: TransacoesListComponent;
   let fixture: ComponentFixture<TransacoesListComponent>;
 
-  const mockTransacoes = [
+  const mockTransacoes: Transacao[] = [
     {
       id: '1',
       data: '2026-04-17T00:00:00Z',
       descricao: 'Teste',
       valor: 100,
       tipo: TipoTransacao.Receita,
-      categoriaId: 'cat-1'
-    } as any
+      categoriaId: 'cat-1',
+      categoria: 'Outros',
+      nomeCartao: '',
+      finalCartao: '',
+      parcela: '',
+      cotacao: 1
+    }
   ];
 
   beforeEach(async () => {
@@ -35,24 +40,24 @@ describe('TransacoesListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit onSort with Asc when clicking new column', () => {
-    spyOn(component.onSort, 'emit');
+  it('should emit sort with Asc when clicking new column', () => {
+    spyOn(component.sort, 'emit');
     component.ordenarPor = 'Descricao';
     component.direcao = 'Desc';
     
     component.toggleSort('Data');
     
-    expect(component.onSort.emit).toHaveBeenCalledWith({ coluna: 'Data', direcao: 'Asc' });
+    expect(component.sort.emit).toHaveBeenCalledWith({ coluna: 'Data', direcao: 'Asc' });
   });
 
-  it('should emit onSort with inverted direction when clicking same column', () => {
-    spyOn(component.onSort, 'emit');
+  it('should emit sort with inverted direction when clicking same column', () => {
+    spyOn(component.sort, 'emit');
     component.ordenarPor = 'Data';
     component.direcao = 'Desc';
     
     component.toggleSort('Data');
     
-    expect(component.onSort.emit).toHaveBeenCalledWith({ coluna: 'Data', direcao: 'Asc' });
+    expect(component.sort.emit).toHaveBeenCalledWith({ coluna: 'Data', direcao: 'Asc' });
   });
 
   it('should return correct sort icon', () => {
@@ -73,15 +78,15 @@ describe('TransacoesListComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    const input = fixture.debugElement.query(By.css('input[type="text"]'));
+    const input = fixture.debugElement.query(By.css('input[aria-label="Editar descrição"]'));
     expect(input).toBeTruthy();
     expect(input.nativeElement.value).toBe('Teste');
   });
 
-  it('should emit onEdit when edit button is clicked', () => {
-    spyOn(component.onEdit, 'emit');
+  it('should emit edit when edit button is clicked', () => {
+    spyOn(component.edit, 'emit');
     const editBtn = fixture.debugElement.query(By.css('.btn-icon'));
     editBtn.nativeElement.click();
-    expect(component.onEdit.emit).toHaveBeenCalledWith(mockTransacoes[0]);
+    expect(component.edit.emit).toHaveBeenCalledWith(mockTransacoes[0]);
   });
 });

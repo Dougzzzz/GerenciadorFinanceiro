@@ -13,26 +13,26 @@ import { CartaoCredito } from '../../core/models/financeiro.model';
     <app-card [title]="editando ? 'Editar Cartão' : 'Novo Cartão'">
       <form (submit)="salvar()" class="form">
         <div class="form-group">
-          <label>Nome do Cartão</label>
-          <input type="text" [(ngModel)]="dados.nome" name="nome" required>
+          <label for="nome">Nome do Cartão</label>
+          <input type="text" id="nome" [(ngModel)]="dados.nome" name="nome" required>
         </div>
         <div class="form-group">
-          <label>Limite (R$)</label>
-          <input type="number" step="0.01" [(ngModel)]="dados.limite" name="limite">
+          <label for="limite">Limite (R$)</label>
+          <input type="number" id="limite" step="0.01" [(ngModel)]="dados.limite" name="limite">
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Dia Fechamento</label>
-            <input type="number" [(ngModel)]="dados.diaFechamento" name="diaFechamento">
+            <label for="diaFechamento">Dia Fechamento</label>
+            <input type="number" id="diaFechamento" [(ngModel)]="dados.diaFechamento" name="diaFechamento">
           </div>
           <div class="form-group">
-            <label>Dia Vencimento</label>
-            <input type="number" [(ngModel)]="dados.diaVencimento" name="diaVencimento">
+            <label for="diaVencimento">Dia Vencimento</label>
+            <input type="number" id="diaVencimento" [(ngModel)]="dados.diaVencimento" name="diaVencimento">
           </div>
         </div>
         <div class="form-group">
-          <label>Provedor de Extrato</label>
-          <select [(ngModel)]="dados.provedor" name="provedor">
+          <label for="provedor">Provedor de Extrato</label>
+          <select id="provedor" [(ngModel)]="dados.provedor" name="provedor">
             <option [value]="0">Genérico / Padrão</option>
             <option [value]="1">C6 Bank</option>
             <option [value]="2">Nubank</option>
@@ -41,7 +41,7 @@ import { CartaoCredito } from '../../core/models/financeiro.model';
         </div>
         <div class="actions">
           <app-button type="submit" [disabled]="!dados.nome">Salvar</app-button>
-          <app-button *ngIf="editando" variant="outline" (click)="cancelar()">Cancelar</app-button>
+          <app-button *ngIf="editando" variant="outline" (clicked)="cancelar()">Cancelar</app-button>
         </div>
       </form>
     </app-card>
@@ -56,8 +56,8 @@ import { CartaoCredito } from '../../core/models/financeiro.model';
 })
 export class CartoesFormComponent implements OnChanges {
   @Input() cartao: CartaoCredito | null = null;
-  @Output() onSalvar = new EventEmitter<Partial<CartaoCredito>>();
-  @Output() onCancelar = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<Partial<CartaoCredito>>();
+  @Output() canceled = new EventEmitter<void>();
 
   dados: Partial<CartaoCredito> = this.resetDados();
   editando = false;
@@ -73,13 +73,13 @@ export class CartoesFormComponent implements OnChanges {
   }
 
   salvar() {
-    this.onSalvar.emit({ ...this.dados });
+    this.saved.emit({ ...this.dados });
     this.dados = this.resetDados();
     this.editando = false;
   }
 
   cancelar() {
-    this.onCancelar.emit();
+    this.canceled.emit();
     this.dados = this.resetDados();
     this.editando = false;
   }

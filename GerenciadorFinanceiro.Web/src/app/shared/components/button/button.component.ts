@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
       [type]="type" 
       [disabled]="disabled" 
       [class]="'btn btn-' + variant + ' btn-' + size"
-      (click)="onClick.emit($event)">
+      (click)="clicked.emit($event)">
       <ng-content></ng-content>
     </button>
   `,
@@ -73,5 +73,5 @@ export class ButtonComponent {
   @Input() variant: 'primary' | 'outline' | 'ghost' = 'primary';
   @Input() size: 'sm' | 'md' = 'md';
   @Input() disabled = false;
-  @Output() onClick = new EventEmitter<MouseEvent>();
+  @Output() clicked = new EventEmitter<MouseEvent>();
 }

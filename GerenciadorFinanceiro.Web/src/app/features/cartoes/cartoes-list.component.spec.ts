@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CartoesListComponent } from './cartoes-list.component';
+import { ProvedorExtrato } from '../../core/models/financeiro.model';
 
 describe('CartoesListComponent', () => {
   let component: CartoesListComponent;
@@ -20,7 +21,7 @@ describe('CartoesListComponent', () => {
   });
 
   it('should render cards list', () => {
-    component.cartoes = [{ id: '1', nome: 'Mastercard', limite: 5000, diaVencimento: 15, provedor: 2 } as any];
+    component.cartoes = [{ id: '1', nome: 'Mastercard', limite: 5000, diaFechamento: 5, diaVencimento: 15, provedor: ProvedorExtrato.Nubank }];
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
