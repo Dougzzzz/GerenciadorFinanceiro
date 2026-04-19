@@ -3,16 +3,25 @@ import { By } from '@angular/platform-browser';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { TransacoesImportComponent } from './transacoes-import.component';
 import { TipoTransacao, ProvedorExtrato } from '../../core/models/financeiro.model';
+import { FinanceiroService } from '../../core/services/financeiro.service';
+import { of } from 'rxjs';
 
 describe('TransacoesImportComponent', () => {
   let fixture: ComponentFixture<TransacoesImportComponent>;
   let component: TransacoesImportComponent;
+  let financeiroService: jasmine.SpyObj<FinanceiroService>;
 
   beforeEach(async () => {
+    const spy = jasmine.createSpyObj('FinanceiroService', ['getPreviewImportacao', 'confirmarImportacao']);
+
     await TestBed.configureTestingModule({
       imports: [TransacoesImportComponent],
+      providers: [
+        { provide: FinanceiroService, useValue: spy }
+      ]
     }).compileComponents();
 
+    financeiroService = TestBed.inject(FinanceiroService) as jasmine.SpyObj<FinanceiroService>;
     fixture = TestBed.createComponent(TransacoesImportComponent);
     component = fixture.componentInstance;
     component.categorias = [{ id: 'cat-1', nome: 'Outros', tipo: TipoTransacao.Despesa }];
@@ -53,36 +62,33 @@ describe('TransacoesImportComponent', () => {
     expect(component.selectedFile).toBe(file);
   });
 
-  it('deve emitir o evento de importacao com arquivo e configuracao', () => {
+  it('deve chamar o servico de preview ao clicar em verificar', () => {
     const file = new File(['conteudo'], 'extrato.csv', { type: 'text/csv' });
-    spyOn(component.imported, 'emit');
-
     component.selectedFile = file;
-    component.config = {
-      categoriaId: 'cat-1',
-      contaId: 'conta-1',
-      cartaoId: undefined,
-    };
+    component.destino = 'conta';
+    component.config.contaId = 'conta-1';
+    
+    financeiroService.getPreviewImportacao.and.returnValue(of({ transacoes: [], linhasComErro: 0, totalComSugestao: 0, totalSemSugestao: 0 }));
 
-    component.confirmarImportacao();
+    component.gerarPreview();
 
-    expect(component.imported.emit).toHaveBeenCalledWith({
-      file,
-      config: {
-        categoriaId: 'cat-1',
-        contaId: 'conta-1',
-        cartaoId: undefined,
-      },
-    });
+    expect(financeiroService.getPreviewImportacao).toHaveBeenCalledWith(file, 'conta-1', undefined);
   });
 
-  it('nao deve emitir importacao quando nenhum arquivo estiver selecionado', () => {
-    spyOn(component.imported, 'emit');
+  it('deve chamar o servico de confirmacao ao clicar em salvar', () => {
+    component.selectedFile = new File(['conteudo'], 'extrato.csv', { type: 'text/csv' });
+    component.destino = 'conta';
     component.config.contaId = 'conta-1';
+    const mockPreview = [{ idTemporario: '1', descricao: 'T', valor: 10, data: '2024-01-01', categoriasSugeridas: [] }];
+    component.previewItems.set(mockPreview);
+
+    financeiroService.confirmarImportacao.and.returnValue(of({ sucesso: true, totalImportado: 1 }));
+    spyOn(component.imported, 'emit');
 
     component.confirmarImportacao();
 
-    expect(component.imported.emit).not.toHaveBeenCalled();
+    expect(financeiroService.confirmarImportacao).toHaveBeenCalledWith(mockPreview, 'conta-1', undefined);
+    expect(component.imported.emit).toHaveBeenCalled();
   });
 
   it('deve habilitar o botao de verificar quando houver arquivo e destino selecionados', () => {

@@ -2,6 +2,7 @@ using GerenciadorFinanceiro.Api.Controllers;
 using GerenciadorFinanceiro.Application.DTOs;
 using GerenciadorFinanceiro.Application.Interfaces;
 using GerenciadorFinanceiro.Application.UseCases;
+using GerenciadorFinanceiro.Application.UseCases.Importacao;
 using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Filtros;
 using GerenciadorFinanceiro.Domain.Interfaces;
@@ -15,6 +16,8 @@ namespace GerenciadorFinanceiro.Tests.Api
     {
         private readonly ITransacaoRepository _repository;
         private readonly ImportarExtratoUseCase _useCase;
+        private readonly GerarPreviewImportacaoUseCase _previewUseCase;
+        private readonly ConfirmarImportacaoUseCase _confirmarUseCase;
         private readonly TransacoesController _controller;
 
         public TransacoesControllerTests()
@@ -24,9 +27,14 @@ namespace GerenciadorFinanceiro.Tests.Api
             var cartaoRepository = Substitute.For<ICartaoCreditoRepository>();
             var contaRepository = Substitute.For<IContaBancariaRepository>();
             var readerFactory = Substitute.For<IExtratoReaderFactory>();
+            var similaridadeService = Substitute.For<ICategoriaSimilaridadeService>();
+            var unitOfWork = Substitute.For<IUnitOfWork>();
 
             _useCase = Substitute.For<ImportarExtratoUseCase>(_repository, categoriaRepository, cartaoRepository, contaRepository, readerFactory);
-            _controller = new TransacoesController(_repository, _useCase);
+            _previewUseCase = Substitute.For<GerarPreviewImportacaoUseCase>(readerFactory, categoriaRepository, cartaoRepository, contaRepository, similaridadeService);
+            _confirmarUseCase = Substitute.For<ConfirmarImportacaoUseCase>(categoriaRepository, _repository, unitOfWork);
+
+            _controller = new TransacoesController(_repository, _useCase, _previewUseCase, _confirmarUseCase);
         }
 
         [Fact]
@@ -181,7 +189,7 @@ namespace GerenciadorFinanceiro.Tests.Api
             // Assert
             Assert.IsType<NoContentResult>(result);
             await _repository.Received(1).AtualizarAsync(existing);
-            Assert.Equal("Update", existing.Descricao);
+            Assert.Equal("Update", existing.Descricao); // Fix property name if needed
             Assert.Equal(150, existing.Valor);
         }
 

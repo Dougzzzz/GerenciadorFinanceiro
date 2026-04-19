@@ -212,15 +212,12 @@ describe('TransacoesComponent', () => {
     expect(financeiroService.getTransacoes).toHaveBeenCalled();
   });
 
-  it('deve chamar importar e recarregar dados', () => {
-    spyOn(window, 'alert');
+  it('deve recarregar dados quando aoImportarSucesso for chamado', () => {
     fixture.detectChanges();
     financeiroService.getTransacoes.calls.reset();
-    const event = { file: new File([], 'test.csv'), config: { categoriaId: '1', contaId: '1' } };
     
-    component.importar(event);
+    component.aoImportarSucesso();
     
-    expect(financeiroService.importarExtrato).toHaveBeenCalled();
     expect(component.mostrarImportacao()).toBeFalse();
     expect(financeiroService.getTransacoes).toHaveBeenCalled();
   });

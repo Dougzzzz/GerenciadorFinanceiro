@@ -1,5 +1,7 @@
 using GerenciadorFinanceiro.Application.DTOs;
+using GerenciadorFinanceiro.Application.DTOs.Importacao;
 using GerenciadorFinanceiro.Application.UseCases;
+using GerenciadorFinanceiro.Application.UseCases.Importacao;
 using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Filtros;
 using GerenciadorFinanceiro.Domain.Interfaces;
@@ -13,11 +15,19 @@ namespace GerenciadorFinanceiro.Api.Controllers
     {
         private readonly ITransacaoRepository _repository;
         private readonly ImportarExtratoUseCase _importarExtratoUseCase;
+        private readonly GerarPreviewImportacaoUseCase _gerarPreviewUseCase;
+        private readonly ConfirmarImportacaoUseCase _confirmarImportacaoUseCase;
 
-        public TransacoesController(ITransacaoRepository repository, ImportarExtratoUseCase importarExtratoUseCase)
+        public TransacoesController(
+            ITransacaoRepository repository,
+            ImportarExtratoUseCase importarExtratoUseCase,
+            GerarPreviewImportacaoUseCase gerarPreviewUseCase,
+            ConfirmarImportacaoUseCase confirmarImportacaoUseCase)
         {
             _repository = repository;
             _importarExtratoUseCase = importarExtratoUseCase;
+            _gerarPreviewUseCase = gerarPreviewUseCase;
+            _confirmarImportacaoUseCase = confirmarImportacaoUseCase;
         }
 
         [HttpGet]
@@ -119,6 +129,31 @@ namespace GerenciadorFinanceiro.Api.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPost("importar/preview")]
+        public async Task<ActionResult<ImportacaoPreviewResultadoDto>> GerarPreview(IFormFile arquivo, [FromQuery] Guid? contaId, [FromQuery] Guid? cartaoId)
+        {
+            if (arquivo == null || arquivo.Length == 0)
+            {
+                return BadRequest("Arquivo inválido.");
+            }
+
+            using var stream = arquivo.OpenReadStream();
+            var resultado = await _gerarPreviewUseCase.ExecutarAsync(stream, contaId, cartaoId);
+            return Ok(resultado);
+        }
+
+        [HttpPost("importar/confirmar")]
+        public async Task<ActionResult<ResultadoImportacaoDto>> ConfirmarImportacao([FromBody] List<TransacaoPreviewDto> transacoes, [FromQuery] Guid? contaId, [FromQuery] Guid? cartaoId)
+        {
+            if (transacoes == null || !transacoes.Any())
+            {
+                return BadRequest("Nenhuma transação para confirmar.");
+            }
+
+            var resultado = await _confirmarImportacaoUseCase.ExecutarAsync(transacoes, contaId, cartaoId);
+            return Ok(resultado);
         }
 
         [HttpDelete("excluir-muitas")]

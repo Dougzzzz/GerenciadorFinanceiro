@@ -1,4 +1,5 @@
 using GerenciadorFinanceiro.Application.UseCases;
+using GerenciadorFinanceiro.Application.UseCases.Importacao;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GerenciadorFinanceiro.Application
@@ -8,6 +9,8 @@ namespace GerenciadorFinanceiro.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<ImportarExtratoUseCase>();
+            services.AddScoped<GerarPreviewImportacaoUseCase>();
+            services.AddScoped<ConfirmarImportacaoUseCase>();
             services.AddScoped<IValidarMetaGastoUseCase, ValidarMetaGastoUseCase>();
 
             return services;
