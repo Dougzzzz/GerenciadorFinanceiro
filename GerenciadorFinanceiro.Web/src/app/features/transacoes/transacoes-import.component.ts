@@ -1,9 +1,11 @@
-import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
-import { Categoria, ContaBancaria, CartaoCredito, Transacao } from '../../core/models/financeiro.model';
+import { Categoria, ContaBancaria, CartaoCredito } from '../../core/models/financeiro.model';
+import { FinanceiroService } from '../../core/services/financeiro.service';
+import { TransacaoPreview } from '../../core/models/importacao.model';
 
 export interface ImportConfig {
   categoriaId: string;
@@ -84,14 +86,33 @@ export interface ImportConfig {
                 <tr>
                   <th>Data</th>
                   <th>Descrição</th>
+                  <th>Categoria</th>
                   <th class="text-right">Valor</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let item of previewItems()">
-                  <td>{{ item.data }}</td>
-                  <td>{{ item.descricao }}</td>
-                  <td class="text-right" [class.negativo]="item.valor && item.valor < 0" [class.positivo]="item.valor && item.valor > 0">
+                  <td>{{ item.data | date:'dd/MM' }}</td>
+                  <td>
+                    <div class="desc-cell">
+                      <span>{{ item.descricao }}</span>
+                      <small class="original-cat" *ngIf="item.categoriaOriginalCsv">CSV: {{ item.categoriaOriginalCsv }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <select [(ngModel)]="item.categoriaEscolhidaId" class="cat-select">
+                      <option [value]="null">Criar nova: "{{ item.categoriaOriginalCsv || item.descricao }}"</option>
+                      <optgroup label="Sugestões" *ngIf="item.categoriasSugeridas.length">
+                        <option *ngFor="let s of item.categoriasSugeridas" [value]="s.categoriaId">
+                          {{ s.nomeCategoria }} ({{ s.similaridadeFormatada }})
+                        </option>
+                      </optgroup>
+                      <optgroup label="Todas as Categorias">
+                        <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nome }}</option>
+                      </optgroup>
+                    </select>
+                  </td>
+                  <td class="text-right" [class.negativo]="item.valor < 0" [class.positivo]="item.valor > 0">
                     {{ item.valor | currency:'BRL' }}
                   </td>
                 </tr>
@@ -102,7 +123,7 @@ export interface ImportConfig {
           <div class="actions">
             <app-button variant="outline" (clicked)="limparPreview()">Voltar</app-button>
             <app-button (clicked)="confirmarImportacao()">
-              Confirmar e Salvar no Banco
+              Confirmar e Salvar
             </app-button>
           </div>
         </div>
@@ -129,10 +150,15 @@ export interface ImportConfig {
     .group label, .label-fake { font-size: 0.875rem; font-weight: 600; color: var(--color-sidebar); }
     select { padding: 10px; border-radius: var(--border-radius); border: 1px solid #e2e8f0; }
 
-    .table-container { max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: var(--border-radius); margin: var(--spacing-md) 0; }
+    .table-container { max-height: 500px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: var(--border-radius); margin: var(--spacing-md) 0; }
     .preview-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-    .preview-table th { background: #f8fafc; position: sticky; top: 0; padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0; }
-    .preview-table td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
+    .preview-table th { background: #f8fafc; position: sticky; top: 0; padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0; z-index: 10; }
+    .preview-table td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    
+    .desc-cell { display: flex; flex-direction: column; }
+    .original-cat { font-size: 0.7rem; color: #94a3b8; }
+    .cat-select { width: 100%; padding: 4px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 0.8rem; }
+
     .text-right { text-align: right; }
     .negativo { color: #f43f5e; font-weight: 600; }
     .positivo { color: #10b981; font-weight: 600; }
@@ -141,23 +167,26 @@ export interface ImportConfig {
   `]
 })
 export class TransacoesImportComponent {
+  private financeiroService = inject(FinanceiroService);
+
   @Input() categorias: Categoria[] = [];
   @Input() contas: ContaBancaria[] = [];
   @Input() cartoes: CartaoCredito[] = [];
-  @Output() imported = new EventEmitter<{file: File, config: ImportConfig}>();
+  
+  @Output() imported = new EventEmitter<void>();
   @Output() canceled = new EventEmitter<void>();
 
   selectedFile: File | null = null;
   destino: 'conta' | 'cartao' | null = null;
   config: ImportConfig = { categoriaId: '', contaId: undefined, cartaoId: undefined };
   
-  previewItems = signal<Partial<Transacao>[]>([]);
+  previewItems = signal<TransacaoPreview[]>([]);
 
   onFileChange(event: Event) { 
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.selectedFile = input.files[0]; 
-      this.previewItems.set([]); // Reset preview se mudar o arquivo
+      this.previewItems.set([]); 
     }
   }
 
@@ -177,27 +206,13 @@ export class TransacoesImportComponent {
   gerarPreview() {
     if (!this.selectedFile) return;
 
-    const reader = new FileReader();
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      const text = e.target?.result as string;
-      if (!text) return;
-
-      const lines = text.split('\n').slice(1); // Pular cabeçalho
-      const items = lines
-        .filter((line: string) => line.trim().length > 0)
-        .map((line: string) => {
-          const parts = line.split(','); // Assumindo CSV simples para o preview
-          return {
-            data: parts[0] || 'N/A',
-            descricao: parts[1] || 'Sem descrição',
-            valor: parseFloat(parts[2]) || 0
-          } as Partial<Transacao>;
-        })
-        .slice(0, 10); // Mostrar apenas as primeiras 10 para preview
-      
-      this.previewItems.set(items);
-    };
-    reader.readAsText(this.selectedFile);
+    this.financeiroService.getPreviewImportacao(this.selectedFile, this.config.contaId, this.config.cartaoId)
+      .subscribe({
+        next: (res) => {
+          this.previewItems.set(res.transacoes);
+        },
+        error: (err: Error) => alert('Erro ao gerar preview: ' + err.message)
+      });
   }
 
   limparPreview() {
@@ -205,9 +220,20 @@ export class TransacoesImportComponent {
   }
 
   confirmarImportacao() {
-    if (this.selectedFile) {
-      this.imported.emit({ file: this.selectedFile, config: this.config });
-    }
+    if (!this.selectedFile) return;
+
+    this.financeiroService.confirmarImportacao(this.previewItems(), this.config.contaId, this.config.cartaoId)
+      .subscribe({
+        next: (res) => {
+          if (res.sucesso) {
+            alert(`Sucesso! ${res.totalImportado} transações importadas.`);
+            this.imported.emit();
+          } else {
+            alert('Erro: ' + res.mensagemErro);
+          }
+        },
+        error: (err: Error) => alert('Erro técnico: ' + err.message)
+      });
   }
 
   getDestinoNome(): string {

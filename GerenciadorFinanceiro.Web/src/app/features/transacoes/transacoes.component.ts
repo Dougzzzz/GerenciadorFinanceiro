@@ -6,7 +6,7 @@ import { Transacao, Categoria, ContaBancaria, CartaoCredito } from '../../core/m
 import { FiltroTransacao } from '../../core/models/filtros.model';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { TransacoesFormComponent, SaveTransacaoData } from './transacoes-form.component';
-import { TransacoesImportComponent, ImportConfig } from './transacoes-import.component';
+import { TransacoesImportComponent } from './transacoes-import.component';
 import { TransacoesListComponent } from './transacoes-list.component';
 
 @Component({
@@ -70,7 +70,7 @@ import { TransacoesListComponent } from './transacoes-list.component';
 
       <app-transacoes-import *ngIf="mostrarImportacao()"
         [categorias]="categorias()" [contas]="contas()" [cartoes]="cartoes()"
-        (imported)="importar($event)" (canceled)="mostrarImportacao.set(false)">
+        (imported)="aoImportarSucesso()" (canceled)="mostrarImportacao.set(false)">
       </app-transacoes-import>
 
       <app-transacoes-list
@@ -161,11 +161,9 @@ export class TransacoesComponent implements OnInit {
     });
   }
 
-  importar(event: {file: File, config: ImportConfig}): void {
-    this.financeiroService.importarExtrato(event.file, event.config.categoriaId, event.config.contaId, event.config.cartaoId).subscribe({
-      next: () => { this.mostrarImportacao.set(false); this.carregarDados(this.filterForm.value); alert('Importado!'); },
-      error: (err: Error) => alert('Erro: ' + err.message)
-    });
+  aoImportarSucesso(): void {
+    this.mostrarImportacao.set(false);
+    this.carregarDados(this.filterForm.value);
   }
 
   iniciarEdicao(t: Transacao) {

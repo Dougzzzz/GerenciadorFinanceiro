@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Transacao, Categoria, ContaBancaria, CartaoCredito, TipoTransacao, MetaGasto, ResultadoValidacaoMeta, MetaResumo } from '../models/financeiro.model';
 import { FiltroTransacao } from '../models/filtros.model';
+import { ImportacaoPreviewResultado, ResultadoImportacao, TransacaoPreview } from '../models/importacao.model';
 
 @Injectable({
   providedIn: 'root'
@@ -51,13 +52,10 @@ export class FinanceiroService {
       Object.keys(filtroObj).forEach(key => {
         const value = filtroObj[key];
         
-        // Ignoramos valores nulos, indefinidos ou vazios
         if (value !== null && value !== undefined && value !== '') {
-          // Se for uma string de data do input type="date" (yyyy-mm-dd), ou um objeto Date
           if (value instanceof Date) {
             params = params.set(key, value.toISOString().split('T')[0]);
           } else if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-            // Se já for uma string ISO do input date, enviamos como está
             params = params.set(key, value);
           } else {
             params = params.set(key, value.toString());
@@ -70,7 +68,6 @@ export class FinanceiroService {
   }
 
   criarTransacao(transacao: Partial<Transacao>): Observable<Transacao> {
-    // Garante que a data está em UTC
     if (transacao.data) {
       transacao.data = new Date(transacao.data).toISOString();
     }
@@ -78,13 +75,31 @@ export class FinanceiroService {
   }
 
   atualizarTransacao(transacao: Transacao): Observable<unknown> {
-    // Garante que a data está em UTC
     const body = { ...transacao, data: new Date(transacao.data).toISOString() };
     return this.http.put(`${this.apiUrl}/transacoes/${transacao.id}`, body);
   }
 
   excluirTransacoes(ids: string[]): Observable<unknown> {
     return this.http.delete(`${this.apiUrl}/transacoes/excluir-muitas`, { body: ids });
+  }
+
+  getPreviewImportacao(arquivo: File, contaId?: string, cartaoId?: string): Observable<ImportacaoPreviewResultado> {
+    const formData = new FormData();
+    formData.append('arquivo', arquivo);
+    
+    let url = `${this.apiUrl}/transacoes/importar/preview?`;
+    if (contaId) url += `contaId=${contaId}&`;
+    if (cartaoId) url += `cartaoId=${cartaoId}`;
+
+    return this.http.post<ImportacaoPreviewResultado>(url, formData);
+  }
+
+  confirmarImportacao(transacoes: TransacaoPreview[], contaId?: string, cartaoId?: string): Observable<ResultadoImportacao> {
+    let url = `${this.apiUrl}/transacoes/importar/confirmar?`;
+    if (contaId) url += `contaId=${contaId}&`;
+    if (cartaoId) url += `cartaoId=${cartaoId}`;
+
+    return this.http.post<ResultadoImportacao>(url, transacoes);
   }
 
   importarExtrato(arquivo: File, categoriaId?: string, contaId?: string, cartaoId?: string): Observable<string> {
