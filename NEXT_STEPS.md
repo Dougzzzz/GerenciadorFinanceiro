@@ -61,16 +61,14 @@ Melhorar a organização e o monitoramento de orçamentos.
 Garantir que o sistema seja robusto e fácil de manter.
 
 - [x] **[Check] Verificação de Cobertura e Formatação (dotnet format)**
-- [ ] **[Backend] Documentação Swagger Avançada**
-    - Adicionar descrições XML e exemplos de Request/Response para facilitar o uso da API.
+- [ ] **[Frontend] Componente de Feedback de Espera (Loading)**
+    - Criar um componente global (ou interceptor) que exibe um indicador de carregamento durante chamadas assíncronas ao banco/API.
 - [ ] **[Frontend] Implementar Linter (ESLint)**
     - Configurar ESLint com regras recomendadas para Angular e TypeScript.
     - Adicionar script `npm run lint` ao package.json.
+- [ ] **[Backend] Documentação Swagger Avançada**
 - [ ] **[Infra] Dockerização do Ambiente**
-    - Criar `Dockerfile` para API e Web.
-    - Criar `docker-compose.yml` incluindo o banco de dados PostgreSQL para execução local rápida.
 - [ ] **[CI/CD] Refinar Pipeline do GitHub Actions**
-    - Adicionar passo de verificação de cobertura de testes (falhar se cair abaixo de 80%).
 
 ---
 

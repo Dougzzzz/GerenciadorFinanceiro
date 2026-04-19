@@ -1,0 +1,543 @@
+2. Código e Implementação
+🔴 PASSO 1 — Testes Primeiro (TDD)
+Antes de qualquer implementação, escrevemos os testes que definem o comportamento esperado.
+
+// GerenciadorFinanceiro.Tests/Application/CategoriaSimilaridadeServiceTests.cs
+
+using GerenciadorFinanceiro.Application.Services;
+using GerenciadorFinanceiro.Domain.Entities;
+using GerenciadorFinanceiro.Domain.Enums;
+using Xunit;
+
+namespace GerenciadorFinanceiro.Tests.Application;
+
+public class CategoriaSimilaridadeServiceTests
+{
+    // Instância do serviço que vamos criar a seguir
+    private readonly LevenshteinSimilaridadeService _service = new();
+
+    // ✅ Cenário 1: Deve encontrar categoria com nome idêntico (similaridade = 1.0)
+    [Fact]
+    public void BuscarSimilares_ComNomeIdentico_DeveRetornarSimilaridadeMaxima()
+    {
+        // Arrange (prepara os dados)
+        var categorias = new List<Categoria>
+        {
+            new("Mercado", TipoTransacao.Despesa)
+        };
+
+        // Act (executa a ação)
+        var sugestoes = _service.BuscarSimilares("Mercado", categorias);
+
+        // Assert (verifica o resultado)
+        Assert.Single(sugestoes);
+        Assert.Equal(1.0, sugestoes.First().Similaridade, precision: 2);
+    }
+
+    // ✅ Cenário 2: Deve encontrar categoria similar mesmo com maiúsculas diferentes
+    [Fact]
+    public void BuscarSimilares_ComDiferencaDeMaiusculas_DeveEncontrarSimilar()
+    {
+        var categorias = new List<Categoria>
+        {
+            new("Mercado", TipoTransacao.Despesa)
+        };
+
+        var sugestoes = _service.BuscarSimilares("MERCADO EXTRA S/A", categorias, limiarMinimo: 0.5);
+
+        Assert.NotEmpty(sugestoes);
+        Assert.Contains(sugestoes, s => s.NomeCategoria == "Mercado");
+    }
+
+    // ✅ Cenário 3: Não deve retornar categorias muito diferentes
+    [Fact]
+    public void BuscarSimilares_ComNomeCompletamenteDiferente_DeveRetornarListaVazia()
+    {
+        var categorias = new List<Categoria>
+        {
+            new("Aluguel", TipoTransacao.Despesa)
+        };
+
+        // "Netflix" não tem nada a ver com "Aluguel"
+        var sugestoes = _service.BuscarSimilares("Netflix", categorias, limiarMinimo: 0.6);
+
+        Assert.Empty(sugestoes);
+    }
+
+    // ✅ Cenário 4: Deve ordenar por similaridade decrescente (mais parecido primeiro)
+    [Fact]
+    public void BuscarSimilares_ComMultiplasCategorias_DeveOrdenarPorSimilaridade()
+    {
+        var categorias = new List<Categoria>
+        {
+            new("Supermercado", TipoTransacao.Despesa),
+            new("Mercado", TipoTransacao.Despesa),
+            new("Aluguel", TipoTransacao.Despesa)
+        };
+
+        var sugestoes = _service
+            .BuscarSimilares("Mercado Municipal", categorias, limiarMinimo: 0.4)
+            .ToList();
+
+        // O mais parecido com "Mercado Municipal" deve vir primeiro
+        Assert.Equal("Mercado", sugestoes.First().NomeCategoria);
+    }
+}
+
+🟡 PASSO 2 — DTOs (Objetos de Transferência de Dados)
+Estes objetos carregam os dados entre as camadas sem expor as entidades diretamente.
+
+// GerenciadorFinanceiro.Application/DTOs/Importacao/CategoriaSugestaoDto.cs
+
+namespace GerenciadorFinanceiro.Application.DTOs.Importacao;
+
+/// <summary>
+/// Representa uma sugestão de categoria existente para uma linha do extrato.
+/// </summary>
+public class CategoriaSugestaoDto
+{
+    /// <summary>O ID da categoria existente no banco de dados.</summary>
+    public Guid CategoriaId { get; init; }
+
+    /// <summary>O nome da categoria existente.</summary>
+    public string NomeCategoria { get; init; } = null!;
+
+    /// <summary>
+    /// Percentual de similaridade entre 0.0 (nada similar) e 1.0 (idêntico).
+    /// Ex: 0.85 significa 85% similar.
+    /// </summary>
+    public double Similaridade { get; init; }
+
+    /// <summary>Exibe a similaridade formatada como percentual legível.</summary>
+    public string SimilaridadeFormatada => $"{Similaridade:P0}"; // Ex: "85%"
+}
+
+// GerenciadorFinanceiro.Application/DTOs/Importacao/TransacaoPreviewDto.cs
+
+namespace GerenciadorFinanceiro.Application.DTOs.Importacao;
+
+/// <summary>
+/// Representa UMA linha do extrato CSV ainda não persistida,
+/// com as sugestões de categoria para o utilizador revisar.
+/// </summary>
+public class TransacaoPreviewDto
+{
+    /// <summary>Identificador temporário (só existe no preview, não no banco).</summary>
+    public Guid IdTemporario { get; init; } = Guid.NewGuid();
+
+    public string Descricao { get; init; } = null!;
+
+    /// <summary>
+    /// Valor já normalizado: negativo para Despesa, positivo para Receita.
+    /// Regra de Negócio: Gastos são SEMPRE negativos no sistema.
+    /// </summary>
+    public decimal Valor { get; init; }
+
+    public DateTime Data { get; init; }
+
+    /// <summary>Nome bruto da categoria vindo do CSV (ex: "MERCADO EXTRA S/A").</summary>
+    public string? CategoriaOriginalCsv { get; init; }
+
+    /// <summary>
+    /// Lista de categorias existentes ordenadas por similaridade.
+    /// Pode estar vazia se nenhuma categoria for parecida o suficiente.
+    /// </summary>
+    public IReadOnlyList<CategoriaSugestaoDto> CategoriasSugeridas { get; init; }
+        = new List<CategoriaSugestaoDto>();
+
+    /// <summary>
+    /// ID da categoria escolhida pelo utilizador.
+    /// NULL significa "criar nova categoria com o nome original do CSV".
+    /// </summary>
+    public Guid? CategoriaEscolhidaId { get; set; }
+
+    /// <summary>
+    /// Nome para a nova categoria, caso o utilizador opte por criar uma.
+    /// Só é usado quando <see cref="CategoriaEscolhidaId"/> é NULL.
+    /// </summary>
+    public string? NovaCategoriaPersonalizada { get; set; }
+}
+
+// GerenciadorFinanceiro.Application/DTOs/Importacao/ImportacaoPreviewResultadoDto.cs
+
+namespace GerenciadorFinanceiro.Application.DTOs.Importacao;
+
+/// <summary>
+/// Resultado completo do parsing do CSV, retornado antes da persistência.
+/// O frontend exibirá estes dados para o utilizador revisar.
+/// </summary>
+public class ImportacaoPreviewResultadoDto
+{
+    /// <summary>Todas as transações lidas do CSV aguardando confirmação.</summary>
+    public IReadOnlyList<TransacaoPreviewDto> Transacoes { get; init; }
+        = new List<TransacaoPreviewDto>();
+
+    /// <summary>Total de linhas que o sistema não conseguiu interpretar.</summary>
+    public int LinhasComErro { get; init; }
+
+    /// <summary>Resumo: quantas transações têm sugestão automática vs. precisam de atenção.</summary>
+    public int TotalComSugestao => Transacoes.Count(t => t.CategoriasSugeridas.Any());
+    public int TotalSemSugestao => Transacoes.Count(t => !t.CategoriasSugeridas.Any());
+}
+// GerenciadorFinanceiro.Application/Interfaces/ICategoriaSimilaridadeService.cs
+
+using GerenciadorFinanceiro.Application.DTOs.Importacao;
+using GerenciadorFinanceiro.Domain.Entities;
+
+namespace GerenciadorFinanceiro.Application.Interfaces;
+
+/// <summary>
+/// Define o contrato para o serviço que compara descrições do CSV
+/// com categorias já existentes no sistema.
+/// </summary>
+public interface ICategoriaSimilaridadeService
+{
+    /// <summary>
+    /// Busca categorias existentes que são textualmente similares à descrição fornecida.
+    /// </summary>
+    /// <param name="descricao">Texto vindo do CSV (ex: "MERCADO EXTRA S/A").</param>
+    /// <param name="categorias">Lista de todas as categorias existentes no banco.</param>
+    /// <param name="limiarMinimo">
+    ///     Valor mínimo de similaridade para incluir na sugestão (0.0 a 1.0).
+    ///     Padrão: 0.5 (50%). Abaixo disso, a categoria é ignorada.
+    /// </param>
+    /// <returns>Sugestões ordenadas da mais para a menos similar.</returns>
+    IEnumerable<CategoriaSugestaoDto> BuscarSimilares(
+        string descricao,
+        IEnumerable<Categoria> categorias,
+        double limiarMinimo = 0.5);
+}
+
+// GerenciadorFinanceiro.Infrastructure/Services/LevenshteinSimilaridadeService.cs
+
+using GerenciadorFinanceiro.Application.DTOs.Importacao;
+using GerenciadorFinanceiro.Application.Interfaces;
+using GerenciadorFinanceiro.Domain.Entities;
+using System.Text;
+using System.Text.RegularExpressions;
+
+namespace GerenciadorFinanceiro.Infrastructure.Services;
+
+/// <summary>
+/// Implementação do serviço de similaridade usando o algoritmo de Distância de Levenshtein.
+///
+/// 📚 O que é Distância de Levenshtein?
+/// É uma medida de quantas operações (inserir, remover, substituir um caractere)
+/// são necessárias para transformar uma palavra em outra.
+///
+/// Exemplo:
+///   "Mercado" → "Mercados"  = 1 operação  (inserir 's') → muito similar
+///   "Mercado" → "Netflix"   = 7 operações              → muito diferente
+///
+/// Convertemos isso em % de similaridade: 1 - (distância / tamanho_maior)
+/// </summary>
+public class LevenshteinSimilaridadeService : ICategoriaSimilaridadeService
+{
+    public IEnumerable<CategoriaSugestaoDto> BuscarSimilares(
+        string descricao,
+        IEnumerable<Categoria> categorias,
+        double limiarMinimo = 0.5)
+    {
+        // Normaliza o texto de entrada (limpa, minúsculas, sem acentos)
+        var descricaoNormalizada = Normalizar(descricao);
+
+        return categorias
+            .Select(categoria =>
+            {
+                var nomeNormalizado = Normalizar(categoria.Nome);
+                var similaridade = CalcularSimilaridade(descricaoNormalizada, nomeNormalizado);
+
+                return new CategoriaSugestaoDto
+                {
+                    CategoriaId = categoria.Id,
+                    NomeCategoria = categoria.Nome, // mantém o nome original bonito
+                    Similaridade = similaridade
+                };
+            })
+            .Where(s => s.Similaridade >= limiarMinimo)   // filtra os muito diferentes
+            .OrderByDescending(s => s.Similaridade)        // mais parecido primeiro
+            .Take(3);                                       // máximo 3 sugestões por linha
+    }
+
+    /// <summary>
+    /// Calcula a similaridade entre dois textos já normalizados.
+    /// Retorna um valor entre 0.0 (completamente diferente) e 1.0 (idêntico).
+    /// </summary>
+    private static double CalcularSimilaridade(string a, string b)
+    {
+        if (string.IsNullOrEmpty(a) && string.IsNullOrEmpty(b)) return 1.0;
+        if (string.IsNullOrEmpty(a) || string.IsNullOrEmpty(b)) return 0.0;
+
+        var distancia = CalcularDistanciaLevenshtein(a, b);
+        var tamanhoDoPadraoMaior = Math.Max(a.Length, b.Length);
+
+        // Fórmula: quanto menor a distância, maior a similaridade
+        return 1.0 - (double)distancia / tamanhoDoPadraoMaior;
+    }
+
+    /// <summary>
+    /// Implementação do algoritmo de Levenshtein usando programação dinâmica.
+    /// Calcula o número mínimo de edições para transformar 'a' em 'b'.
+    /// </summary>
+    private static int CalcularDistanciaLevenshtein(string a, string b)
+    {
+        // Criamos uma tabela (matriz) de tamanho (len_a+1) x (len_b+1)
+        // Cada célula [i,j] representa o custo de transformar
+        // os primeiros i chars de 'a' nos primeiros j chars de 'b'
+        var matriz = new int[a.Length + 1, b.Length + 1];
+
+        // Preenche a primeira coluna: custo de deletar i caracteres de 'a'
+        for (int i = 0; i <= a.Length; i++) matriz[i, 0] = i;
+
+        // Preenche a primeira linha: custo de inserir j caracteres de 'b'
+        for (int j = 0; j <= b.Length; j++) matriz[0, j] = j;
+
+        // Preenche o restante da tabela
+        for (int i = 1; i <= a.Length; i++)
+        {
+            for (int j = 1; j <= b.Length; j++)
+            {
+                // Se os caracteres são iguais, sem custo extra
+                var custo = a[i - 1] == b[j - 1] ? 0 : 1;
+
+                matriz[i, j] = Math.Min(
+                    Math.Min(
+                        matriz[i - 1, j] + 1,      // deleção
+                        matriz[i, j - 1] + 1),      // inserção
+                        matriz[i - 1, j - 1] + custo // substituição
+                );
+            }
+        }
+
+        return matriz[a.Length, b.Length];
+    }
+
+    /// <summary>
+    /// Normaliza o texto para comparação justa:
+    /// - Remove espaços extras
+    /// - Converte para minúsculas
+    /// - Remove acentos (ã → a, é → e)
+    /// - Remove caracteres especiais (S/A, LTDA, etc.)
+    /// </summary>
+    private static string Normalizar(string texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto)) return string.Empty;
+
+        // 1. Minúsculas e trim
+        var resultado = texto.ToLowerInvariant().Trim();
+
+        // 2. Remove sufixos comuns de empresas que poluem a comparação
+        resultado = Regex.Replace(resultado, @"\b(s/a|ltda|eireli|me|epp|sa)\b", "", RegexOptions.IgnoreCase);
+
+        // 3. Remove caracteres não-alfanuméricos (exceto espaço)
+        resultado = Regex.Replace(resultado, @"[^a-z0-9\s]", " ");
+
+        // 4. Remove espaços múltiplos
+        resultado = Regex.Replace(resultado, @"\s+", " ").Trim();
+
+        // 5. Remove acentos (normalização Unicode)
+        resultado = RemoverAcentos(resultado);
+
+        return resultado;
+    }
+
+    private static string RemoverAcentos(string texto)
+    {
+        var normalizado = texto.Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder();
+
+        foreach (var c in normalizado)
+        {
+            // Mantém apenas caracteres da categoria "letra" sem modificadores
+            if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c)
+                != System.Globalization.UnicodeCategory.NonSpacingMark)
+            {
+                sb.Append(c);
+            }
+        }
+
+        return sb.ToString().Normalize(NormalizationForm.FormC);
+    }
+}
+
+🔵 PASSO 4 — Refatorar o Use Case de Importação (2 fases)
+A importação agora tem 2 etapas separadas:
+
+// GerenciadorFinanceiro.Application/UseCases/Importacao/GerarPreviewImportacaoUseCase.cs
+
+using GerenciadorFinanceiro.Application.DTOs.Importacao;
+using GerenciadorFinanceiro.Application.Interfaces;
+
+namespace GerenciadorFinanceiro.Application.UseCases.Importacao;
+
+/// <summary>
+/// FASE 1 da importação: Lê o CSV e retorna um preview para o utilizador revisar.
+/// NÃO persiste nada no banco de dados ainda.
+/// </summary>
+public class GerarPreviewImportacaoUseCase
+{
+    private readonly IExtratoParser _parser;
+    private readonly ICategoriaRepository _categoriaRepository;
+    private readonly ICategoriaSimilaridadeService _similaridadeService;
+
+    public GerarPreviewImportacaoUseCase(
+        IExtratoParser parser,
+        ICategoriaRepository categoriaRepository,
+        ICategoriaSimilaridadeService similaridadeService)
+    {
+        _parser = parser;
+        _categoriaRepository = categoriaRepository;
+        _similaridadeService = similaridadeService;
+    }
+
+    public async Task<ImportacaoPreviewResultadoDto> ExecutarAsync(
+        Stream arquivoCsv,
+        string tipoParser) // "C6" ou "Generico"
+    {
+        // 1. Faz o parsing do CSV (lógica que já existe)
+        var linhasParseadas = await _parser.ParsearAsync(arquivoCsv, tipoParser);
+
+        // 2. Busca TODAS as categorias existentes (uma única consulta ao banco)
+        var categoriasExistentes = await _categoriaRepository.ListarTodasAsync();
+
+        // 3. Para cada linha do CSV, busca sugestões de categoria
+        var previews = linhasParseadas.Transacoes.Select(linha =>
+        {
+            var sugestoes = _similaridadeService
+                .BuscarSimilares(linha.Descricao, categoriasExistentes)
+                .ToList();
+
+            return new TransacaoPreviewDto
+            {
+                Descricao = linha.Descricao,
+                Valor = linha.Valor, // já deve vir negativo para despesas
+                Data = linha.Data,
+                CategoriaOriginalCsv = linha.CategoriaOriginal,
+                CategoriasSugeridas = sugestoes,
+                // Pré-seleciona automaticamente se a similaridade for muito alta (≥90%)
+                CategoriaEscolhidaId = sugestoes
+                    .FirstOrDefault(s => s.Similaridade >= 0.9)?.CategoriaId
+            };
+        }).ToList();
+
+        return new ImportacaoPreviewResultadoDto
+        {
+            Transacoes = previews,
+            LinhasComErro = linhasParseadas.LinhasComErro
+        };
+    }
+}
+
+// GerenciadorFinanceiro.Application/UseCases/Importacao/ConfirmarImportacaoUseCase.cs
+
+using GerenciadorFinanceiro.Application.DTOs.Importacao;
+using GerenciadorFinanceiro.Domain.Entities;
+using GerenciadorFinanceiro.Domain.Enums;
+
+namespace GerenciadorFinanceiro.Application.UseCases.Importacao;
+
+/// <summary>
+/// FASE 2 da importação: Recebe as decisões do utilizador e persiste no banco.
+/// Chamado após o utilizador revisar e confirmar o preview.
+/// </summary>
+public class ConfirmarImportacaoUseCase
+{
+    private readonly ICategoriaRepository _categoriaRepository;
+    private readonly ITransacaoRepository _transacaoRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ConfirmarImportacaoUseCase(
+        ICategoriaRepository categoriaRepository,
+        ITransacaoRepository transacaoRepository,
+        IUnitOfWork unitOfWork)
+    {
+        _categoriaRepository = categoriaRepository;
+        _transacaoRepository = transacaoRepository;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<ResultadoImportacaoDto> ExecutarAsync(
+        IEnumerable<TransacaoPreviewDto> transacoesConfirmadas,
+        Guid contaId)
+    {
+        // 🔒 Tudo acontece numa única transação de banco de dados
+        // Se algo falhar no meio, TUDO é revertido (rollback automático)
+        await _unitOfWork.IniciarTransacaoAsync();
+
+        try
+        {
+            var transacoesCriadas = 0;
+
+            foreach (var preview in transacoesConfirmadas)
+            {
+                // Determina a categoria a usar (existente ou nova)
+                var categoriaId = await ResolverCategoriaAsync(preview);
+
+                // Cria a transação definitiva
+                var transacao = new Transacao(
+                    descricao: preview.Descricao,
+                    valor: preview.Valor, // Regra: já deve ser negativo para despesas
+                    data: preview.Data,
+                    categoriaId: categoriaId,
+                    contaId: contaId
+                );
+
+                await _transacaoRepository.AdicionarAsync(transacao);
+                transacoesCriadas++;
+            }
+
+            await _unitOfWork.CommitAsync();
+
+            return new ResultadoImportacaoDto
+            {
+                Sucesso = true,
+                TotalImportado = transacoesCriadas
+            };
+        }
+        catch (Exception ex)
+        {
+            // Se qualquer erro ocorrer, desfaz TUDO
+            await _unitOfWork.RollbackAsync();
+
+            return new ResultadoImportacaoDto
+            {
+                Sucesso = false,
+                MensagemErro = $"Erro ao persistir importação: {ex.Message}",
+                TotalImportado = 0
+            };
+        }
+    }
+
+    /// <summary>
+    /// Decide qual categoria usar baseado na escolha do utilizador.
+    /// </summary>
+    private async Task<Guid> ResolverCategoriaAsync(TransacaoPreviewDto preview)
+    {
+        // Caso 1: Utilizador escolheu uma categoria existente
+        if (preview.CategoriaEscolhidaId.HasValue)
+            return preview.CategoriaEscolhidaId.Value;
+
+        // Caso 2: Utilizador quer criar uma nova categoria
+        var nomeNova = preview.NovaCategoriaPersonalizada
+                       ?? preview.CategoriaOriginalCsv
+                       ?? preview.Descricao;
+
+        var tipo = preview.Valor < 0 ? TipoTransacao.Despesa : TipoTransacao.Receita;
+
+        var novaCategoria = new Categoria(nomeNova, tipo);
+        await _categoriaRepository.AdicionarAsync(novaCategoria);
+
+        return novaCategoria.Id;
+    }
+}
+
+3. Passos Finais
+Registar o novo serviço na injeção de dependências
+No Program.cs ou no seu ficheiro de configuração de serviços:
+
+// GerenciadorFinanceiro.Api/Program.cs
+
+// Adiciona esta linha junto aos outros serviços
+builder.Services.AddScoped<ICategoriaSimilaridadeService, LevenshteinSimilaridadeService>();
+builder.Services.AddScoped<GerarPreviewImportacaoUseCase>();
+builder.Services.AddScoped<ConfirmarImportacaoUseCase>();

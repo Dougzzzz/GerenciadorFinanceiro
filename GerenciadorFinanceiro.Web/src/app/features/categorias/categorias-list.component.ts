@@ -15,7 +15,7 @@ import { CardComponent } from '../../shared/components/card/card.component';
           <input type="text" [(ngModel)]="filtro" (input)="filtrar()" placeholder="Pesquisar categoria...">
         </div>
         
-        <div class="selection-info" *ngIf="categorias().length > 0">
+        <div class="selection-info" *ngIf="categorias && categorias.length > 0">
           <label class="checkbox-container">
             <input type="checkbox" 
                    [checked]="isTodasSelecionadas()" 
@@ -86,7 +86,7 @@ import { CardComponent } from '../../shared/components/card/card.component';
   `]
 })
 export class CategoriasListComponent implements OnChanges {
-  @Input() categorias: any;
+  @Input() categorias: Categoria[] = [];
   @Input() selecionadas = new Set<string>();
   
   @Output() onIniciarEdicao = new EventEmitter<Categoria>();
@@ -104,12 +104,7 @@ export class CategoriasListComponent implements OnChanges {
   }
 
   filtrar() {
-    const lista = this.categorias();
-    if (!lista) {
-      this.categoriasFiltradas = [];
-      return;
-    }
-
+    const lista = this.categorias || [];
     if (!this.filtro) {
       this.categoriasFiltradas = lista;
     } else {

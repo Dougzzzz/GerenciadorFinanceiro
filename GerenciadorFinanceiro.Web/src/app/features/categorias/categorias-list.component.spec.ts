@@ -20,9 +20,9 @@ describe('CategoriasListComponent', () => {
 
     fixture = TestBed.createComponent(CategoriasListComponent);
     component = fixture.componentInstance;
-    component.categorias = signal(mockCategorias);
+    component.categorias = mockCategorias;
     component.selecionadas = new Set(['1']);
-    component.filtrar(); // Disparar filtro manualmente já que ngOnChanges não roda em atribuição direta no teste
+    component.filtrar();
     fixture.detectChanges();
   });
 
