@@ -7,7 +7,7 @@ namespace GerenciadorFinanceiro.Domain.Entidades
     {
         public Guid Id { get; private set; }
         public DateTime Data { get; private set; }
-        public string Descricao { get; private set; } = null!;
+        public string Descricao { get; private set; }
         public decimal Valor { get; private set; }
         public TipoTransacao Tipo { get; private set; }
 
@@ -15,7 +15,7 @@ namespace GerenciadorFinanceiro.Domain.Entidades
         /// Gets hash único gerado para evitar duplicação de importações.
         /// Gerado a partir de: Data + Descricao + Valor + Conta/Cartão.
         /// </summary>
-        public string ChaveExclusiva { get; private set; } = null!;
+        public string ChaveExclusiva { get; private set; }
 
         // Relacionamentos
         public Guid CategoriaId { get; private set; }
