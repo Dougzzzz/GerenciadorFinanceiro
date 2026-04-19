@@ -29,6 +29,7 @@ describe('TransacoesImportComponent', () => {
 
   it('deve habilitar o botao de processar quando houver arquivo e conta selecionada', () => {
     component.selectedFile = new File(['conteudo'], 'extrato.csv', { type: 'text/csv' });
+    component.destino = 'conta';
     component.config.contaId = 'conta-1';
 
     fixture.detectChanges();
@@ -62,7 +63,7 @@ describe('TransacoesImportComponent', () => {
       cartaoId: undefined,
     };
 
-    component.importar();
+    component.confirmarImportacao();
 
     expect(component.onImport.emit).toHaveBeenCalledWith({
       file,
@@ -78,8 +79,17 @@ describe('TransacoesImportComponent', () => {
     spyOn(component.onImport, 'emit');
     component.config.contaId = 'conta-1';
 
-    component.importar();
+    component.confirmarImportacao();
 
     expect(component.onImport.emit).not.toHaveBeenCalled();
+  });
+
+  it('deve habilitar o botao de verificar quando houver arquivo e destino selecionados', () => {
+    component.selectedFile = new File(['conteudo'], 'extrato.csv', { type: 'text/csv' });
+    component.destino = 'conta';
+    component.config.contaId = 'conta-1';
+    
+    fixture.detectChanges();
+    expect(component.canProcess()).toBeTrue();
   });
 });
