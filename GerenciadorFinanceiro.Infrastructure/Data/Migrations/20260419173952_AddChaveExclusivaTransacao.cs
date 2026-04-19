@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -16,7 +16,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
                 type: "character varying(100)",
                 maxLength: 100,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: string.Empty);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transacoes_ChaveExclusiva",

@@ -63,7 +63,7 @@ namespace GerenciadorFinanceiro.Application.UseCases.Importacao
 
                     // 3. Resolve a categoria real (existente ou cria nova)
                     var categoriaId = await ResolverCategoriaAsync(preview, novasCategoriasCache);
-                    
+
                     // 4. Atualiza a transação com a categoria correta antes de salvar
                     transacao.Atualizar(
                         transacao.Data,
@@ -88,7 +88,7 @@ namespace GerenciadorFinanceiro.Application.UseCases.Importacao
                 {
                     Sucesso = true,
                     TotalImportado = transacoesCriadas,
-                    TotalIgnorado = transacoesIgnoradas
+                    TotalIgnorado = transacoesIgnoradas,
                 };
             }
             catch (Exception ex)
@@ -100,7 +100,7 @@ namespace GerenciadorFinanceiro.Application.UseCases.Importacao
                     Sucesso = false,
                     MensagemErro = $"Erro ao persistir importação: {ex.Message}",
                     TotalImportado = 0,
-                    TotalIgnorado = 0
+                    TotalIgnorado = 0,
                 };
             }
         }

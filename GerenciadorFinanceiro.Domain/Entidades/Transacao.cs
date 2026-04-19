@@ -12,7 +12,7 @@ namespace GerenciadorFinanceiro.Domain.Entidades
         public TipoTransacao Tipo { get; private set; }
 
         /// <summary>
-        /// Hash único gerado para evitar duplicação de importações.
+        /// Gets hash único gerado para evitar duplicação de importações.
         /// Gerado a partir de: Data + Descricao + Valor + Conta/Cartão.
         /// </summary>
         public string ChaveExclusiva { get; private set; } = null!;
@@ -58,8 +58,18 @@ namespace GerenciadorFinanceiro.Domain.Entidades
             ChaveExclusiva = GerarHash();
         }
 
-        public Transacao(DateTime data, string descricao, decimal valor, Guid categoriaId, Guid? contaBancariaId, Guid? cartaoCreditoId,
-            string categoria, string nomeCartao, string finalCartao, string parcela, decimal cotacao)
+        public Transacao(
+            DateTime data,
+            string descricao,
+            decimal valor,
+            Guid categoriaId,
+            Guid? contaBancariaId,
+            Guid? cartaoCreditoId,
+            string categoria,
+            string nomeCartao,
+            string finalCartao,
+            string parcela,
+            decimal cotacao)
             : this(data, descricao, valor, categoriaId, contaBancariaId, cartaoCreditoId)
         {
             Categoria = categoria ?? string.Empty;
@@ -67,15 +77,25 @@ namespace GerenciadorFinanceiro.Domain.Entidades
             FinalCartao = finalCartao ?? string.Empty;
             Parcela = parcela ?? string.Empty;
             Cotacao = cotacao;
-            
+
             // Recalcula o hash com os campos de snapshot se disponíveis
             ChaveExclusiva = GerarHash();
         }
 
         protected Transacao() { }
 
-        public void Atualizar(DateTime data, string descricao, decimal valor, Guid categoriaId, Guid? contaBancariaId, Guid? cartaoCreditoId,
-            string categoria, string nomeCartao, string finalCartao, string parcela, decimal cotacao)
+        public void Atualizar(
+            DateTime data,
+            string descricao,
+            decimal valor,
+            Guid categoriaId,
+            Guid? contaBancariaId,
+            Guid? cartaoCreditoId,
+            string categoria,
+            string nomeCartao,
+            string finalCartao,
+            string parcela,
+            decimal cotacao)
         {
             Data = data.Kind == DateTimeKind.Unspecified
                 ? DateTime.SpecifyKind(data, DateTimeKind.Utc)
@@ -92,7 +112,7 @@ namespace GerenciadorFinanceiro.Domain.Entidades
             FinalCartao = finalCartao ?? string.Empty;
             Parcela = parcela ?? string.Empty;
             Cotacao = cotacao;
-            
+
             ChaveExclusiva = GerarHash();
         }
 
