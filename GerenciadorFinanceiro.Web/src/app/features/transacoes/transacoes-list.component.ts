@@ -32,24 +32,24 @@ import { Transacao, Categoria, ContaBancaria, CartaoCredito } from '../../core/m
           <tr *ngFor="let t of transacoes">
             <td><input type="checkbox" [checked]="selecionadas.has(t.id)" (change)="selected.emit(t.id)" [attr.aria-label]="'Selecionar transação ' + t.descricao"></td>
             <td>
-              <input *ngIf="editandoId === t.id" type="date" [(ngModel)]="tempEdit.data" class="edit-input" aria-label="Editar data">
+              <input *ngIf="editandoId === t.id && tempEdit" type="date" [(ngModel)]="tempEdit.data" class="edit-input" aria-label="Editar data">
               <span *ngIf="editandoId !== t.id">{{ t.data | date:'dd/MM/yyyy' }}</span>
             </td>
             <td>
-              <input *ngIf="editandoId === t.id" type="text" [(ngModel)]="tempEdit.descricao" class="edit-input" aria-label="Editar descrição">
+              <input *ngIf="editandoId === t.id && tempEdit" type="text" [(ngModel)]="tempEdit.descricao" class="edit-input" aria-label="Editar descrição">
               <div *ngIf="editandoId !== t.id" class="desc-cell">
                 <strong>{{ t.descricao }}</strong>
                 <small *ngIf="t.parcela">{{ t.parcela }}</small>
               </div>
             </td>
             <td>
-              <select *ngIf="editandoId === t.id" [(ngModel)]="tempEdit.categoriaId" class="edit-input" aria-label="Editar categoria">
+              <select *ngIf="editandoId === t.id && tempEdit" [(ngModel)]="tempEdit.categoriaId" class="edit-input" aria-label="Editar categoria">
                 <option *ngFor="let c of categorias" [value]="c.id">{{ c.nome }}</option>
               </select>
               <span *ngIf="editandoId !== t.id" class="badge">{{ t.categoriaNavigation?.nome || t.categoria }}</span>
             </td>
             <td>
-              <div *ngIf="editandoId === t.id" class="edit-group">
+              <div *ngIf="editandoId === t.id && tempEdit" class="edit-group">
                 <select [(ngModel)]="tempEdit.contaBancariaId" class="edit-input" aria-label="Editar conta">
                   <option [value]="undefined">Nenhuma</option>
                   <option *ngFor="let c of contas" [value]="c.id">{{ c.nomeBanco }}</option>
@@ -62,7 +62,7 @@ import { Transacao, Categoria, ContaBancaria, CartaoCredito } from '../../core/m
               <span *ngIf="editandoId !== t.id">{{ t.cartaoCreditoNavigation?.nome || t.contaBancariaNavigation?.nomeBanco || t.nomeCartao || 'Nenhum' }}</span>
             </td>
             <td class="text-right">
-              <input *ngIf="editandoId === t.id" type="number" step="0.01" [(ngModel)]="tempEdit.valor" class="edit-input text-right" aria-label="Editar valor">
+              <input *ngIf="editandoId === t.id && tempEdit" type="number" step="0.01" [(ngModel)]="tempEdit.valor" class="edit-input text-right" aria-label="Editar valor">
               <span *ngIf="editandoId !== t.id" [class.income]="t.valor > 0" [class.expense]="t.valor < 0">{{ t.valor | currency:'BRL' }}</span>
             </td>
             <td>

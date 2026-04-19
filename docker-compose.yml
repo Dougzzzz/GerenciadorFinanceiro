@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: gf_database
+    environment:
+      POSTGRES_DB: gerenciador_financeiro
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: GerenciadorFinanceiro.Api/Dockerfile
+    container_name: gf_api
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Database=gerenciador_financeiro;Username=admin;Password=password123
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  web:
+    build:
+      context: .
+      dockerfile: GerenciadorFinanceiro.Web/Dockerfile
+    container_name: gf_web
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
