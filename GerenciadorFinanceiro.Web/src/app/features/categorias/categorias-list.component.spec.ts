@@ -22,6 +22,7 @@ describe('CategoriasListComponent', () => {
     component = fixture.componentInstance;
     component.categorias = signal(mockCategorias);
     component.selecionadas = new Set(['1']);
+    component.filtrar(); // Disparar filtro manualmente já que ngOnChanges não roda em atribuição direta no teste
     fixture.detectChanges();
   });
 
@@ -31,22 +32,34 @@ describe('CategoriasListComponent', () => {
 
   it('should emit onIniciarEdicao when edit button is clicked', () => {
     spyOn(component.onIniciarEdicao, 'emit');
-    const editBtn = fixture.debugElement.query(By.css('.btn-icon'));
+    // Procurar botão com title "Editar"
+    const editBtn = fixture.debugElement.query(By.css('button[title="Editar"]'));
     editBtn.nativeElement.click();
     expect(component.onIniciarEdicao.emit).toHaveBeenCalledWith(mockCategorias[0]);
   });
 
   it('should emit onExcluirUma when delete button is clicked', () => {
     spyOn(component.onExcluirUma, 'emit');
-    const deleteBtn = fixture.debugElement.query(By.css('.btn-icon.danger'));
+    // Procurar botão com title "Excluir"
+    const deleteBtn = fixture.debugElement.query(By.css('button[title="Excluir"]'));
     deleteBtn.nativeElement.click();
     expect(component.onExcluirUma.emit).toHaveBeenCalledWith(mockCategorias[0]);
   });
 
   it('should emit onToggleSelecionada when checkbox is changed', () => {
     spyOn(component.onToggleSelecionada, 'emit');
+    // Procurar checkbox dentro de .item-info
     const checkbox = fixture.debugElement.query(By.css('.item-info input[type="checkbox"]'));
     checkbox.nativeElement.click();
     expect(component.onToggleSelecionada.emit).toHaveBeenCalledWith('1');
+  });
+
+  it('should filter categories when filtro is changed', () => {
+    component.filtro = 'Salário';
+    component.filtrar();
+    fixture.detectChanges();
+    
+    expect(component.categoriasFiltradas.length).toBe(1);
+    expect(component.categoriasFiltradas[0].nome).toBe('Salário');
   });
 });

@@ -81,8 +81,12 @@ export class CategoriasComponent implements OnInit {
     this.selecionadas.set(s);
   }
 
-  toggleTodas(event: any) {
-    this.selecionadas.set(event.target.checked ? new Set(this.categorias().map(c => c.id)) : new Set());
+  toggleTodas(ids: string[]) {
+    if (ids.length === 0) {
+      this.selecionadas.set(new Set());
+    } else {
+      this.selecionadas.set(new Set(ids));
+    }
   }
 
   excluirUma(c: Categoria) {
