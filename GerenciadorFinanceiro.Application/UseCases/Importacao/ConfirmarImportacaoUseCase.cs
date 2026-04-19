@@ -33,28 +33,50 @@ namespace GerenciadorFinanceiro.Application.UseCases.Importacao
             try
             {
                 var transacoesCriadas = 0;
+                var transacoesIgnoradas = 0;
 
                 // Cache local para não duplicar categorias criadas no mesmo lote
                 var novasCategoriasCache = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (var preview in transacoesConfirmadas)
                 {
-                    var categoriaId = await ResolverCategoriaAsync(preview, novasCategoriasCache);
-
-                    // Regra de Ouro: Se o valor for negativo, é despesa. Se positivo, é receita.
-                    // O leitor (ex: C6) deve garantir que o valor já chegue aqui normalizado.
+                    // 1. Instancia transação temporária para gerar o Hash e verificar duplicidade
                     var transacao = new Transacao(
                         preview.Data,
                         preview.Descricao,
                         preview.Valor,
-                        categoriaId,
+                        Guid.Empty, // Categoria temporária
                         contaId,
                         cartaoId,
                         preview.CategoriaOriginalCsv ?? string.Empty,
-                        string.Empty, // nomeCartao
-                        string.Empty, // finalCartao
-                        string.Empty, // parcela
-                        1m);         // cotacao
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        1m);
+
+                    // 2. Verifica se esta transação já existe no sistema (Prevenção de Duplicados)
+                    if (await _transacaoRepository.ExisteChaveExclusivaAsync(transacao.ChaveExclusiva))
+                    {
+                        transacoesIgnoradas++;
+                        continue;
+                    }
+
+                    // 3. Resolve a categoria real (existente ou cria nova)
+                    var categoriaId = await ResolverCategoriaAsync(preview, novasCategoriasCache);
+                    
+                    // 4. Atualiza a transação com a categoria correta antes de salvar
+                    transacao.Atualizar(
+                        transacao.Data,
+                        transacao.Descricao,
+                        transacao.Valor,
+                        categoriaId,
+                        transacao.ContaBancariaId,
+                        transacao.CartaoCreditoId,
+                        transacao.Categoria,
+                        transacao.NomeCartao,
+                        transacao.FinalCartao,
+                        transacao.Parcela,
+                        transacao.Cotacao);
 
                     await _transacaoRepository.AdicionarAsync(transacao);
                     transacoesCriadas++;
@@ -66,6 +88,7 @@ namespace GerenciadorFinanceiro.Application.UseCases.Importacao
                 {
                     Sucesso = true,
                     TotalImportado = transacoesCriadas,
+                    TotalIgnorado = transacoesIgnoradas
                 };
             }
             catch (Exception ex)
@@ -77,24 +100,22 @@ namespace GerenciadorFinanceiro.Application.UseCases.Importacao
                     Sucesso = false,
                     MensagemErro = $"Erro ao persistir importação: {ex.Message}",
                     TotalImportado = 0,
+                    TotalIgnorado = 0
                 };
             }
         }
 
         private async Task<Guid> ResolverCategoriaAsync(TransacaoPreviewDto preview, Dictionary<string, Guid> cache)
         {
-            // 1. Utilizador escolheu uma categoria existente
             if (preview.CategoriaEscolhidaId.HasValue)
             {
                 return preview.CategoriaEscolhidaId.Value;
             }
 
-            // 2. Utilizador quer criar uma nova categoria
             var nomeNova = preview.NovaCategoriaPersonalizada
                            ?? preview.CategoriaOriginalCsv
                            ?? "Outros";
 
-            // Verifica no cache se já criamos esta categoria neste lote
             if (cache.TryGetValue(nomeNova, out var idExistenteNoLote))
             {
                 return idExistenteNoLote;
@@ -102,7 +123,6 @@ namespace GerenciadorFinanceiro.Application.UseCases.Importacao
 
             var tipo = preview.Valor < 0 ? TipoTransacao.Despesa : TipoTransacao.Receita;
 
-            // Verifica no banco (segurança extra)
             var existenteNoBanco = await _categoriaRepository.ObterPorNomeAsync(nomeNova, tipo);
             if (existenteNoBanco != null)
             {

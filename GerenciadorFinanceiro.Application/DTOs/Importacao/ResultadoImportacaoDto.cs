@@ -11,6 +11,9 @@ namespace GerenciadorFinanceiro.Application.DTOs.Importacao
         /// <summary>Gets the total number of transactions imported.</summary>
         public int TotalImportado { get; init; }
 
+        /// <summary>Gets the total number of duplicate transactions ignored.</summary>
+        public int TotalIgnorado { get; init; }
+
         /// <summary>Gets the error message if the import failed.</summary>
         public string? MensagemErro { get; init; }
     }

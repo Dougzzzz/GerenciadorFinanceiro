@@ -65,5 +65,10 @@ namespace GerenciadorFinanceiro.Infrastructure.Repositories
         }
 
         public async Task<bool> PossuiTransacoesPorCategoriaAsync(Guid categoriaId) => await _context.Transacoes.AnyAsync(t => t.CategoriaId == categoriaId);
+
+        public async Task<bool> ExisteChaveExclusivaAsync(string chaveExclusiva)
+        {
+            return await _context.Transacoes.AnyAsync(t => t.ChaveExclusiva == chaveExclusiva);
+        }
     }
 }
