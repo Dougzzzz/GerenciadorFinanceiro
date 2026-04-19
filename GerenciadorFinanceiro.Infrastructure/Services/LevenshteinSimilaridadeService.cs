@@ -1,8 +1,8 @@
+using System.Text;
+using System.Text.RegularExpressions;
 using GerenciadorFinanceiro.Application.DTOs.Importacao;
 using GerenciadorFinanceiro.Application.Interfaces;
 using GerenciadorFinanceiro.Domain.Entidades;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace GerenciadorFinanceiro.Infrastructure.Services
 {

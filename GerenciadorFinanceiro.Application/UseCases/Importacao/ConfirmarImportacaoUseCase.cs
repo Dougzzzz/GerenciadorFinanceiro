@@ -2,116 +2,119 @@ using GerenciadorFinanceiro.Application.DTOs.Importacao;
 using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Interfaces;
 
-namespace GerenciadorFinanceiro.Application.UseCases.Importacao;
-
-/// <summary>
-/// FASE 2 da importação: Recebe as decisões do utilizador e persiste no banco.
-/// </summary>
-public class ConfirmarImportacaoUseCase
+namespace GerenciadorFinanceiro.Application.UseCases.Importacao
 {
-    private readonly ICategoriaRepository _categoriaRepository;
-    private readonly ITransacaoRepository _transacaoRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public ConfirmarImportacaoUseCase(
-        ICategoriaRepository categoriaRepository,
-        ITransacaoRepository transacaoRepository,
-        IUnitOfWork unitOfWork)
+    /// <summary>
+    /// FASE 2 da importação: Recebe as decisões do utilizador e persiste no banco.
+    /// </summary>
+    public class ConfirmarImportacaoUseCase
     {
-        _categoriaRepository = categoriaRepository;
-        _transacaoRepository = transacaoRepository;
-        _unitOfWork = unitOfWork;
-    }
+        private readonly ICategoriaRepository _categoriaRepository;
+        private readonly ITransacaoRepository _transacaoRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-    public async Task<ResultadoImportacaoDto> ExecutarAsync(
-        IEnumerable<TransacaoPreviewDto> transacoesConfirmadas,
-        Guid? contaId,
-        Guid? cartaoId)
-    {
-        await _unitOfWork.IniciarTransacaoAsync();
-
-        try
+        public ConfirmarImportacaoUseCase(
+            ICategoriaRepository categoriaRepository,
+            ITransacaoRepository transacaoRepository,
+            IUnitOfWork unitOfWork)
         {
-            var transacoesCriadas = 0;
+            _categoriaRepository = categoriaRepository;
+            _transacaoRepository = transacaoRepository;
+            _unitOfWork = unitOfWork;
+        }
 
-            // Cache local para não duplicar categorias criadas no mesmo lote
-            var novasCategoriasCache = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+        public async Task<ResultadoImportacaoDto> ExecutarAsync(
+            IEnumerable<TransacaoPreviewDto> transacoesConfirmadas,
+            Guid? contaId,
+            Guid? cartaoId)
+        {
+            await _unitOfWork.IniciarTransacaoAsync();
 
-            foreach (var preview in transacoesConfirmadas)
+            try
             {
-                var categoriaId = await ResolverCategoriaAsync(preview, novasCategoriasCache);
+                var transacoesCriadas = 0;
 
-                var transacao = new Transacao(
-                    preview.Data,
-                    preview.Descricao,
-                    preview.Valor,
-                    categoriaId,
-                    contaId,
-                    cartaoId,
-                    preview.CategoriaOriginalCsv ?? string.Empty,
-                    string.Empty, // nomeCartao
-                    string.Empty, // finalCartao
-                    string.Empty, // parcela
-                    1m);         // cotacao
+                // Cache local para não duplicar categorias criadas no mesmo lote
+                var novasCategoriasCache = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
 
-                await _transacaoRepository.AdicionarAsync(transacao);
-                transacoesCriadas++;
+                foreach (var preview in transacoesConfirmadas)
+                {
+                    var categoriaId = await ResolverCategoriaAsync(preview, novasCategoriasCache);
+
+                    // Regra de Ouro: Se o valor for negativo, é despesa. Se positivo, é receita.
+                    // O leitor (ex: C6) deve garantir que o valor já chegue aqui normalizado.
+                    var transacao = new Transacao(
+                        preview.Data,
+                        preview.Descricao,
+                        preview.Valor,
+                        categoriaId,
+                        contaId,
+                        cartaoId,
+                        preview.CategoriaOriginalCsv ?? string.Empty,
+                        string.Empty, // nomeCartao
+                        string.Empty, // finalCartao
+                        string.Empty, // parcela
+                        1m);         // cotacao
+
+                    await _transacaoRepository.AdicionarAsync(transacao);
+                    transacoesCriadas++;
+                }
+
+                await _unitOfWork.CommitAsync();
+
+                return new ResultadoImportacaoDto
+                {
+                    Sucesso = true,
+                    TotalImportado = transacoesCriadas,
+                };
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackAsync();
+
+                return new ResultadoImportacaoDto
+                {
+                    Sucesso = false,
+                    MensagemErro = $"Erro ao persistir importação: {ex.Message}",
+                    TotalImportado = 0,
+                };
+            }
+        }
+
+        private async Task<Guid> ResolverCategoriaAsync(TransacaoPreviewDto preview, Dictionary<string, Guid> cache)
+        {
+            // 1. Utilizador escolheu uma categoria existente
+            if (preview.CategoriaEscolhidaId.HasValue)
+            {
+                return preview.CategoriaEscolhidaId.Value;
             }
 
-            await _unitOfWork.CommitAsync();
+            // 2. Utilizador quer criar uma nova categoria
+            var nomeNova = preview.NovaCategoriaPersonalizada
+                           ?? preview.CategoriaOriginalCsv
+                           ?? "Outros";
 
-            return new ResultadoImportacaoDto
+            // Verifica no cache se já criamos esta categoria neste lote
+            if (cache.TryGetValue(nomeNova, out var idExistenteNoLote))
             {
-                Sucesso = true,
-                TotalImportado = transacoesCriadas,
-            };
-        }
-        catch (Exception ex)
-        {
-            await _unitOfWork.RollbackAsync();
+                return idExistenteNoLote;
+            }
 
-            return new ResultadoImportacaoDto
+            var tipo = preview.Valor < 0 ? TipoTransacao.Despesa : TipoTransacao.Receita;
+
+            // Verifica no banco (segurança extra)
+            var existenteNoBanco = await _categoriaRepository.ObterPorNomeAsync(nomeNova, tipo);
+            if (existenteNoBanco != null)
             {
-                Sucesso = false,
-                MensagemErro = $"Erro ao persistir importação: {ex.Message}",
-                TotalImportado = 0,
-            };
+                cache[nomeNova] = existenteNoBanco.Id;
+                return existenteNoBanco.Id;
+            }
+
+            var novaCategoria = new Categoria(nomeNova, tipo);
+            await _categoriaRepository.AdicionarAsync(novaCategoria);
+
+            cache[nomeNova] = novaCategoria.Id;
+            return novaCategoria.Id;
         }
-    }
-
-    private async Task<Guid> ResolverCategoriaAsync(TransacaoPreviewDto preview, Dictionary<string, Guid> cache)
-    {
-        // 1. Utilizador escolheu uma categoria existente
-        if (preview.CategoriaEscolhidaId.HasValue)
-        {
-            return preview.CategoriaEscolhidaId.Value;
-        }
-
-        // 2. Utilizador quer criar uma nova categoria
-        var nomeNova = preview.NovaCategoriaPersonalizada
-                       ?? preview.CategoriaOriginalCsv
-                       ?? "Outros";
-
-        // Verifica no cache se já criamos esta categoria neste lote
-        if (cache.TryGetValue(nomeNova, out var idExistenteNoLote))
-        {
-            return idExistenteNoLote;
-        }
-
-        var tipo = preview.Valor < 0 ? TipoTransacao.Despesa : TipoTransacao.Receita;
-
-        // Verifica no banco (segurança extra)
-        var existenteNoBanco = await _categoriaRepository.ObterPorNomeAsync(nomeNova, tipo);
-        if (existenteNoBanco != null)
-        {
-            cache[nomeNova] = existenteNoBanco.Id;
-            return existenteNoBanco.Id;
-        }
-
-        var novaCategoria = new Categoria(nomeNova, tipo);
-        await _categoriaRepository.AdicionarAsync(novaCategoria);
-
-        cache[nomeNova] = novaCategoria.Id;
-        return novaCategoria.Id;
     }
 }
