@@ -3,12 +3,14 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SidebarComponent } from './shared/layout/sidebar/sidebar.component';
 import { HeaderComponent } from './shared/layout/header/header.component';
+import { LoadingComponent } from './shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule, SidebarComponent, HeaderComponent],
+  imports: [CommonModule, RouterModule, SidebarComponent, HeaderComponent, LoadingComponent],
   template: `
+    <app-loading></app-loading>
     <div class="app-container">
       <app-sidebar></app-sidebar>
       <div class="main-content">
