@@ -6,6 +6,7 @@ import localePt from '@angular/common/locales/pt';
 
 import { routes } from './app.routes';
 import { apiErrorInterceptor } from './core/interceptors/api-error.interceptor';
+import { loadingInterceptor } from './core/interceptors/loading.interceptor';
 
 registerLocaleData(localePt);
 
@@ -14,6 +15,6 @@ export const appConfig: ApplicationConfig = {
     { provide: LOCALE_ID, useValue: 'pt-BR' },
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes),
-    provideHttpClient(withInterceptors([apiErrorInterceptor]))
+    provideHttpClient(withInterceptors([loadingInterceptor, apiErrorInterceptor]))
   ]
 };
