@@ -67,11 +67,12 @@ describe('CategoriasComponent', () => {
     expect(component.selecionadas().has('1')).toBeFalse();
   });
 
-  it('should toggle all categories', () => {
-    component.toggleTodas({ target: { checked: true } });
+  it('should toggle selection of all categories', () => {
+    const ids = component.categorias().map(c => c.id);
+    component.toggleTodas(ids);
     expect(component.selecionadas().size).toBe(2);
 
-    component.toggleTodas({ target: { checked: false } });
+    component.toggleTodas([]);
     expect(component.selecionadas().size).toBe(0);
   });
 
