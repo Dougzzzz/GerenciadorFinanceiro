@@ -32,18 +32,29 @@ namespace GerenciadorFinanceiro.Application.UseCases
             var transacoes = await _transacaoRepository.ObterTodasAsync(filtro);
 
             // 3. Calcular totais respeitando os sinais
-            // Receitas: Valores > 0
-            // Despesas: Valores < 0 (armazenamos o valor absoluto para o DTO de exibição)
             var totalReceitas = transacoes.Where(t => t.Valor > 0).Sum(t => t.Valor);
             var totalDespesas = transacoes.Where(t => t.Valor < 0).Sum(t => t.Valor);
+
+            // 4. Calcular gastos por categoria (apenas despesas)
+            var gastosPorCategoria = transacoes
+                .Where(t => t.Valor < 0)
+                .GroupBy(t => t.CategoriaNavigation?.Nome ?? "Outros")
+                .Select(g => new ResumoCategoriaDto
+                {
+                    Categoria = g.Key,
+                    Valor = Math.Abs(g.Sum(t => t.Valor)),
+                })
+                .OrderByDescending(x => x.Valor)
+                .ToList();
 
             return new ResumoMensalDto
             {
                 TotalReceitas = totalReceitas,
-                TotalDespesas = Math.Abs(totalDespesas), // Retornamos positivo para facilitar a UI
-                Saldo = totalReceitas + totalDespesas,   // O saldo considera o sinal negativo real
+                TotalDespesas = Math.Abs(totalDespesas),
+                Saldo = totalReceitas + totalDespesas,
                 Mes = mes,
                 Ano = ano,
+                GastosPorCategoria = gastosPorCategoria,
             };
         }
     }

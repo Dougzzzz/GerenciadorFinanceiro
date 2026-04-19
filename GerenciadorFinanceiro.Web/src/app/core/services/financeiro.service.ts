@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Transacao, Categoria, ContaBancaria, CartaoCredito, TipoTransacao, MetaGasto, ResultadoValidacaoMeta, MetaResumo } from '../models/financeiro.model';
+import { Transacao, Categoria, ContaBancaria, CartaoCredito, TipoTransacao, MetaResumo, ResumoMensal, MetaGasto, ResultadoValidacaoMeta } from '../models/financeiro.model';
 import { FiltroTransacao } from '../models/filtros.model';
 import { ImportacaoPreviewResultado, ResultadoImportacao, TransacaoPreview } from '../models/importacao.model';
 
@@ -12,6 +12,15 @@ export class FinanceiroService {
   private apiUrl = '/api';
 
   constructor(private http: HttpClient) { }
+
+  // Dashboard & Resumos
+  getResumoMensal(mes: number, ano: number): Observable<ResumoMensal> {
+    return this.http.get<ResumoMensal>(`${this.apiUrl}/dashboard/resumo?mes=${mes}&ano=${ano}`);
+  }
+
+  getResumoMetas(mes: number, ano: number): Observable<MetaResumo[]> {
+    return this.http.get<MetaResumo[]>(`${this.apiUrl}/MetasGastos/resumo?mes=${mes}&ano=${ano}`);
+  }
 
   // Metas de Gastos
   getMetas(): Observable<MetaGasto[]> {
@@ -32,10 +41,6 @@ export class FinanceiroService {
 
   validarMeta(categoriaId: string, mes: number, ano: number): Observable<ResultadoValidacaoMeta> {
     return this.http.get<ResultadoValidacaoMeta>(`${this.apiUrl}/MetasGastos/validar/${categoriaId}?mes=${mes}&ano=${ano}`);
-  }
-
-  getResumoMetas(mes: number, ano: number): Observable<MetaResumo[]> {
-    return this.http.get<MetaResumo[]>(`${this.apiUrl}/MetasGastos/resumo?mes=${mes}&ano=${ano}`);
   }
 
   // Transações
