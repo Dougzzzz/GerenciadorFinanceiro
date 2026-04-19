@@ -1,15 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MetasGastosListComponent } from './metas-gastos-list.component';
 import { By } from '@angular/platform-browser';
+import { MetaGasto, Categoria, TipoTransacao } from '../../core/models/financeiro.model';
 
 describe('MetasGastosListComponent', () => {
   let component: MetasGastosListComponent;
   let fixture: ComponentFixture<MetasGastosListComponent>;
 
-  const mockCategorias = [{ id: 'cat-1', nome: 'Alimentação' }];
-  const mockMetas = [
-    { id: 'meta-1', categoriaId: 'cat-1', valorLimite: 1000, ehRecorrente: true }
-  ] as any;
+  const mockCategorias: Categoria[] = [{ id: 'cat-1', nome: 'Alimentação', tipo: TipoTransacao.Despesa }];
+  const mockMetas: MetaGasto[] = [
+    { id: 'meta-1', categoriaId: 'cat-1', valorLimite: 1000, ehRecorrente: true, mes: undefined, ano: undefined }
+  ];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -19,7 +20,7 @@ describe('MetasGastosListComponent', () => {
     fixture = TestBed.createComponent(MetasGastosListComponent);
     component = fixture.componentInstance;
     component.metas = mockMetas;
-    component.categorias = mockCategorias as any;
+    component.categorias = mockCategorias;
     fixture.detectChanges();
   });
 
@@ -33,16 +34,16 @@ describe('MetasGastosListComponent', () => {
   });
 
   it('should emit events when buttons are clicked', () => {
-    spyOn(component.onIniciarEdicao, 'emit');
-    spyOn(component.onExcluirUma, 'emit');
+    spyOn(component.editClicked, 'emit');
+    spyOn(component.deleteClicked, 'emit');
 
-    const editBtn = fixture.debugElement.query(By.css('.btn-icon'));
-    const deleteBtn = fixture.debugElement.query(By.css('.btn-icon.danger'));
+    const editBtn = fixture.debugElement.query(By.css('button[title="Editar"]'));
+    const deleteBtn = fixture.debugElement.query(By.css('button[title="Excluir"]'));
 
     editBtn.nativeElement.click();
     deleteBtn.nativeElement.click();
 
-    expect(component.onIniciarEdicao.emit).toHaveBeenCalledWith(mockMetas[0]);
-    expect(component.onExcluirUma.emit).toHaveBeenCalledWith(mockMetas[0]);
+    expect(component.editClicked.emit).toHaveBeenCalledWith(mockMetas[0]);
+    expect(component.deleteClicked.emit).toHaveBeenCalledWith(mockMetas[0]);
   });
 });

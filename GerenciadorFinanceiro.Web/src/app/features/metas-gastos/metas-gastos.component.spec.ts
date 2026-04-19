@@ -2,20 +2,20 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MetasGastosComponent } from './metas-gastos.component';
 import { FinanceiroService } from '../../core/services/financeiro.service';
 import { of, throwError } from 'rxjs';
-import { TipoTransacao } from '../../core/models/financeiro.model';
+import { TipoTransacao, MetaGasto, Categoria } from '../../core/models/financeiro.model';
 
 describe('MetasGastosComponent', () => {
   let component: MetasGastosComponent;
   let fixture: ComponentFixture<MetasGastosComponent>;
   let financeiroServiceSpy: jasmine.SpyObj<FinanceiroService>;
 
-  const mockCategorias = [
+  const mockCategorias: Categoria[] = [
     { id: 'cat-1', nome: 'Alimentação', tipo: TipoTransacao.Despesa },
     { id: 'cat-2', nome: 'Salário', tipo: TipoTransacao.Receita }
   ];
 
-  const mockMetas = [
-    { id: 'meta-1', categoriaId: 'cat-1', valorLimite: 1000, valorGasto: 500, percentual: 50 }
+  const mockMetas: MetaGasto[] = [
+    { id: 'meta-1', categoriaId: 'cat-1', valorLimite: 1000, ehRecorrente: true, mes: undefined, ano: undefined }
   ];
 
   beforeEach(async () => {
@@ -35,7 +35,7 @@ describe('MetasGastosComponent', () => {
     }).compileComponents();
 
     financeiroServiceSpy = TestBed.inject(FinanceiroService) as jasmine.SpyObj<FinanceiroService>;
-    financeiroServiceSpy.getMetas.and.returnValue(of(mockMetas as any));
+    financeiroServiceSpy.getMetas.and.returnValue(of(mockMetas));
     financeiroServiceSpy.getCategorias.and.returnValue(of(mockCategorias));
     
     fixture = TestBed.createComponent(MetasGastosComponent);
@@ -52,7 +52,7 @@ describe('MetasGastosComponent', () => {
   });
 
   it('should start editing a meta', () => {
-    const meta = mockMetas[0] as any;
+    const meta = mockMetas[0];
     component.iniciarEdicao(meta);
     
     expect(component.editando()).toEqual(meta);
@@ -60,7 +60,7 @@ describe('MetasGastosComponent', () => {
   });
 
   it('should clear form', () => {
-    component.iniciarEdicao(mockMetas[0] as any);
+    component.iniciarEdicao(mockMetas[0]);
     component.limpar();
     
     expect(component.editando()).toBeNull();
@@ -77,7 +77,7 @@ describe('MetasGastosComponent', () => {
 
   it('should call criarMeta on onSave when not editing', () => {
     const novaMeta = { categoriaId: 'cat-1', valorLimite: 200 };
-    financeiroServiceSpy.criarMeta.and.returnValue(of({ id: 'meta-2', ...novaMeta } as any));
+    financeiroServiceSpy.criarMeta.and.returnValue(of({ id: 'meta-2', ...novaMeta } as MetaGasto));
     
     component.onSave(novaMeta);
     
@@ -85,10 +85,10 @@ describe('MetasGastosComponent', () => {
   });
 
   it('should call atualizarMeta on onSave when editing', () => {
-    const meta = mockMetas[0] as any;
+    const meta = mockMetas[0];
     component.iniciarEdicao(meta);
     const dadosAlt = { valorLimite: 1500 };
-    financeiroServiceSpy.atualizarMeta.and.returnValue(of({ ...meta, valorLimite: 1500 } as any));
+    financeiroServiceSpy.atualizarMeta.and.returnValue(of({ ...meta, valorLimite: 1500 } as MetaGasto));
     
     component.onSave(dadosAlt);
     
@@ -99,7 +99,7 @@ describe('MetasGastosComponent', () => {
     spyOn(window, 'confirm').and.returnValue(true);
     financeiroServiceSpy.excluirMeta.and.returnValue(of({}));
     
-    component.onDelete(mockMetas[0] as any);
+    component.onDelete(mockMetas[0]);
     
     expect(financeiroServiceSpy.excluirMeta).toHaveBeenCalledWith('meta-1');
     expect(financeiroServiceSpy.getMetas).toHaveBeenCalledTimes(2);
@@ -107,7 +107,7 @@ describe('MetasGastosComponent', () => {
 
   it('should handle error on save', () => {
     spyOn(window, 'alert');
-    financeiroServiceSpy.criarMeta.and.returnValue(throwError(() => ({ error: { message: 'Erro de API' } })));
+    financeiroServiceSpy.criarMeta.and.returnValue(throwError(() => new Error('Erro de API')));
     
     component.onSave({ categoriaId: 'cat-1', valorLimite: 100 });
     

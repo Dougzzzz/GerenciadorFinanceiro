@@ -3,7 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
-import { Categoria, TipoTransacao } from '../../core/models/financeiro.model';
+import { TipoTransacao } from '../../core/models/financeiro.model';
+
+export interface SaveCategoriaData {
+  nome: string;
+  tipo: TipoTransacao;
+}
 
 @Component({
   selector: 'app-categorias-form',
@@ -11,20 +16,20 @@ import { Categoria, TipoTransacao } from '../../core/models/financeiro.model';
   imports: [CommonModule, CardComponent, ButtonComponent, FormsModule],
   template: `
     <app-card [title]="editando ? 'Editar Categoria' : 'Nova Categoria'">
-      <form (submit)="onSalvar.emit(novo)" class="form">
+      <form (submit)="saved.emit(novo)" class="form">
         <div class="form-group">
-          <label>Nome</label>
-          <input type="text" [(ngModel)]="novo.nome" name="nome" required>
+          <label for="nome">Nome</label>
+          <input type="text" id="nome" [(ngModel)]="novo.nome" name="nome" required>
         </div>
         <div class="form-group">
-          <label>Tipo</label>
-          <select [(ngModel)]="novo.tipo" name="tipo">
+          <label for="tipo">Tipo</label>
+          <select id="tipo" [(ngModel)]="novo.tipo" name="tipo">
             <option [value]="0">Receita</option>
             <option [value]="1">Despesa</option>
           </select>
         </div>
         <div class="form-actions">
-          <app-button *ngIf="editando" variant="outline" (onClick)="onLimpar.emit()">
+          <app-button *ngIf="editando" variant="outline" (clicked)="cleared.emit()">
             Cancelar
           </app-button>
           <app-button type="submit" [disabled]="!novo.nome">
@@ -42,8 +47,8 @@ import { Categoria, TipoTransacao } from '../../core/models/financeiro.model';
   `]
 })
 export class CategoriasFormComponent {
-  @Input() editando: boolean = false;
-  @Input() novo: any = { nome: '', tipo: TipoTransacao.Despesa };
-  @Output() onSalvar = new EventEmitter<any>();
-  @Output() onLimpar = new EventEmitter<void>();
+  @Input() editando = false;
+  @Input() novo: SaveCategoriaData = { nome: '', tipo: TipoTransacao.Despesa };
+  @Output() saved = new EventEmitter<SaveCategoriaData>();
+  @Output() cleared = new EventEmitter<void>();
 }

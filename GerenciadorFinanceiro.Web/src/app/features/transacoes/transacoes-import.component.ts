@@ -3,7 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
-import { Categoria, ContaBancaria, CartaoCredito } from '../../core/models/financeiro.model';
+import { Categoria, ContaBancaria, CartaoCredito, Transacao } from '../../core/models/financeiro.model';
+
+export interface ImportConfig {
+  categoriaId: string;
+  contaId?: string;
+  cartaoId?: string;
+}
 
 @Component({
   selector: 'app-transacoes-import',
@@ -15,23 +21,25 @@ import { Categoria, ContaBancaria, CartaoCredito } from '../../core/models/finan
         <!-- Passo 1: Seleção de Arquivo e Destino -->
         <div class="setup-section" *ngIf="!previewItems().length">
           <div class="upload-zone" [class.has-file]="!!selectedFile">
-            <input type="file" (change)="onFileChange($event)" accept=".csv" id="fileInput" hidden>
             <label for="fileInput" class="upload-label">
               <span class="icon">📁</span>
               <span class="text">{{ selectedFile ? selectedFile.name : 'Selecione ou arraste um arquivo CSV' }}</span>
               <small *ngIf="selectedFile">Clique para trocar de arquivo</small>
             </label>
+            <input type="file" (change)="onFileChange($event)" accept=".csv" id="fileInput" hidden>
           </div>
 
           <div class="destination-selectors">
             <div class="group">
-              <label>Onde deseja importar?</label>
+              <span class="label-fake">Onde deseja importar?</span>
               <div class="radio-cards">
-                <div class="radio-card" [class.active]="destino === 'conta'" (click)="setDestino('conta')">
+                <div class="radio-card" [class.active]="destino === 'conta'" 
+                     (click)="setDestino('conta')" (keydown.enter)="setDestino('conta')" tabindex="0" role="button">
                   <span class="icon">🏦</span>
                   <span class="title">Conta Bancária</span>
                 </div>
-                <div class="radio-card" [class.active]="destino === 'cartao'" (click)="setDestino('cartao')">
+                <div class="radio-card" [class.active]="destino === 'cartao'" 
+                     (click)="setDestino('cartao')" (keydown.enter)="setDestino('cartao')" tabindex="0" role="button">
                   <span class="icon">💳</span>
                   <span class="title">Cartão de Crédito</span>
                 </div>
@@ -39,16 +47,16 @@ import { Categoria, ContaBancaria, CartaoCredito } from '../../core/models/finan
             </div>
 
             <div class="group" *ngIf="destino === 'conta'">
-              <label>Selecione a Conta</label>
-              <select [(ngModel)]="config.contaId">
+              <label for="contaId">Selecione a Conta</label>
+              <select id="contaId" [(ngModel)]="config.contaId" name="contaId">
                 <option [value]="undefined" disabled>Escolha um banco...</option>
                 <option *ngFor="let c of contas" [value]="c.id">{{ c.nomeBanco }}</option>
               </select>
             </div>
 
             <div class="group" *ngIf="destino === 'cartao'">
-              <label>Selecione o Cartão</label>
-              <select [(ngModel)]="config.cartaoId">
+              <label for="cartaoId">Selecione o Cartão</label>
+              <select id="cartaoId" [(ngModel)]="config.cartaoId" name="cartaoId">
                 <option [value]="undefined" disabled>Escolha um cartão...</option>
                 <option *ngFor="let c of cartoes" [value]="c.id">{{ c.nome }}</option>
               </select>
@@ -56,8 +64,8 @@ import { Categoria, ContaBancaria, CartaoCredito } from '../../core/models/finan
           </div>
 
           <div class="actions">
-            <app-button variant="outline" (onClick)="onCancel.emit()">Cancelar</app-button>
-            <app-button [disabled]="!canProcess()" (onClick)="gerarPreview()">
+            <app-button variant="outline" (clicked)="canceled.emit()">Cancelar</app-button>
+            <app-button [disabled]="!canProcess()" (clicked)="gerarPreview()">
               Verificar Transações
             </app-button>
           </div>
@@ -83,7 +91,7 @@ import { Categoria, ContaBancaria, CartaoCredito } from '../../core/models/finan
                 <tr *ngFor="let item of previewItems()">
                   <td>{{ item.data }}</td>
                   <td>{{ item.descricao }}</td>
-                  <td class="text-right" [class.negativo]="item.valor < 0" [class.positivo]="item.valor > 0">
+                  <td class="text-right" [class.negativo]="item.valor && item.valor < 0" [class.positivo]="item.valor && item.valor > 0">
                     {{ item.valor | currency:'BRL' }}
                   </td>
                 </tr>
@@ -92,8 +100,8 @@ import { Categoria, ContaBancaria, CartaoCredito } from '../../core/models/finan
           </div>
 
           <div class="actions">
-            <app-button variant="outline" (onClick)="limparPreview()">Voltar</app-button>
-            <app-button (onClick)="confirmarImportacao()">
+            <app-button variant="outline" (clicked)="limparPreview()">Voltar</app-button>
+            <app-button (clicked)="confirmarImportacao()">
               Confirmar e Salvar no Banco
             </app-button>
           </div>
@@ -118,7 +126,7 @@ import { Categoria, ContaBancaria, CartaoCredito } from '../../core/models/finan
     .radio-card .icon { font-size: 1.2rem; }
     
     .group { display: flex; flex-direction: column; gap: 4px; }
-    .group label { font-size: 0.875rem; font-weight: 600; color: var(--color-sidebar); }
+    .group label, .label-fake { font-size: 0.875rem; font-weight: 600; color: var(--color-sidebar); }
     select { padding: 10px; border-radius: var(--border-radius); border: 1px solid #e2e8f0; }
 
     .table-container { max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: var(--border-radius); margin: var(--spacing-md) 0; }
@@ -136,18 +144,21 @@ export class TransacoesImportComponent {
   @Input() categorias: Categoria[] = [];
   @Input() contas: ContaBancaria[] = [];
   @Input() cartoes: CartaoCredito[] = [];
-  @Output() onImport = new EventEmitter<{file: File, config: any}>();
-  @Output() onCancel = new EventEmitter<void>();
+  @Output() imported = new EventEmitter<{file: File, config: ImportConfig}>();
+  @Output() canceled = new EventEmitter<void>();
 
   selectedFile: File | null = null;
   destino: 'conta' | 'cartao' | null = null;
-  config = { categoriaId: '', contaId: undefined as string | undefined, cartaoId: undefined as string | undefined };
+  config: ImportConfig = { categoriaId: '', contaId: undefined, cartaoId: undefined };
   
-  previewItems = signal<any[]>([]);
+  previewItems = signal<Partial<Transacao>[]>([]);
 
-  onFileChange(event: any) { 
-    this.selectedFile = event.target.files[0]; 
-    this.previewItems.set([]); // Reset preview se mudar o arquivo
+  onFileChange(event: Event) { 
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0]; 
+      this.previewItems.set([]); // Reset preview se mudar o arquivo
+    }
   }
 
   setDestino(d: 'conta' | 'cartao') {
@@ -167,8 +178,10 @@ export class TransacoesImportComponent {
     if (!this.selectedFile) return;
 
     const reader = new FileReader();
-    reader.onload = (e: any) => {
-      const text = e.target.result;
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      const text = e.target?.result as string;
+      if (!text) return;
+
       const lines = text.split('\n').slice(1); // Pular cabeçalho
       const items = lines
         .filter((line: string) => line.trim().length > 0)
@@ -178,7 +191,7 @@ export class TransacoesImportComponent {
             data: parts[0] || 'N/A',
             descricao: parts[1] || 'Sem descrição',
             valor: parseFloat(parts[2]) || 0
-          };
+          } as Partial<Transacao>;
         })
         .slice(0, 10); // Mostrar apenas as primeiras 10 para preview
       
@@ -193,7 +206,7 @@ export class TransacoesImportComponent {
 
   confirmarImportacao() {
     if (this.selectedFile) {
-      this.onImport.emit({ file: this.selectedFile, config: this.config });
+      this.imported.emit({ file: this.selectedFile, config: this.config });
     }
   }
 

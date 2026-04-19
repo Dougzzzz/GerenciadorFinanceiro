@@ -22,26 +22,26 @@ describe('CategoriasFormComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit onSalvar when form is submitted', () => {
-    spyOn(component.onSalvar, 'emit');
+  it('should emit saved when form is submitted', () => {
+    spyOn(component.saved, 'emit');
     component.novo = { nome: 'Teste', tipo: TipoTransacao.Despesa };
     fixture.detectChanges();
 
     const form = fixture.nativeElement.querySelector('form');
     form.dispatchEvent(new Event('submit'));
 
-    expect(component.onSalvar.emit).toHaveBeenCalledWith(component.novo);
+    expect(component.saved.emit).toHaveBeenCalledWith(component.novo);
   });
 
-  it('should emit onLimpar when cancel button is clicked', () => {
-    spyOn(component.onLimpar, 'emit');
+  it('should emit cleared when cancel button is clicked', () => {
+    spyOn(component.cleared, 'emit');
     component.editando = true;
     fixture.detectChanges();
 
     const cancelBtn = fixture.debugElement.query(By.css('app-button[variant="outline"]'));
-    cancelBtn.triggerEventHandler('onClick', null);
+    cancelBtn.triggerEventHandler('clicked', null);
 
-    expect(component.onLimpar.emit).toHaveBeenCalled();
+    expect(component.cleared.emit).toHaveBeenCalled();
   });
 
   it('should disable submit button when name is empty', () => {
@@ -49,7 +49,6 @@ describe('CategoriasFormComponent', () => {
     fixture.detectChanges();
 
     const submitBtn = fixture.nativeElement.querySelector('app-button[type="submit"]');
-    // Como o app-button tem uma propriedade disabled interna
     expect(submitBtn.getAttribute('ng-reflect-disabled')).toBe('true');
   });
 });

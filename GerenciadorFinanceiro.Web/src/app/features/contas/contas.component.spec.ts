@@ -2,13 +2,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ContasComponent } from './contas.component';
 import { FinanceiroService } from '../../core/services/financeiro.service';
 import { of } from 'rxjs';
+import { ContaBancaria } from '../../core/models/financeiro.model';
 
 describe('ContasComponent', () => {
   let component: ContasComponent;
   let fixture: ComponentFixture<ContasComponent>;
   let financeiroServiceSpy: jasmine.SpyObj<FinanceiroService>;
 
-  const mockContas = [
+  const mockContas: ContaBancaria[] = [
     { id: '1', nomeBanco: 'Nubank', saldoAtual: 1000, provedor: 1 }
   ];
 
@@ -23,7 +24,7 @@ describe('ContasComponent', () => {
     }).compileComponents();
 
     financeiroServiceSpy = TestBed.inject(FinanceiroService) as jasmine.SpyObj<FinanceiroService>;
-    financeiroServiceSpy.getContas.and.returnValue(of(mockContas as any));
+    financeiroServiceSpy.getContas.and.returnValue(of(mockContas));
     
     fixture = TestBed.createComponent(ContasComponent);
     component = fixture.componentInstance;
@@ -38,7 +39,7 @@ describe('ContasComponent', () => {
 
   it('should call criarConta when not editing', () => {
     const novaConta = { nomeBanco: 'Inter', saldoInicial: 500, provedor: 2 };
-    financeiroServiceSpy.criarConta.and.returnValue(of({ id: '2', ...novaConta } as any));
+    financeiroServiceSpy.criarConta.and.returnValue(of({ id: '2', ...novaConta, saldoAtual: 500 } as ContaBancaria));
     
     component.salvar(novaConta);
     
@@ -47,7 +48,7 @@ describe('ContasComponent', () => {
   });
 
   it('should call atualizarConta when editing', () => {
-    const conta = mockContas[0] as any;
+    const conta = mockContas[0];
     component.iniciarEdicao(conta);
     
     const dadosAlt = { nomeBanco: 'Nubank Alt', saldoInicial: 2000, provedor: 1 };
@@ -69,7 +70,7 @@ describe('ContasComponent', () => {
   });
 
   it('should clear editing state when limpar is called', () => {
-    component.iniciarEdicao(mockContas[0] as any);
+    component.iniciarEdicao(mockContas[0]);
     component.limpar();
     
     expect(component.editando()).toBeNull();

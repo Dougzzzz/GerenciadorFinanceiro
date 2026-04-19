@@ -23,8 +23,8 @@ import { CardComponent } from '../../shared/components/card/card.component';
           <div class="right">
             <span class="value">{{ c.limite | currency:'BRL' }}</span>
             <div class="actions">
-              <button class="btn-icon" (click)="onEditar.emit(c)" title="Editar">✏️</button>
-              <button class="btn-icon delete" (click)="onExcluir.emit(c.id)" title="Excluir">🗑️</button>
+              <button class="btn-icon" (click)="edit.emit(c)" title="Editar">✏️</button>
+              <button class="btn-icon delete" (click)="delete.emit(c.id)" title="Excluir">🗑️</button>
             </div>
           </div>
         </li>
@@ -50,6 +50,6 @@ import { CardComponent } from '../../shared/components/card/card.component';
 })
 export class CartoesListComponent {
   @Input() cartoes: CartaoCredito[] = [];
-  @Output() onEditar = new EventEmitter<CartaoCredito>();
-  @Output() onExcluir = new EventEmitter<string>();
+  @Output() edit = new EventEmitter<CartaoCredito>();
+  @Output() delete = new EventEmitter<string>();
 }

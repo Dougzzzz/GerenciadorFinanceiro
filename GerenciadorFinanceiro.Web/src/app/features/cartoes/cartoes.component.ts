@@ -16,13 +16,13 @@ import { CartoesListComponent } from './cartoes-list.component';
       <div class="grid">
         <app-cartoes-form 
           [cartao]="cartaoParaEditar()" 
-          (onSalvar)="salvar($event)"
-          (onCancelar)="cancelarEdicao()">
+          (saved)="salvar($event)"
+          (canceled)="cancelarEdicao()">
         </app-cartoes-form>
         <app-cartoes-list 
           [cartoes]="cartoes()" 
-          (onEditar)="editar($event)" 
-          (onExcluir)="excluir($event)">
+          (edit)="editar($event)" 
+          (delete)="excluir($event)">
         </app-cartoes-list>
       </div>
     </div>

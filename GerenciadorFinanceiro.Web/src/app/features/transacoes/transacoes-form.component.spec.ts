@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { TransacoesFormComponent } from './transacoes-form.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { TipoTransacao, ProvedorExtrato } from '../../core/models/financeiro.model';
 
 describe('TransacoesFormComponent', () => {
   let fixture: ComponentFixture<TransacoesFormComponent>;
@@ -15,11 +16,11 @@ describe('TransacoesFormComponent', () => {
     fixture = TestBed.createComponent(TransacoesFormComponent);
     component = fixture.componentInstance;
     component.categorias = [
-      { id: 'cat-1', nome: 'Alimentacao', tipo: 1 },
-      { id: 'cat-2', nome: 'Salario', tipo: 0 },
+      { id: 'cat-1', nome: 'Alimentacao', tipo: TipoTransacao.Despesa },
+      { id: 'cat-2', nome: 'Salario', tipo: TipoTransacao.Receita },
     ];
-    component.contas = [{ id: 'conta-1', nomeBanco: 'Inter', saldoAtual: 1000, provedor: 0 }];
-    component.cartoes = [{ id: 'cartao-1', nome: 'Nubank', limite: 5000, diaFechamento: 10, diaVencimento: 20, provedor: 2 }];
+    component.contas = [{ id: 'conta-1', nomeBanco: 'Inter', saldoAtual: 1000, provedor: ProvedorExtrato.Generico }];
+    component.cartoes = [{ id: 'cartao-1', nome: 'Nubank', limite: 5000, diaFechamento: 10, diaVencimento: 20, provedor: ProvedorExtrato.Nubank }];
     fixture.detectChanges();
   });
 
@@ -42,7 +43,7 @@ describe('TransacoesFormComponent', () => {
   });
 
   it('deve emitir os dados preenchidos e resetar o formulario ao salvar', () => {
-    spyOn(component.onSave, 'emit');
+    spyOn(component.saved, 'emit');
 
     component.dados = {
       data: '2026-04-17',
@@ -55,7 +56,7 @@ describe('TransacoesFormComponent', () => {
 
     component.salvar();
 
-    expect(component.onSave.emit).toHaveBeenCalledWith({
+    expect(component.saved.emit).toHaveBeenCalledWith({
       data: '2026-04-17',
       descricao: 'Mercado',
       valor: -90,

@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CategoriasListComponent } from './categorias-list.component';
 import { TipoTransacao } from '../../core/models/financeiro.model';
 import { By } from '@angular/platform-browser';
-import { signal } from '@angular/core';
 
 describe('CategoriasListComponent', () => {
   let component: CategoriasListComponent;
@@ -30,28 +29,25 @@ describe('CategoriasListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit onIniciarEdicao when edit button is clicked', () => {
-    spyOn(component.onIniciarEdicao, 'emit');
-    // Procurar botão com title "Editar"
+  it('should emit editClicked when edit button is clicked', () => {
+    spyOn(component.editClicked, 'emit');
     const editBtn = fixture.debugElement.query(By.css('button[title="Editar"]'));
     editBtn.nativeElement.click();
-    expect(component.onIniciarEdicao.emit).toHaveBeenCalledWith(mockCategorias[0]);
+    expect(component.editClicked.emit).toHaveBeenCalledWith(mockCategorias[0]);
   });
 
-  it('should emit onExcluirUma when delete button is clicked', () => {
-    spyOn(component.onExcluirUma, 'emit');
-    // Procurar botão com title "Excluir"
+  it('should emit deleteClicked when delete button is clicked', () => {
+    spyOn(component.deleteClicked, 'emit');
     const deleteBtn = fixture.debugElement.query(By.css('button[title="Excluir"]'));
     deleteBtn.nativeElement.click();
-    expect(component.onExcluirUma.emit).toHaveBeenCalledWith(mockCategorias[0]);
+    expect(component.deleteClicked.emit).toHaveBeenCalledWith(mockCategorias[0]);
   });
 
-  it('should emit onToggleSelecionada when checkbox is changed', () => {
-    spyOn(component.onToggleSelecionada, 'emit');
-    // Procurar checkbox dentro de .item-info
+  it('should emit selectionToggled when checkbox is changed', () => {
+    spyOn(component.selectionToggled, 'emit');
     const checkbox = fixture.debugElement.query(By.css('.item-info input[type="checkbox"]'));
     checkbox.nativeElement.click();
-    expect(component.onToggleSelecionada.emit).toHaveBeenCalledWith('1');
+    expect(component.selectionToggled.emit).toHaveBeenCalledWith('1');
   });
 
   it('should filter categories when filtro is changed', () => {

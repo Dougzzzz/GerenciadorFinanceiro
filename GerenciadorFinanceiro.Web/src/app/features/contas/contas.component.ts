@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FinanceiroService } from '../../core/services/financeiro.service';
 import { ContaBancaria } from '../../core/models/financeiro.model';
-import { ContasFormComponent } from './contas-form.component';
+import { ContasFormComponent, SaveContaData } from './contas-form.component';
 import { ContasListComponent } from './contas-list.component';
 
 @Component({
@@ -17,13 +17,13 @@ import { ContasListComponent } from './contas-list.component';
         <app-contas-form 
           [editando]="!!editando()" 
           [novo]="novo()"
-          (onSalvar)="salvar($event)"
-          (onLimpar)="limpar()">
+          (saved)="salvar($event)"
+          (cleared)="limpar()">
         </app-contas-form>
         <app-contas-list 
           [contas]="contas()"
-          (onIniciarEdicao)="iniciarEdicao($event)"
-          (onExcluir)="excluir($event)">
+          (edit)="iniciarEdicao($event)"
+          (delete)="excluir($event)">
         </app-contas-list>
       </div>
     </div>
@@ -35,7 +35,7 @@ import { ContasListComponent } from './contas-list.component';
 export class ContasComponent implements OnInit {
   contas = signal<ContaBancaria[]>([]);
   editando = signal<ContaBancaria | null>(null);
-  novo = signal<any>({ nomeBanco: '', saldoInicial: 0, provedor: 0 });
+  novo = signal<SaveContaData>({ nomeBanco: '', saldoInicial: 0, provedor: 0 });
 
   constructor(private service: FinanceiroService) {}
 
@@ -59,7 +59,7 @@ export class ContasComponent implements OnInit {
     this.novo.set({ nomeBanco: '', saldoInicial: 0, provedor: 0 });
   }
 
-  salvar(dados: any) {
+  salvar(dados: SaveContaData) {
     const atual = this.editando();
     const obs = atual 
       ? this.service.atualizarConta(atual.id, dados.nomeBanco, dados.saldoInicial, dados.provedor)
@@ -70,7 +70,7 @@ export class ContasComponent implements OnInit {
         this.carregar();
         this.limpar();
       },
-      error: (err) => alert('Erro ao salvar conta: ' + (err.error?.message || err.message))
+      error: (err: Error) => alert('Erro ao salvar conta: ' + err.message)
     });
   }
 
@@ -78,7 +78,7 @@ export class ContasComponent implements OnInit {
     if (confirm('Deseja realmente excluir esta conta?')) {
       this.service.excluirConta(id).subscribe({
         next: () => this.carregar(),
-        error: (err) => alert('Erro ao excluir conta: ' + (err.error?.message || err.message))
+        error: (err: Error) => alert('Erro ao excluir conta: ' + err.message)
       });
     }
   }

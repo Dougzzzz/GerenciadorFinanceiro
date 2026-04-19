@@ -21,15 +21,15 @@ describe('MetasGastosFormComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit onSalvar when form is submitted', () => {
-    spyOn(component.onSalvar, 'emit');
+  it('should emit saved when form is submitted', () => {
+    spyOn(component.saved, 'emit');
     component.novo = { categoriaId: 'cat-1', valorLimite: 500 };
     fixture.detectChanges();
 
     const form = fixture.debugElement.query(By.css('form'));
     form.triggerEventHandler('ngSubmit', null);
 
-    expect(component.onSalvar.emit).toHaveBeenCalledWith(component.novo);
+    expect(component.saved.emit).toHaveBeenCalledWith(component.novo);
   });
 
   it('should disable category select when editing', async () => {

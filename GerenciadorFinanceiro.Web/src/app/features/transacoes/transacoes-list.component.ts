@@ -13,7 +13,7 @@ import { Transacao, Categoria, ContaBancaria, CartaoCredito } from '../../core/m
       <table class="table">
         <thead>
           <tr>
-            <th width="40"><input type="checkbox" (change)="onSelectAll.emit($event)"></th>
+            <th width="40"><input type="checkbox" (change)="selectAll.emit($event)" aria-label="Selecionar todas as transações"></th>
             <th class="sortable" (click)="toggleSort('Data')">
               Data {{ getSortIcon('Data') }}
             </th>
@@ -30,31 +30,31 @@ import { Transacao, Categoria, ContaBancaria, CartaoCredito } from '../../core/m
         </thead>
         <tbody>
           <tr *ngFor="let t of transacoes">
-            <td><input type="checkbox" [checked]="selecionadas.has(t.id)" (change)="onSelect.emit(t.id)"></td>
+            <td><input type="checkbox" [checked]="selecionadas.has(t.id)" (change)="selected.emit(t.id)" [attr.aria-label]="'Selecionar transação ' + t.descricao"></td>
             <td>
-              <input *ngIf="editandoId === t.id" type="date" [(ngModel)]="tempEdit.data" class="edit-input">
+              <input *ngIf="editandoId === t.id" type="date" [(ngModel)]="tempEdit.data" class="edit-input" aria-label="Editar data">
               <span *ngIf="editandoId !== t.id">{{ t.data | date:'dd/MM/yyyy' }}</span>
             </td>
             <td>
-              <input *ngIf="editandoId === t.id" type="text" [(ngModel)]="tempEdit.descricao" class="edit-input">
+              <input *ngIf="editandoId === t.id" type="text" [(ngModel)]="tempEdit.descricao" class="edit-input" aria-label="Editar descrição">
               <div *ngIf="editandoId !== t.id" class="desc-cell">
                 <strong>{{ t.descricao }}</strong>
                 <small *ngIf="t.parcela">{{ t.parcela }}</small>
               </div>
             </td>
             <td>
-              <select *ngIf="editandoId === t.id" [(ngModel)]="tempEdit.categoriaId" class="edit-input">
+              <select *ngIf="editandoId === t.id" [(ngModel)]="tempEdit.categoriaId" class="edit-input" aria-label="Editar categoria">
                 <option *ngFor="let c of categorias" [value]="c.id">{{ c.nome }}</option>
               </select>
               <span *ngIf="editandoId !== t.id" class="badge">{{ t.categoriaNavigation?.nome || t.categoria }}</span>
             </td>
             <td>
               <div *ngIf="editandoId === t.id" class="edit-group">
-                <select [(ngModel)]="tempEdit.contaBancariaId" class="edit-input">
+                <select [(ngModel)]="tempEdit.contaBancariaId" class="edit-input" aria-label="Editar conta">
                   <option [value]="undefined">Nenhuma</option>
                   <option *ngFor="let c of contas" [value]="c.id">{{ c.nomeBanco }}</option>
                 </select>
-                <select [(ngModel)]="tempEdit.cartaoCreditoId" class="edit-input">
+                <select [(ngModel)]="tempEdit.cartaoCreditoId" class="edit-input" aria-label="Editar cartão">
                   <option [value]="undefined">Nenhum</option>
                   <option *ngFor="let c of cartoes" [value]="c.id">{{ c.nome }}</option>
                 </select>
@@ -62,14 +62,14 @@ import { Transacao, Categoria, ContaBancaria, CartaoCredito } from '../../core/m
               <span *ngIf="editandoId !== t.id">{{ t.cartaoCreditoNavigation?.nome || t.contaBancariaNavigation?.nomeBanco || t.nomeCartao || 'Nenhum' }}</span>
             </td>
             <td class="text-right">
-              <input *ngIf="editandoId === t.id" type="number" step="0.01" [(ngModel)]="tempEdit.valor" class="edit-input text-right">
+              <input *ngIf="editandoId === t.id" type="number" step="0.01" [(ngModel)]="tempEdit.valor" class="edit-input text-right" aria-label="Editar valor">
               <span *ngIf="editandoId !== t.id" [class.income]="t.valor > 0" [class.expense]="t.valor < 0">{{ t.valor | currency:'BRL' }}</span>
             </td>
             <td>
               <div class="row-actions">
-                <button *ngIf="editandoId !== t.id" (click)="onEdit.emit(t)" class="btn-icon">✏️</button>
-                <button *ngIf="editandoId === t.id" (click)="onSaveEdit.emit()" class="btn-icon success">✅</button>
-                <button *ngIf="editandoId === t.id" (click)="onCancelEdit.emit()" class="btn-icon danger">❌</button>
+                <button *ngIf="editandoId !== t.id" (click)="edit.emit(t)" class="btn-icon">✏️</button>
+                <button *ngIf="editandoId === t.id" (click)="saveEdit.emit()" class="btn-icon success">✅</button>
+                <button *ngIf="editandoId === t.id" (click)="cancelEdit.emit()" class="btn-icon danger">❌</button>
               </div>
             </td>
           </tr>
@@ -105,20 +105,20 @@ export class TransacoesListComponent {
   @Input() cartoes: CartaoCredito[] = [];
   @Input() selecionadas = new Set<string>();
   @Input() editandoId: string | null = null;
-  @Input() tempEdit: any = null;
+  @Input() tempEdit: Transacao | null = null;
   
   // Informação de ordenação atual (recebida do pai)
-  @Input() ordenarPor: string = 'Data';
+  @Input() ordenarPor = 'Data';
   @Input() direcao: 'Asc' | 'Desc' = 'Desc';
 
-  @Output() onSelect = new EventEmitter<string>();
-  @Output() onSelectAll = new EventEmitter<any>();
-  @Output() onEdit = new EventEmitter<Transacao>();
-  @Output() onSaveEdit = new EventEmitter<void>();
-  @Output() onCancelEdit = new EventEmitter<void>();
+  @Output() selected = new EventEmitter<string>();
+  @Output() selectAll = new EventEmitter<Event>();
+  @Output() edit = new EventEmitter<Transacao>();
+  @Output() saveEdit = new EventEmitter<void>();
+  @Output() cancelEdit = new EventEmitter<void>();
   
   // Novo evento de ordenação
-  @Output() onSort = new EventEmitter<{coluna: string, direcao: 'Asc' | 'Desc'}>();
+  @Output() sort = new EventEmitter<{coluna: string, direcao: 'Asc' | 'Desc'}>();
 
   toggleSort(coluna: string) {
     let novaDirecao: 'Asc' | 'Desc' = 'Asc';
@@ -128,7 +128,7 @@ export class TransacoesListComponent {
       novaDirecao = this.direcao === 'Asc' ? 'Desc' : 'Asc';
     }
     
-    this.onSort.emit({ coluna, direcao: novaDirecao });
+    this.sort.emit({ coluna, direcao: novaDirecao });
   }
 
   getSortIcon(coluna: string): string {

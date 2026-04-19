@@ -5,6 +5,15 @@ import { CardComponent } from '../../shared/components/card/card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { Categoria, ContaBancaria, CartaoCredito } from '../../core/models/financeiro.model';
 
+export interface SaveTransacaoData {
+  data: string;
+  descricao: string;
+  valor: number;
+  categoriaId: string;
+  contaBancariaId?: string;
+  cartaoCreditoId?: string;
+}
+
 @Component({
   selector: 'app-transacoes-form',
   standalone: true,
@@ -13,33 +22,33 @@ import { Categoria, ContaBancaria, CartaoCredito } from '../../core/models/finan
     <app-card title="Nova Transação">
       <form (submit)="salvar()" class="form-grid">
         <div class="form-group">
-          <label>Data</label>
-          <input type="date" [(ngModel)]="dados.data" name="data" required>
+          <label for="data">Data</label>
+          <input type="date" id="data" [(ngModel)]="dados.data" name="data" required>
         </div>
         <div class="form-group">
-          <label>Descrição</label>
-          <input type="text" [(ngModel)]="dados.descricao" name="descricao" placeholder="Ex: Almoço" required>
+          <label for="descricao">Descrição</label>
+          <input type="text" id="descricao" [(ngModel)]="dados.descricao" name="descricao" placeholder="Ex: Almoço" required>
         </div>
         <div class="form-group">
-          <label>Valor (R$)</label>
-          <input type="number" step="0.01" [(ngModel)]="dados.valor" name="valor" placeholder="Negativo para despesas" required>
+          <label for="valor">Valor (R$)</label>
+          <input type="number" id="valor" step="0.01" [(ngModel)]="dados.valor" name="valor" placeholder="Negativo para despesas" required>
         </div>
         <div class="form-group">
-          <label>Categoria</label>
-          <select [(ngModel)]="dados.categoriaId" name="categoriaId" required>
+          <label for="categoriaId">Categoria</label>
+          <select id="categoriaId" [(ngModel)]="dados.categoriaId" name="categoriaId" required>
             <option *ngFor="let c of categorias" [value]="c.id">{{ c.nome }}</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Conta (Opcional)</label>
-          <select [(ngModel)]="dados.contaBancariaId" name="contaBancariaId">
+          <label for="contaBancariaId">Conta (Opcional)</label>
+          <select id="contaBancariaId" [(ngModel)]="dados.contaBancariaId" name="contaBancariaId">
             <option [value]="undefined">Nenhuma</option>
             <option *ngFor="let c of contas" [value]="c.id">{{ c.nomeBanco }}</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Cartão (Opcional)</label>
-          <select [(ngModel)]="dados.cartaoCreditoId" name="cartaoCreditoId">
+          <label for="cartaoCreditoId">Cartão (Opcional)</label>
+          <select id="cartaoCreditoId" [(ngModel)]="dados.cartaoCreditoId" name="cartaoCreditoId">
             <option [value]="undefined">Nenhum</option>
             <option *ngFor="let c of cartoes" [value]="c.id">{{ c.nome }}</option>
           </select>
@@ -64,7 +73,7 @@ export class TransacoesFormComponent {
   @Input() categorias: Categoria[] = [];
   @Input() contas: ContaBancaria[] = [];
   @Input() cartoes: CartaoCredito[] = [];
-  @Output() onSave = new EventEmitter<any>();
+  @Output() saved = new EventEmitter<SaveTransacaoData>();
 
   // Helper para pegar a data atual no fuso horário local formatada para o input (yyyy-MM-dd)
   private getDataAtualLocal(): string {
@@ -74,17 +83,17 @@ export class TransacoesFormComponent {
     return d.toISOString().split('T')[0];
   }
 
-  dados = {
+  dados: SaveTransacaoData = {
     data: this.getDataAtualLocal(),
     descricao: '',
     valor: 0,
     categoriaId: '',
-    contaBancariaId: undefined as string | undefined,
-    cartaoCreditoId: undefined as string | undefined
+    contaBancariaId: undefined,
+    cartaoCreditoId: undefined
   };
 
   salvar() {
-    this.onSave.emit(this.dados);
+    this.saved.emit(this.dados);
     this.dados = {
       data: this.getDataAtualLocal(),
       descricao: '',
