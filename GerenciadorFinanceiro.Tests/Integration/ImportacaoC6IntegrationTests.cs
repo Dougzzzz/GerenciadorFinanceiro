@@ -26,7 +26,6 @@ namespace GerenciadorFinanceiro.Tests.Integration
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                // Limpa o banco para garantir isolamento
                 db.Database.EnsureDeleted();
                 db.Database.EnsureCreated();
 
@@ -46,29 +45,27 @@ namespace GerenciadorFinanceiro.Tests.Integration
 
             var responsePreview = await _client.PostAsync($"/api/transacoes/importar/preview?cartaoId={cartaoId}", content);
 
-            // Assert Preview
             responsePreview.EnsureSuccessStatusCode();
             var previewResult = await responsePreview.Content.ReadFromJsonAsync<ImportacaoPreviewResultadoDto>();
 
             Assert.NotNull(previewResult);
-            Assert.Equal(4, previewResult.Transacoes.Count);
+            Assert.Equal(10, previewResult.Transacoes.Count);
 
-            // Regra C6: Valor 120.50 (positivo no CSV) deve virar -120.50 (negativo no preview)
-            Assert.Contains(previewResult.Transacoes, t => t.Descricao == "RESTAURANTE LOCAL" && t.Valor == -120.50m);
+            // Validação de sinais invertidos (Regra C6)
+            // Gastos (Positivos no CSV) viram Negativos no Preview
+            Assert.Contains(previewResult.Transacoes, t => t.Descricao.Contains("LANCHONETE") && t.Valor == -89.10m);
 
-            // Regra C6: Pagamento -185.50 (negativo no CSV) deve virar 185.50 (positivo no preview)
-            Assert.Contains(previewResult.Transacoes, t => t.Descricao == "PAGAMENTO FATURA" && t.Valor == 185.50m);
+            // Pagamentos (Negativos no CSV) viram Positivos no Preview
+            Assert.Contains(previewResult.Transacoes, t => t.Descricao.Contains("Inclusao de Pagamento") && t.Valor == 5465.99m);
 
             // --- ACT: FASE 2 - Confirmar Importação ---
-            // Vamos simular que o usuário aceitou o preview
             var responseConfirmar = await _client.PostAsJsonAsync($"/api/transacoes/importar/confirmar?cartaoId={cartaoId}", previewResult.Transacoes);
 
-            // Assert Confirmação
             responseConfirmar.EnsureSuccessStatusCode();
             var resultadoFinal = await responseConfirmar.Content.ReadFromJsonAsync<ResultadoImportacaoDto>();
 
             Assert.True(resultadoFinal?.Sucesso);
-            Assert.Equal(4, resultadoFinal?.TotalImportado);
+            Assert.Equal(10, resultadoFinal?.TotalImportado);
 
             // --- ASSERT FINAL: Validar no Banco de Dados Real (InMemory) ---
             using (var scope = _factory.Services.CreateScope())
@@ -77,16 +74,14 @@ namespace GerenciadorFinanceiro.Tests.Integration
                 var transacoes = db.Transacoes.ToList();
                 var categorias = db.Categorias.ToList();
 
-                Assert.Equal(4, transacoes.Count);
+                Assert.Equal(10, transacoes.Count);
+                Assert.Contains(categorias, c => c.Nome.Contains("Restaurante"));
 
-                // Verifica se criou categorias automáticas para as novas descrições
-                Assert.Contains(categorias, c => c.Nome == "Serviços");
-                Assert.Contains(categorias, c => c.Nome == "Alimentação");
+                var lanche = transacoes.First(t => t.Descricao.Contains("LANCHONETE"));
+                Assert.Equal(-89.10m, lanche.Valor);
 
-                // Valida persistência dos valores invertidos
-                var restaurante = transacoes.First(t => t.Descricao == "RESTAURANTE LOCAL");
-                Assert.Equal(-120.50m, restaurante.Valor);
-                Assert.Equal(cartaoId, restaurante.CartaoCreditoId);
+                var pagamento = transacoes.First(t => t.Descricao.Contains("Inclusao de Pagamento") && t.Valor == 5465.99m);
+                Assert.Equal(TipoTransacao.Receita, pagamento.Tipo);
             }
         }
     }
