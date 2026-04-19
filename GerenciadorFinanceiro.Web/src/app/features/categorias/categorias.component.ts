@@ -30,7 +30,7 @@ import { CategoriasListComponent } from './categorias-list.component';
         </app-categorias-form>
 
         <app-categorias-list
-          [categorias]="categorias"
+          [categorias]="categorias()"
           [selecionadas]="selecionadas()"
           (onIniciarEdicao)="iniciarEdicao($event)"
           (onExcluirUma)="excluirUma($event)"
