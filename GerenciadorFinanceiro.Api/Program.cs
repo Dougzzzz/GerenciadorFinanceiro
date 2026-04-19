@@ -3,6 +3,8 @@ using GerenciadorFinanceiro.Application;
 using GerenciadorFinanceiro.Infrastructure;
 using GerenciadorFinanceiro.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,9 +15,27 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Adiciona os serviços para os Controllers da API
 builder.Services.AddControllers();
 
-// Adiciona o Swagger
+// Adiciona o Swagger com Documentação Avançada
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "Gerenciador Financeiro API",
+        Description = "API REST para controle de finanças pessoais (Contas, Cartões, Transações e Metas).",
+        Contact = new OpenApiContact
+        {
+            Name = "Equipe de Desenvolvimento",
+            Url = new Uri("https://github.com/Dougzzzz/GerenciadorFinanceiro"),
+        }
+    });
+
+    // Incluindo comentários XML
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    options.IncludeXmlComments(xmlPath);
+});
 
 // Configuração do CORS
 builder.Services.AddCors(options => options.AddPolicy("AngularDev", policy => policy.WithOrigins("http://localhost:4200")
