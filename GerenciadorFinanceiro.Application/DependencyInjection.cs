@@ -11,6 +11,7 @@ namespace GerenciadorFinanceiro.Application
             services.AddScoped<ImportarExtratoUseCase>();
             services.AddScoped<GerarPreviewImportacaoUseCase>();
             services.AddScoped<ConfirmarImportacaoUseCase>();
+            services.AddScoped<ObterResumoMensalUseCase>();
             services.AddScoped<IValidarMetaGastoUseCase, ValidarMetaGastoUseCase>();
 
             return services;
