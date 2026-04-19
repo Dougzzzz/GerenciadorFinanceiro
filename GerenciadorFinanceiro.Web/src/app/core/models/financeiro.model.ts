@@ -73,3 +73,17 @@ export interface MetaResumo {
   gastoAtual: number;
   percentual: number;
 }
+
+export interface ResumoCategoria {
+  categoria: string;
+  valor: number;
+}
+
+export interface ResumoMensal {
+  totalReceitas: number;
+  totalDespesas: number;
+  saldo: number;
+  mes: number;
+  ano: number;
+  gastosPorCategoria: ResumoCategoria[];
+}

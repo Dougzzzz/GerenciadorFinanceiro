@@ -4,7 +4,7 @@ WORKDIR /app/GerenciadorFinanceiro.Web
 
 # Instalar dependências
 COPY GerenciadorFinanceiro.Web/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copiar código e compilar
 # Precisamos manter a estrutura de pastas para que o outputPath relativo funcione

@@ -72,7 +72,7 @@ export class MetasGastosComponent implements OnInit {
       this.categorias = categorias;
       this.categoriasDespesa = categorias.filter(c => c.tipo === TipoTransacao.Despesa);
       
-      const ids = new Set(metas.map(m => m.id));
+      const ids = new Set(metas.map((m: MetaGasto) => m.id));
       const s = new Set(this.selecionadas());
       s.forEach(id => { if (!ids.has(id)) s.delete(id); });
       this.selecionadas.set(s);

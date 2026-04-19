@@ -13,10 +13,19 @@ describe('DashboardComponent', () => {
     financeiroService = jasmine.createSpyObj<FinanceiroService>('FinanceiroService', [
       'getTransacoes',
       'getResumoMetas',
+      'getResumoMensal',
     ]);
 
     financeiroService.getTransacoes.and.returnValue(of([]));
     financeiroService.getResumoMetas.and.returnValue(of([]));
+    financeiroService.getResumoMensal.and.returnValue(of({
+      totalReceitas: 0,
+      totalDespesas: 0,
+      saldo: 0,
+      mes: 4,
+      ano: 2026,
+      gastosPorCategoria: [],
+    }));
 
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
@@ -51,60 +60,38 @@ describe('DashboardComponent', () => {
         percentual: 65,
       },
     ];
+    const resumoMensal = {
+      totalReceitas: 5000,
+      totalDespesas: 1000,
+      saldo: 4000,
+      mes: 4,
+      ano: 2026,
+      gastosPorCategoria: [],
+    };
 
     financeiroService.getTransacoes.and.returnValue(of(transacoes));
     financeiroService.getResumoMetas.and.returnValue(of(metasResumo));
+    financeiroService.getResumoMensal.and.returnValue(of(resumoMensal));
 
     fixture.detectChanges();
 
     expect(financeiroService.getTransacoes).toHaveBeenCalledOnceWith();
     expect(financeiroService.getResumoMetas).toHaveBeenCalled();
+    expect(financeiroService.getResumoMensal).toHaveBeenCalled();
     expect(component.transacoes()).toEqual(transacoes);
     expect(component.metasResumo()).toEqual(metasResumo);
+    expect(component.resumo()).toEqual(resumoMensal);
   });
 
-  it('deve calcular total de receitas, despesas e saldo corretamente', () => {
-    component.transacoes.set([
-      {
-        id: '1',
-        data: '2026-04-10T00:00:00Z',
-        descricao: 'Salario',
-        valor: 5000,
-        tipo: TipoTransacao.Receita,
-        categoriaId: 'cat-1',
-        categoria: 'Salario',
-        nomeCartao: '',
-        finalCartao: '',
-        parcela: '',
-        cotacao: 1,
-      },
-      {
-        id: '2',
-        data: '2026-04-11T00:00:00Z',
-        descricao: 'Mercado',
-        valor: -1200,
-        tipo: TipoTransacao.Despesa,
-        categoriaId: 'cat-2',
-        categoria: 'Alimentacao',
-        nomeCartao: '',
-        finalCartao: '',
-        parcela: '',
-        cotacao: 1,
-      },
-      {
-        id: '3',
-        data: '2026-04-12T00:00:00Z',
-        descricao: 'Freelance',
-        valor: 800,
-        tipo: TipoTransacao.Receita,
-        categoriaId: 'cat-3',
-        categoria: 'Extra',
-        nomeCartao: '',
-        finalCartao: '',
-        parcela: '',
-        cotacao: 1,
-      },
-    ]);
+  it('deve calcular total de receitas, despesas e saldo corretamente a partir do resumo', () => {
+    component.resumo.set({
+      totalReceitas: 5800,
+      totalDespesas: 1200,
+      saldo: 4600,
+      mes: 4,
+      ano: 2026,
+      gastosPorCategoria: [],
+    });
 
     expect(component.totalReceitas()).toBe(5800);
     expect(component.totalDespesas()).toBe(1200);
