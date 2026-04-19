@@ -18,17 +18,32 @@ jobs:
       with:
         dotnet-version: 9.0.x
 
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
     - name: Restore dependencies
       run: dotnet restore GerenciadorFinanceiro.sln
 
-    - name: Build (Lint Check)
+    - name: Build
       run: dotnet build GerenciadorFinanceiro.sln --no-restore --configuration Release
 
     - name: Check Formatting
       run: dotnet format GerenciadorFinanceiro.sln --verify-no-changes --no-restore
 
     - name: Test
-      run: dotnet test GerenciadorFinanceiro.sln --no-build --configuration Release --verbosity normal
+      run: dotnet test GerenciadorFinanceiro.sln --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+    - name: Upload backend test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-test-results
+        path: "**/TestResults/test-results.trx"
 
   frontend:
     runs-on: ubuntu-latest
@@ -68,3 +83,14 @@ jobs:
         name: frontend-coverage
         path: GerenciadorFinanceiro.Web/coverage
         if-no-files-found: warn
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Test Docker Compose Build
+      run: docker compose build

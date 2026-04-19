@@ -15,6 +15,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Adiciona os serviços para os Controllers da API
 builder.Services.AddControllers();
 
+// Adiciona Health Checks (DevOps)
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>(name: "PostgreSQL");
+
 // Adiciona o Swagger com Documentação Avançada
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -60,6 +64,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AngularDev");
 app.UseAuthorization();
+
+// Endpoint de Health Check
+app.MapHealthChecks("/health");
 
 // Permite servir o frontend (index.html, js, css) da pasta wwwroot
 app.UseDefaultFiles();
