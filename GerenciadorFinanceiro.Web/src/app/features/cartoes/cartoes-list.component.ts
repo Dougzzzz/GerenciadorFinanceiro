@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartaoCredito } from '../../core/models/financeiro.model';
 import { CardComponent } from '../../shared/components/card/card.component';
@@ -20,21 +20,36 @@ import { CardComponent } from '../../shared/components/card/card.component';
               </small>
             </div>
           </div>
-          <span class="value">{{ c.limite | currency:'BRL' }}</span>
+          <div class="right">
+            <span class="value">{{ c.limite | currency:'BRL' }}</span>
+            <div class="actions">
+              <button class="btn-icon" (click)="onEditar.emit(c)" title="Editar">✏️</button>
+              <button class="btn-icon delete" (click)="onExcluir.emit(c.id)" title="Excluir">🗑️</button>
+            </div>
+          </div>
         </li>
       </ul>
+      <p *ngIf="cartoes.length === 0" class="empty">Nenhum cartão cadastrado.</p>
     </app-card>
   `,
   styles: [`
-    .list { display: flex; flex-direction: column; gap: 8px; }
+    .list { display: flex; flex-direction: column; }
     .item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f1f5f9; }
     .info { display: flex; flex-direction: column; }
     .meta { display: flex; align-items: center; gap: 8px; }
     .badge { font-size: 10px; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
     .info small { color: var(--color-text-secondary); }
+    .right { display: flex; align-items: center; gap: var(--spacing-md); }
     .value { font-weight: 600; }
+    .actions { display: flex; gap: 4px; }
+    .btn-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 4px; border-radius: 4px; transition: background 0.2s; }
+    .btn-icon:hover { background: #f1f5f9; }
+    .btn-icon.delete:hover { background: #fee2e2; }
+    .empty { padding: var(--spacing-md); text-align: center; color: var(--color-text-secondary); }
   `]
 })
 export class CartoesListComponent {
   @Input() cartoes: CartaoCredito[] = [];
+  @Output() onEditar = new EventEmitter<CartaoCredito>();
+  @Output() onExcluir = new EventEmitter<string>();
 }

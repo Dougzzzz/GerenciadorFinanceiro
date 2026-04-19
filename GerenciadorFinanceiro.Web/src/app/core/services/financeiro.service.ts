@@ -138,7 +138,19 @@ export class FinanceiroService {
     return this.http.get<CartaoCredito[]>(`${this.apiUrl}/cartoes`);
   }
 
-  criarCartao(nome: string, limite: number, diaFechamento: number, diaVencimento: number, provedor: number = 0): Observable<CartaoCredito> {
-    return this.http.post<CartaoCredito>(`${this.apiUrl}/cartoes?nome=${nome}&limite=${limite}&diaFechamento=${diaFechamento}&diaVencimento=${diaVencimento}&provedor=${provedor}`, {});
+  getCartaoById(id: string): Observable<CartaoCredito> {
+    return this.http.get<CartaoCredito>(`${this.apiUrl}/cartoes/${id}`);
+  }
+
+  criarCartao(cartao: Partial<CartaoCredito>): Observable<CartaoCredito> {
+    return this.http.post<CartaoCredito>(`${this.apiUrl}/cartoes`, cartao);
+  }
+
+  atualizarCartao(id: string, cartao: Partial<CartaoCredito>): Observable<any> {
+    return this.http.put(`${this.apiUrl}/cartoes/${id}`, cartao);
+  }
+
+  excluirCartao(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/cartoes/${id}`);
   }
 }

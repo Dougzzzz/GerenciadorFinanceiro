@@ -22,11 +22,11 @@ describe('CartoesFormComponent', () => {
 
   it('should emit onSalvar and reset form when salvar is called', () => {
     spyOn(component.onSalvar, 'emit');
-    component.novo = { nome: 'Visa', limite: 1000, diaFechamento: 1, diaVencimento: 10, provedor: 1 };
+    component.dados = { nome: 'Visa', limite: 1000, diaFechamento: 1, diaVencimento: 10, provedor: 1 };
     
     component.salvar();
     
     expect(component.onSalvar.emit).toHaveBeenCalledWith({ nome: 'Visa', limite: 1000, diaFechamento: 1, diaVencimento: 10, provedor: 1 });
-    expect(component.novo.nome).toBe('');
+    expect(component.dados.nome).toBe('');
   });
 });
