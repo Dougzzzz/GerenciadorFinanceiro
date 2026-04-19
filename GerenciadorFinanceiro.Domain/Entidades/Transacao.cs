@@ -27,10 +27,10 @@ namespace GerenciadorFinanceiro.Domain.Entidades
         public virtual ContaBancaria? ContaBancariaNavigation { get; private set; }
         public virtual CartaoCredito? CartaoCreditoNavigation { get; private set; }
 
-        public string Categoria { get; private set; } = null!;
-        public string NomeCartao { get; private set; } = null!;
-        public string FinalCartao { get; private set; } = null!;
-        public string Parcela { get; private set; } = null!;
+        public string Categoria { get; private set; }
+        public string NomeCartao { get; private set; }
+        public string FinalCartao { get; private set; }
+        public string Parcela { get; private set; }
         public decimal Cotacao { get; private set; }
 
         public Transacao(DateTime data, string descricao, decimal valor, Guid categoriaId, Guid? contaBancariaId, Guid? cartaoCreditoId)
@@ -82,7 +82,15 @@ namespace GerenciadorFinanceiro.Domain.Entidades
             ChaveExclusiva = GerarHash();
         }
 
-        protected Transacao() { }
+        protected Transacao()
+        {
+            Descricao = null!;
+            ChaveExclusiva = null!;
+            Categoria = string.Empty;
+            NomeCartao = string.Empty;
+            FinalCartao = string.Empty;
+            Parcela = string.Empty;
+        }
 
         public void Atualizar(
             DateTime data,
