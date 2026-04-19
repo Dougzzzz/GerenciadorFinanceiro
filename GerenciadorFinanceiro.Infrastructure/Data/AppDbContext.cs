@@ -56,6 +56,13 @@ namespace GerenciadorFinanceiro.Infrastructure.Data
                     .HasMaxLength(200)
                     .IsRequired();
 
+                entity.Property(t => t.ChaveExclusiva)
+                    .HasMaxLength(100)
+                    .IsRequired();
+
+                entity.HasIndex(t => t.ChaveExclusiva)
+                    .IsUnique();
+
                 // Mapeamento de valores numéricos com precisão
                 entity.Property(t => t.Valor)
                     .HasPrecision(18, 2)
@@ -81,8 +88,6 @@ namespace GerenciadorFinanceiro.Infrastructure.Data
                 entity.Property(t => t.Parcela)
                     .HasMaxLength(50)
                     .HasDefaultValue(string.Empty);
-
-                // Chaves e relacionamentos já são inferidos pelas propriedades existentes
             });
 
             modelBuilder.Entity<ContaBancaria>()

@@ -26,5 +26,6 @@ export interface ImportacaoPreviewResultado {
 export interface ResultadoImportacao {
   sucesso: boolean;
   totalImportado: number;
+  totalIgnorado: number;
   mensagemErro?: string;
 }

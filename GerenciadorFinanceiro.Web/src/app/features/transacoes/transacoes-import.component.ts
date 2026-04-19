@@ -226,7 +226,11 @@ export class TransacoesImportComponent {
       .subscribe({
         next: (res) => {
           if (res.sucesso) {
-            alert(`Sucesso! ${res.totalImportado} transações importadas.`);
+            let msg = `Sucesso! ${res.totalImportado} transações importadas.`;
+            if (res.totalIgnorado > 0) {
+              msg += `\n${res.totalIgnorado} transações duplicadas foram ignoradas.`;
+            }
+            alert(msg);
             this.imported.emit();
           } else {
             alert('Erro: ' + res.mensagemErro);

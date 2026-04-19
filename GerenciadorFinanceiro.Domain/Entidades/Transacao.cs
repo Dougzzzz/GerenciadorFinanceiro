@@ -1,36 +1,42 @@
+using System.Security.Cryptography;
+using System.Text;
+
 namespace GerenciadorFinanceiro.Domain.Entidades
 {
     public class Transacao
     {
         public Guid Id { get; private set; }
         public DateTime Data { get; private set; }
-        public string Descricao { get; private set; } = null!;
+        public string Descricao { get; private set; }
         public decimal Valor { get; private set; }
         public TipoTransacao Tipo { get; private set; }
 
-        // Relacionamentos (Referências para outras entidades)
-        public Guid CategoriaId { get; private set; }
-        public Guid? ContaBancariaId { get; private set; } // Nullable (?) pois pode ser do cartão
-        public Guid? CartaoCreditoId { get; private set; } // Nullable (?) pois pode ser da conta
+        /// <summary>
+        /// Gets hash único gerado para evitar duplicação de importações.
+        /// Gerado a partir de: Data + Descricao + Valor + Conta/Cartão.
+        /// </summary>
+        public string ChaveExclusiva { get; private set; }
 
-        // Propriedades de Navegação (para carregar nomes dinamicamente)
+        // Relacionamentos
+        public Guid CategoriaId { get; private set; }
+        public Guid? ContaBancariaId { get; private set; }
+        public Guid? CartaoCreditoId { get; private set; }
+
+        // Propriedades de Navegação
         public virtual Categoria? CategoriaNavigation { get; private set; }
         public virtual ContaBancaria? ContaBancariaNavigation { get; private set; }
         public virtual CartaoCredito? CartaoCreditoNavigation { get; private set; }
 
-        // Novos campos vindos do CSV (Snapshot)
         public string Categoria { get; private set; } = null!;
         public string NomeCartao { get; private set; } = null!;
         public string FinalCartao { get; private set; } = null!;
         public string Parcela { get; private set; } = null!;
         public decimal Cotacao { get; private set; }
 
-        // Construtor principal (compatível com implementações existentes)
         public Transacao(DateTime data, string descricao, decimal valor, Guid categoriaId, Guid? contaBancariaId, Guid? cartaoCreditoId)
         {
             Id = Guid.NewGuid();
 
-            // Sanitização para garantir UTC (PostgreSQL compatibility)
             Data = data.Kind == DateTimeKind.Unspecified
                 ? DateTime.SpecifyKind(data, DateTimeKind.Utc)
                 : data.ToUniversalTime();
@@ -43,17 +49,27 @@ namespace GerenciadorFinanceiro.Domain.Entidades
             ContaBancariaId = contaBancariaId;
             CartaoCreditoId = cartaoCreditoId;
 
-            // Campos opcionais mantidos vazios por compatibilidade
             Categoria = string.Empty;
             NomeCartao = string.Empty;
             FinalCartao = string.Empty;
             Parcela = string.Empty;
             Cotacao = 0m;
+
+            ChaveExclusiva = GerarHash();
         }
 
-        // Sobrecarga que permite popular os novos campos do DTO
-        public Transacao(DateTime data, string descricao, decimal valor, Guid categoriaId, Guid? contaBancariaId, Guid? cartaoCreditoId,
-            string categoria, string nomeCartao, string finalCartao, string parcela, decimal cotacao)
+        public Transacao(
+            DateTime data,
+            string descricao,
+            decimal valor,
+            Guid categoriaId,
+            Guid? contaBancariaId,
+            Guid? cartaoCreditoId,
+            string categoria,
+            string nomeCartao,
+            string finalCartao,
+            string parcela,
+            decimal cotacao)
             : this(data, descricao, valor, categoriaId, contaBancariaId, cartaoCreditoId)
         {
             Categoria = categoria ?? string.Empty;
@@ -61,14 +77,26 @@ namespace GerenciadorFinanceiro.Domain.Entidades
             FinalCartao = finalCartao ?? string.Empty;
             Parcela = parcela ?? string.Empty;
             Cotacao = cotacao;
+
+            // Recalcula o hash com os campos de snapshot se disponíveis
+            ChaveExclusiva = GerarHash();
         }
 
         protected Transacao() { }
 
-        public void Atualizar(DateTime data, string descricao, decimal valor, Guid categoriaId, Guid? contaBancariaId, Guid? cartaoCreditoId,
-            string categoria, string nomeCartao, string finalCartao, string parcela, decimal cotacao)
+        public void Atualizar(
+            DateTime data,
+            string descricao,
+            decimal valor,
+            Guid categoriaId,
+            Guid? contaBancariaId,
+            Guid? cartaoCreditoId,
+            string categoria,
+            string nomeCartao,
+            string finalCartao,
+            string parcela,
+            decimal cotacao)
         {
-            // Sanitização para garantir UTC
             Data = data.Kind == DateTimeKind.Unspecified
                 ? DateTime.SpecifyKind(data, DateTimeKind.Utc)
                 : data.ToUniversalTime();
@@ -84,6 +112,18 @@ namespace GerenciadorFinanceiro.Domain.Entidades
             FinalCartao = finalCartao ?? string.Empty;
             Parcela = parcela ?? string.Empty;
             Cotacao = cotacao;
+
+            ChaveExclusiva = GerarHash();
+        }
+
+        private string GerarHash()
+        {
+            // Criamos uma string composta pelos dados fundamentais da transação
+            // O uso de InvariantCulture e formatos fixos garante que o hash seja o mesmo em qualquer ambiente
+            var raw = $"{Data:yyyyMMdd}-{Descricao.Trim().ToUpper()}-{Valor:F2}-{ContaBancariaId}-{CartaoCreditoId}-{Parcela}";
+            var inputBytes = Encoding.UTF8.GetBytes(raw);
+            var hashBytes = SHA256.HashData(inputBytes);
+            return Convert.ToHexString(hashBytes);
         }
     }
 }

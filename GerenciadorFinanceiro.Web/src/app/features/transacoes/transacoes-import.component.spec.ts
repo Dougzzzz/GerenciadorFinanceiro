@@ -82,7 +82,7 @@ describe('TransacoesImportComponent', () => {
     const mockPreview = [{ idTemporario: '1', descricao: 'T', valor: 10, data: '2024-01-01', categoriasSugeridas: [] }];
     component.previewItems.set(mockPreview);
 
-    financeiroService.confirmarImportacao.and.returnValue(of({ sucesso: true, totalImportado: 1 }));
+    financeiroService.confirmarImportacao.and.returnValue(of({ sucesso: true, totalImportado: 1, totalIgnorado: 0 }));
     spyOn(component.imported, 'emit');
 
     component.confirmarImportacao();
