@@ -33,7 +33,7 @@ namespace GerenciadorFinanceiro.Tests.Application
                     Valor = -150.00m,
                     Data = DateTime.Now,
                     CategoriaOriginalCsv = "Mercado",
-                    CategoriaEscolhidaId = null // Forçar criação automática
+                    CategoriaEscolhidaId = null, // Forçar criação automática
                 },
             };
 
@@ -62,7 +62,7 @@ namespace GerenciadorFinanceiro.Tests.Application
                     Valor = 500.00m,
                     Data = DateTime.Now,
                     CategoriaOriginalCsv = "Transferência",
-                    CategoriaEscolhidaId = null
+                    CategoriaEscolhidaId = null,
                 },
             };
 
