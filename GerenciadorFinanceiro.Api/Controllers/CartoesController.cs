@@ -15,7 +15,7 @@ namespace GerenciadorFinanceiro.Api.Controllers
         private readonly ICartaoCreditoRepository _repository;
 
         /// <summary>
-        /// Inicializa uma nova instância da classe <see cref="CartoesController"/>.
+        /// Initializes a new instance of the <see cref="CartoesController"/> class.
         /// </summary>
         /// <param name="repository">Repositório de cartões de crédito.</param>
         public CartoesController(ICartaoCreditoRepository repository)
@@ -62,7 +62,7 @@ namespace GerenciadorFinanceiro.Api.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<ActionResult<CartaoCredito>> Post([FromBody] SaveCartaoDto dto)
         {
-            var cartao = new CartaoCredito(dto.Nome, dto.Limite, dto.DiaFechamento, dto.DiaVencimento, dto.Provedor);
+            var cartao = new CartaoCredito(dto.nome, dto.limite, dto.diaFechamento, dto.diaVencimento, dto.provedor);
             await _repository.AdicionarAsync(cartao);
             return CreatedAtAction(nameof(GetById), new { id = cartao.Id }, cartao);
         }
@@ -84,7 +84,7 @@ namespace GerenciadorFinanceiro.Api.Controllers
                 return NotFound();
             }
 
-            cartao.Atualizar(dto.Nome, dto.Limite, dto.DiaFechamento, dto.DiaVencimento, dto.Provedor);
+            cartao.Atualizar(dto.nome, dto.limite, dto.diaFechamento, dto.diaVencimento, dto.provedor);
             await _repository.AtualizarAsync(cartao);
 
             return NoContent();

@@ -14,7 +14,7 @@ namespace GerenciadorFinanceiro.Api.Controllers
         private readonly IContaBancariaRepository _repository;
 
         /// <summary>
-        /// Inicializa uma nova instância da classe <see cref="ContasController"/>.
+        /// Initializes a new instance of the <see cref="ContasController"/> class.
         /// </summary>
         /// <param name="repository">Repositório de contas bancárias.</param>
         public ContasController(IContaBancariaRepository repository)
@@ -56,6 +56,7 @@ namespace GerenciadorFinanceiro.Api.Controllers
         /// <param name="nomeBanco">Novo nome do banco.</param>
         /// <param name="saldoAtual">Saldo atualizado.</param>
         /// <param name="provedor">Novo provedor padrão.</param>
+        /// <returns>NoContent em caso de sucesso.</returns>
         [HttpPut("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -76,6 +77,7 @@ namespace GerenciadorFinanceiro.Api.Controllers
         /// Remove uma conta bancária do sistema.
         /// </summary>
         /// <param name="id">ID da conta a ser excluída.</param>
+        /// <returns>NoContent em caso de sucesso.</returns>
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> Delete(Guid id)

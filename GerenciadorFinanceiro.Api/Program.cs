@@ -1,10 +1,10 @@
+using System.Reflection;
 using GerenciadorFinanceiro.Api.Middleware;
 using GerenciadorFinanceiro.Application;
 using GerenciadorFinanceiro.Infrastructure;
 using GerenciadorFinanceiro.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +28,7 @@ builder.Services.AddSwaggerGen(options =>
         {
             Name = "Equipe de Desenvolvimento",
             Url = new Uri("https://github.com/Dougzzzz/GerenciadorFinanceiro"),
-        }
+        },
     });
 
     // Incluindo comentários XML
