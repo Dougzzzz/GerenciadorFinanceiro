@@ -24,7 +24,7 @@ import { forkJoin } from 'rxjs';
 
       <div class="grid">
         <app-metas-gastos-form
-          [categorias]="categoriasDespesa"
+          [categorias]="categoriasDespesa()"
           [editando]="!!editando()"
           [novo]="novo"
           (saved)="onSave($event)"
@@ -33,7 +33,7 @@ import { forkJoin } from 'rxjs';
 
         <app-metas-gastos-list
           [metas]="metas()"
-          [categorias]="categorias"
+          [categorias]="categorias()"
           [selecionadas]="selecionadas()"
           (editClicked)="iniciarEdicao($event)"
           (deleteClicked)="onDelete($event)"
@@ -50,8 +50,8 @@ import { forkJoin } from 'rxjs';
 })
 export class MetasGastosComponent implements OnInit {
   metas = signal<MetaGasto[]>([]);
-  categorias: Categoria[] = [];
-  categoriasDespesa: Categoria[] = [];
+  categorias = signal<Categoria[]>([]);
+  categoriasDespesa = signal<Categoria[]>([]);
   selecionadas = signal<Set<string>>(new Set());
   
   editando = signal<MetaGasto | null>(null);
@@ -69,8 +69,11 @@ export class MetasGastosComponent implements OnInit {
       categorias: this.financeiroService.getCategorias()
     }).subscribe(({ metas, categorias }) => {
       this.metas.set(metas);
-      this.categorias = categorias;
-      this.categoriasDespesa = categorias.filter(c => c.tipo === TipoTransacao.Despesa);
+      this.categorias.set(categorias);
+      
+      // Filtra garantindo que o tipo seja comparado corretamente (número ou string)
+      const despesas = categorias.filter(c => Number(c.tipo) === TipoTransacao.Despesa);
+      this.categoriasDespesa.set(despesas);
       
       const ids = new Set(metas.map((m: MetaGasto) => m.id));
       const s = new Set(this.selecionadas());
@@ -99,7 +102,7 @@ export class MetasGastosComponent implements OnInit {
         this.limpar();
         this.carregarDados();
       },
-      error: (err: Error) => alert('Erro ao salvar meta: ' + err.message)
+      error: (err: any) => alert('Erro ao salvar meta: ' + (err.error?.message || err.message))
     });
   }
 
@@ -131,6 +134,6 @@ export class MetasGastosComponent implements OnInit {
   }
 
   private getCategoriaNome(id: string): string {
-    return this.categorias.find(c => c.id === id)?.nome || 'Desconhecida';
+    return this.categorias().find(c => c.id === id)?.nome || 'Desconhecida';
   }
 }

@@ -55,7 +55,7 @@ namespace GerenciadorFinanceiro.Application.UseCases
             IEnumerable<DTOs.TransacaoDto> dtos;
             try
             {
-                var reader = _readerFactory.ObterReader(provedor);
+                var reader = _readerFactory.ObterReader(provedor, cartaoId.HasValue);
                 dtos = await reader.LerArquivoAsync(arquivo);
             }
             catch (Exception ex)
