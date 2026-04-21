@@ -41,7 +41,7 @@ namespace GerenciadorFinanceiro.Tests.Integration
             // --- ACT: FASE 1 - Gerar Preview ---
             // Usamos o arquivo de teste que foi anonimizado ou preparado no TestFiles
             var filePath = Path.Combine(AppContext.BaseDirectory, "TestFiles", "itau-cc-test.xls");
-            
+
             if (!File.Exists(filePath))
             {
                 throw new FileNotFoundException($"Arquivo de teste não encontrado: {filePath}");
@@ -50,6 +50,7 @@ namespace GerenciadorFinanceiro.Tests.Integration
             using var stream = File.OpenRead(filePath);
             using var content = new MultipartFormDataContent();
             var fileContent = new StreamContent(stream);
+
             // O Itaú XLS costuma ser lido como application/vnd.ms-excel
             fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/vnd.ms-excel");
             content.Add(fileContent, "arquivo", "extrato_itau.xls");
@@ -60,6 +61,7 @@ namespace GerenciadorFinanceiro.Tests.Integration
             var previewResult = await responsePreview.Content.ReadFromJsonAsync<ImportacaoPreviewResultadoDto>();
 
             Assert.NotNull(previewResult);
+
             // No XLS do Itaú real, temos diversas linhas. 
             // O teste deve garantir que pelo menos algumas transações foram identificadas.
             Assert.True(previewResult.Transacoes.Count > 0, "Nenhuma transação encontrada no preview do Itaú.");
@@ -81,7 +83,7 @@ namespace GerenciadorFinanceiro.Tests.Integration
                 var transacoes = db.Transacoes.ToList();
 
                 Assert.Equal(previewResult.Transacoes.Count, transacoes.Count);
-                
+
                 // Verifica se a conta bancária está correta
                 Assert.All(transacoes, t => Assert.Equal(contaId, t.ContaBancariaId));
 
