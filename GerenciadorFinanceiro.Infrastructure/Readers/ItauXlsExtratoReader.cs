@@ -37,7 +37,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
                     arquivo.Position = 0;
                     var config = new ExcelReaderConfiguration
                     {
-                        FallbackEncoding = Encoding.GetEncoding("Windows-1252")
+                        FallbackEncoding = Encoding.GetEncoding("Windows-1252"),
                     };
                     reader = ExcelReaderFactory.CreateCsvReader(arquivo, config);
                 }
@@ -76,7 +76,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
                         {
                             continue;
                         }
-                        
+
                         // Garante que a data é UTC para o banco de dados
                         data = DateTime.SpecifyKind(data, DateTimeKind.Utc);
 

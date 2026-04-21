@@ -1,7 +1,5 @@
 using System.Text;
-using GerenciadorFinanceiro.Application.DTOs;
 using GerenciadorFinanceiro.Infrastructure.Readers;
-using Xunit;
 
 namespace GerenciadorFinanceiro.Tests.Infrastructure
 {
@@ -12,7 +10,7 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
         {
             // Arrange
             var reader = new ItauXlsExtratoReader();
-            
+
             // Simular um conteúdo que represente as colunas do Itaú
             // O ExcelDataReader consegue ler CSVs simples se auto-detectar
             var sb = new StringBuilder();
@@ -20,7 +18,7 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
             {
                 sb.AppendLine($"Lixo linha {i};;;;"); // 10 linhas de cabeçalho
             }
-            
+
             sb.AppendLine("18/02/2026;SALDO ANTERIOR;;;0,66"); // Deve ser ignorada
             sb.AppendLine("06/03/2026;PAGTO SALARIO;;4501,03;4501,69"); // Entrada
             sb.AppendLine("09/03/2026;PIX TRANSF ANA PAU07/03;;-4400,00;"); // Saída
@@ -34,7 +32,7 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
 
             // Assert
             Assert.Equal(2, resultado.Count);
-            
+
             // Validação da Entrada
             Assert.Equal(new DateTime(2026, 3, 6, 0, 0, 0, DateTimeKind.Utc), resultado[0].data);
             Assert.Equal("PAGTO SALARIO", resultado[0].descricao);
