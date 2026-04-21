@@ -2,6 +2,7 @@ services:
   db:
     image: postgres:16-alpine
     container_name: gf_database
+    restart: always
     environment:
       POSTGRES_DB: gerenciador_financeiro
       POSTGRES_USER: admin
@@ -9,7 +10,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./infra/data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d gerenciador_financeiro"]
       interval: 10s
@@ -21,11 +22,12 @@ services:
       context: .
       dockerfile: GerenciadorFinanceiro.Api/Dockerfile
     container_name: gf_api
+    restart: always
     environment:
       - ConnectionStrings__DefaultConnection=Host=db;Database=gerenciador_financeiro;Username=admin;Password=password123
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
     ports:
-      - "8080:8080"
+      - "5000:8080"
     depends_on:
       db:
         condition: service_healthy
@@ -40,11 +42,9 @@ services:
       context: .
       dockerfile: GerenciadorFinanceiro.Web/Dockerfile
     container_name: gf_web
+    restart: always
     ports:
-      - "4200:80"
+      - "80:80"
     depends_on:
       api:
         condition: service_healthy
-
-volumes:
-  postgres_data:
