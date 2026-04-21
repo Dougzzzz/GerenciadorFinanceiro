@@ -42,7 +42,7 @@ namespace GerenciadorFinanceiro.Tests
             }
 
             // Assert: expected columns exist
-            var expected = new[] { "Id", "Data", "Descricao", "Valor", "Tipo", "CategoriaId", "ContaBancariaId", "CartaoCreditoId", "Categoria", "NomeCartao", "FinalCartao", "Parcela", "Cotacao" };
+            var expected = new[] { "Id", "Data", "Descricao", "Valor", "Tipo", "ChaveExclusiva", "CategoriaId", "ContaBancariaId", "CartaoCreditoId", "Categoria", "NomeCartao", "FinalCartao", "Parcela", "Cotacao" };
             foreach (var col in expected)
             {
                 Assert.Contains(columns, c => string.Equals(c.name, col, StringComparison.OrdinalIgnoreCase));

@@ -46,7 +46,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CartoesDeCredito");
+                    b.ToTable("CartoesDeCredito", (string)null);
                 });
 
             modelBuilder.Entity("GerenciadorFinanceiro.Domain.Entidades.Categoria", b =>
@@ -64,7 +64,7 @@ namespace GerenciadorFinanceiro.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categorias");
+                    b.ToTable("Categorias", (string)null);
                 });
 
             modelBuilder.Entity("GerenciadorFinanceiro.Domain.Entidades.ContaBancaria", b =>
