@@ -52,7 +52,7 @@ namespace GerenciadorFinanceiro.Application.UseCases.Importacao
             }
 
             // 2. Faz o parsing do CSV/Excel
-            IEnumerable<Application.DTOs.TransacaoDto> linhas;
+            IEnumerable<DTOs.TransacaoDto> linhas;
             try
             {
                 var reader = _readerFactory.ObterReader(provedor, cartaoId.HasValue);
