@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ContaBancaria } from '../../core/models/financeiro.model';
+import { ContaBancaria, ProvedorExtrato } from '../../core/models/financeiro.model';
 import { CardComponent } from '../../shared/components/card/card.component';
 
 @Component({
@@ -14,7 +14,7 @@ import { CardComponent } from '../../shared/components/card/card.component';
           <div class="info">
             <strong>{{ c.nomeBanco }}</strong>
             <small class="badge" *ngIf="c.provedor > 0">
-              {{ c.provedor === 1 ? 'C6 Bank' : c.provedor === 2 ? 'Nubank' : 'Inter' }}
+              {{ getProvedorNome(c.provedor) }}
             </small>
           </div>
           <div class="actions-wrapper">
@@ -50,4 +50,14 @@ export class ContasListComponent {
   @Input() contas: ContaBancaria[] = [];
   @Output() edit = new EventEmitter<ContaBancaria>();
   @Output() delete = new EventEmitter<string>();
+
+  getProvedorNome(provedor: ProvedorExtrato): string {
+    switch (provedor) {
+      case ProvedorExtrato.C6Bank: return 'C6 Bank';
+      case ProvedorExtrato.Nubank: return 'Nubank';
+      case ProvedorExtrato.Inter: return 'Inter';
+      case ProvedorExtrato.Itau: return 'Itaú';
+      default: return 'Genérico';
+    }
+  }
 }

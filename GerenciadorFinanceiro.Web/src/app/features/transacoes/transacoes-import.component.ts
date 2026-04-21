@@ -25,10 +25,10 @@ export interface ImportConfig {
           <div class="upload-zone" [class.has-file]="!!selectedFile">
             <label for="fileInput" class="upload-label">
               <span class="icon">📁</span>
-              <span class="text">{{ selectedFile ? selectedFile.name : 'Selecione ou arraste um arquivo CSV' }}</span>
+              <span class="text">{{ selectedFile ? selectedFile.name : 'Selecione ou arraste um arquivo (CSV ou Excel)' }}</span>
               <small *ngIf="selectedFile">Clique para trocar de arquivo</small>
             </label>
-            <input type="file" (change)="onFileChange($event)" accept=".csv" id="fileInput" hidden>
+            <input type="file" (change)="onFileChange($event)" accept=".csv, .xls, .xlsx" id="fileInput" hidden>
           </div>
 
           <div class="destination-selectors">

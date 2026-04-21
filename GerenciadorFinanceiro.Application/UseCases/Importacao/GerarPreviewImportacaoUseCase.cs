@@ -51,9 +51,22 @@ namespace GerenciadorFinanceiro.Application.UseCases.Importacao
                 }
             }
 
-            // 2. Faz o parsing do CSV
-            var reader = _readerFactory.ObterReader(provedor);
-            var linhas = await reader.LerArquivoAsync(arquivoCsv);
+            // 2. Faz o parsing do CSV/Excel
+            IEnumerable<Application.DTOs.TransacaoDto> linhas;
+            try
+            {
+                var reader = _readerFactory.ObterReader(provedor);
+                linhas = await reader.LerArquivoAsync(arquivoCsv);
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException($"Falha ao ler o arquivo: {ex.Message}", ex);
+            }
+
+            if (!linhas.Any())
+            {
+                throw new ArgumentException("Nenhuma transação válida foi encontrada no arquivo enviado. Verifique se o formato está correto para o banco selecionado.");
+            }
 
             // 3. Busca categorias existentes
             var categoriasExistentes = await _categoriaRepository.ObterTodasAsync();

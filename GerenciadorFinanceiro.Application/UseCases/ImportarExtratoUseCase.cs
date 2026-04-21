@@ -52,8 +52,21 @@ namespace GerenciadorFinanceiro.Application.UseCases
                 }
             }
 
-            var reader = _readerFactory.ObterReader(provedor);
-            var dtos = await reader.LerArquivoAsync(arquivo);
+            IEnumerable<DTOs.TransacaoDto> dtos;
+            try
+            {
+                var reader = _readerFactory.ObterReader(provedor);
+                dtos = await reader.LerArquivoAsync(arquivo);
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException($"Falha ao ler o arquivo: {ex.Message}", ex);
+            }
+
+            if (!dtos.Any())
+            {
+                throw new ArgumentException("Nenhuma transação válida foi encontrada no arquivo enviado.");
+            }
 
             // Busca ou cria a categoria de fallback "Outros"
             var categoriaOutros = await _categoriaRepository.ObterPorNomeAsync("Outros", TipoTransacao.Despesa);

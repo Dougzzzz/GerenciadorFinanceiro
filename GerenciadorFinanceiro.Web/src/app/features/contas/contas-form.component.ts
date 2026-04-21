@@ -32,6 +32,7 @@ export interface SaveContaData {
             <option [value]="1">C6 Bank</option>
             <option [value]="2">Nubank</option>
             <option [value]="3">Inter</option>
+            <option [value]="4">Itaú</option>
           </select>
         </div>
         <div class="actions">
