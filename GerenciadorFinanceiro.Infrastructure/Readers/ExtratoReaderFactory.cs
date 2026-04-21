@@ -5,9 +5,9 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
 {
     public class ExtratoReaderFactory : IExtratoReaderFactory
     {
-        public IExtratoReader ObterReader(ProvedorExtrato provedor) => provedor switch
+        public IExtratoReader ObterReader(ProvedorExtrato provedor, bool ehCartao = false) => provedor switch
         {
-            ProvedorExtrato.C6Bank => new C6ContaCorrenteCsvExtratoReader(), // Alterado para CC como padrão para contas
+            ProvedorExtrato.C6Bank => ehCartao ? new C6CsvExtratoReader() : new C6ContaCorrenteCsvExtratoReader(),
             ProvedorExtrato.Itau => new ItauXlsExtratoReader(),
             ProvedorExtrato.Nubank => new CsvExtratoReader(),
             ProvedorExtrato.Inter => new CsvExtratoReader(),
