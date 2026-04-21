@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FinanceiroService } from '../../core/services/financeiro.service';
-import { MetaGasto, Categoria, TipoTransacao } from '../../core/models/financeiro.model';
+import { MetaGasto, Categoria } from '../../core/models/financeiro.model';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { MetasGastosFormComponent } from './metas-gastos-form.component';
 import { MetasGastosListComponent } from './metas-gastos-list.component';
@@ -24,7 +24,7 @@ import { forkJoin } from 'rxjs';
 
       <div class="grid">
         <app-metas-gastos-form
-          [categorias]="categoriasDespesa()"
+          [categorias]="categorias()"
           [editando]="!!editando()"
           [novo]="novo"
           (saved)="onSave($event)"
@@ -51,7 +51,6 @@ import { forkJoin } from 'rxjs';
 export class MetasGastosComponent implements OnInit {
   metas = signal<MetaGasto[]>([]);
   categorias = signal<Categoria[]>([]);
-  categoriasDespesa = signal<Categoria[]>([]);
   selecionadas = signal<Set<string>>(new Set());
   
   editando = signal<MetaGasto | null>(null);
@@ -70,10 +69,6 @@ export class MetasGastosComponent implements OnInit {
     }).subscribe(({ metas, categorias }) => {
       this.metas.set(metas);
       this.categorias.set(categorias);
-      
-      // Filtra garantindo que o tipo seja comparado corretamente (número ou string)
-      const despesas = categorias.filter(c => Number(c.tipo) === TipoTransacao.Despesa);
-      this.categoriasDespesa.set(despesas);
       
       const ids = new Set(metas.map((m: MetaGasto) => m.id));
       const s = new Set(this.selecionadas());
@@ -102,7 +97,7 @@ export class MetasGastosComponent implements OnInit {
         this.limpar();
         this.carregarDados();
       },
-      error: (err: any) => alert('Erro ao salvar meta: ' + (err.error?.message || err.message))
+      error: (err: { error?: { message?: string }, message?: string }) => alert('Erro ao salvar meta: ' + (err.error?.message || err.message))
     });
   }
 
