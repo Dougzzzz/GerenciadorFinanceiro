@@ -55,7 +55,7 @@ namespace GerenciadorFinanceiro.Application.UseCases.Importacao
             IEnumerable<DTOs.TransacaoDto> linhas;
             try
             {
-                var reader = _readerFactory.ObterReader(provedor);
+                var reader = _readerFactory.ObterReader(provedor, cartaoId.HasValue);
                 linhas = await reader.LerArquivoAsync(arquivoCsv);
             }
             catch (Exception ex)

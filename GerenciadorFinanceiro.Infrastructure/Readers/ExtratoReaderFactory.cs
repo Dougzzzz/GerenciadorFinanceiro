@@ -5,12 +5,12 @@ namespace GerenciadorFinanceiro.Infrastructure.Readers
 {
     public class ExtratoReaderFactory : IExtratoReaderFactory
     {
-        public IExtratoReader ObterReader(ProvedorExtrato provedor) => provedor switch
+        public IExtratoReader ObterReader(ProvedorExtrato provedor, bool ehCartao = false) => provedor switch
         {
-            ProvedorExtrato.C6Bank => new C6CsvExtratoReader(),
+            ProvedorExtrato.C6Bank => ehCartao ? new C6CsvExtratoReader() : new C6ContaCorrenteCsvExtratoReader(),
             ProvedorExtrato.Itau => new ItauXlsExtratoReader(),
-            ProvedorExtrato.Nubank => new CsvExtratoReader(), // Implementação futura específica
-            ProvedorExtrato.Inter => new CsvExtratoReader(), // Implementação futura específica
+            ProvedorExtrato.Nubank => new CsvExtratoReader(),
+            ProvedorExtrato.Inter => new CsvExtratoReader(),
             ProvedorExtrato.Generico => new CsvExtratoReader(),
             _ => new CsvExtratoReader(),
         };

@@ -4,6 +4,6 @@ namespace GerenciadorFinanceiro.Application.Interfaces
 {
     public interface IExtratoReaderFactory
     {
-        IExtratoReader ObterReader(ProvedorExtrato provedor);
+        IExtratoReader ObterReader(ProvedorExtrato provedor, bool ehCartao = false);
     }
 }

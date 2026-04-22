@@ -13,13 +13,23 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
         }
 
         [Fact]
-        public void ObterReader_C6Bank_DeveRetornarC6CsvExtratoReader()
+        public void ObterReader_C6Bank_Cartao_DeveRetornarC6CsvExtratoReader()
         {
             // Act
-            var reader = _factory.ObterReader(ProvedorExtrato.C6Bank);
+            var reader = _factory.ObterReader(ProvedorExtrato.C6Bank, ehCartao: true);
 
             // Assert
             Assert.IsType<C6CsvExtratoReader>(reader);
+        }
+
+        [Fact]
+        public void ObterReader_C6Bank_Conta_DeveRetornarC6ContaCorrenteCsvExtratoReader()
+        {
+            // Act
+            var reader = _factory.ObterReader(ProvedorExtrato.C6Bank, ehCartao: false);
+
+            // Assert
+            Assert.IsType<C6ContaCorrenteCsvExtratoReader>(reader);
         }
 
         [Theory]

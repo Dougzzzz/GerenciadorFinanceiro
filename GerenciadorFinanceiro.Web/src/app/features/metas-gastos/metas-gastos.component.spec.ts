@@ -48,7 +48,7 @@ describe('MetasGastosComponent', () => {
     expect(financeiroServiceSpy.getMetas).toHaveBeenCalled();
     expect(financeiroServiceSpy.getCategorias).toHaveBeenCalled();
     expect(component.metas().length).toBe(1);
-    expect(component.categoriasDespesa.length).toBe(1);
+    expect(component.categorias().length).toBe(2);
   });
 
   it('should start editing a meta', () => {
