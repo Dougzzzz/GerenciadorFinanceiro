@@ -86,7 +86,16 @@ namespace GerenciadorFinanceiro.Tests.Api
         {
             // Arrange
             var categoriaId = Guid.NewGuid();
-            var dto = new SaveTransacaoDto(Guid.NewGuid(), DateTime.Now, "Compra", -50, categoriaId, "undefined", null);
+            var dto = new SaveTransacaoDto
+            {
+                Id = Guid.NewGuid(),
+                Data = DateTime.Now,
+                Descricao = "Compra",
+                Valor = -50,
+                CategoriaId = categoriaId,
+                ContaBancariaId = null,
+                CartaoCreditoId = null,
+            };
 
             // Act
             var result = await _controller.Post(dto);
@@ -104,7 +113,14 @@ namespace GerenciadorFinanceiro.Tests.Api
         {
             // Arrange
             var idUrl = Guid.NewGuid();
-            var dto = new SaveTransacaoDto(Guid.NewGuid(), DateTime.Now, "Compra", -50, Guid.NewGuid(), null, null);
+            var dto = new SaveTransacaoDto
+            {
+                Id = Guid.NewGuid(),
+                Data = DateTime.Now,
+                Descricao = "Compra",
+                Valor = -50,
+                CategoriaId = Guid.NewGuid(),
+            };
 
             // Act
             var result = await _controller.Put(idUrl, dto);
@@ -179,7 +195,14 @@ namespace GerenciadorFinanceiro.Tests.Api
             var existing = new Transacao(DateTime.Now, "Original", 100, Guid.NewGuid(), null, null);
             typeof(Transacao).GetProperty("Id")?.SetValue(existing, id);
 
-            var dto = new SaveTransacaoDto(id, DateTime.Now, "Update", 150, Guid.NewGuid(), null, null);
+            var dto = new SaveTransacaoDto
+            {
+                Id = id,
+                Data = DateTime.Now,
+                Descricao = "Update",
+                Valor = 150,
+                CategoriaId = Guid.NewGuid(),
+            };
 
             _repository.ObterPorIdAsync(id).Returns(existing);
 
@@ -202,7 +225,15 @@ namespace GerenciadorFinanceiro.Tests.Api
             typeof(Transacao).GetProperty("Id")?.SetValue(existing, id);
 
             // Simulando o que o frontend envia: "undefined" como string
-            var dto = new SaveTransacaoDto(id, DateTime.Now, "Update", 150, Guid.NewGuid(), "undefined", null);
+            var dto = new SaveTransacaoDto
+            {
+                Id = id,
+                Data = DateTime.Now,
+                Descricao = "Update",
+                Valor = 150,
+                CategoriaId = Guid.NewGuid(),
+                ContaBancariaId = null,
+            };
 
             _repository.ObterPorIdAsync(id).Returns(existing);
 

@@ -32,7 +32,7 @@ namespace GerenciadorFinanceiro.Tests.Api
         [Fact]
         public async Task Post_Deve_Retornar_CreatedAtAction_Quando_Valido()
         {
-            var dto = new SaveMetaGastoDto(Guid.NewGuid(), 100, null, null);
+            var dto = new SaveMetaGastoDto { CategoriaId = Guid.NewGuid(), ValorLimite = 100, Mes = null, Ano = null };
             var result = await _controller.Post(dto);
             Assert.IsType<CreatedAtActionResult>(result.Result);
         }
@@ -41,8 +41,9 @@ namespace GerenciadorFinanceiro.Tests.Api
         public async Task Put_Deve_Retornar_NotFound_Quando_Inexistente()
         {
             _repoMock.ObterPorIdAsync(Arg.Any<Guid>()).Returns((MetaGasto?)null);
-            var result = await _controller.Put(Guid.NewGuid(), 100);
-            Assert.IsType<NotFoundResult>(result);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.Put(Guid.NewGuid(), 100));
         }
 
         [Fact]

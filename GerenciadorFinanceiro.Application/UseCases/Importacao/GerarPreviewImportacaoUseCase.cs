@@ -75,15 +75,15 @@ namespace GerenciadorFinanceiro.Application.UseCases.Importacao
             var previews = linhas.Select(linha =>
             {
                 var sugestoes = _similaridadeService
-                    .BuscarSimilares(linha.descricao, categoriasExistentes)
+                    .BuscarSimilares(linha.Descricao, categoriasExistentes)
                     .ToList();
 
                 return new TransacaoPreviewDto
                 {
-                    Descricao = linha.descricao,
-                    Valor = linha.valor,
-                    Data = linha.data,
-                    CategoriaOriginalCsv = linha.categoria,
+                    Descricao = linha.Descricao,
+                    Valor = linha.Valor,
+                    Data = linha.Data,
+                    CategoriaOriginalCsv = linha.Categoria,
                     CategoriasSugeridas = sugestoes,
 
                     // Pré-seleciona se similaridade >= 90%

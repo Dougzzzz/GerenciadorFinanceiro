@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using GerenciadorFinanceiro.Application.DTOs;
 using GerenciadorFinanceiro.Domain.Filtros;
 using GerenciadorFinanceiro.Domain.Interfaces;
@@ -7,11 +8,30 @@ namespace GerenciadorFinanceiro.Application.UseCases
     /// <summary>
     /// Resultado da validação de um gasto contra a meta definida.
     /// </summary>
-    /// <param name="excedeu">Indica se o limite foi ultrapassado.</param>
-    /// <param name="valorLimite">O valor limite definido.</param>
-    /// <param name="totalGasto">O valor total gasto no período (incluindo o novo gasto).</param>
-    /// <param name="percentualUso">A percentagem do limite que foi consumida (1.0 = 100%).</param>
-    public record ResultadoValidacaoMeta(bool excedeu, decimal valorLimite, decimal totalGasto, decimal percentualUso);
+    public class ResultadoValidacaoMeta
+    {
+        [JsonPropertyName("excedeu")]
+        public bool Excedeu { get; set; }
+
+        [JsonPropertyName("valorLimite")]
+        public decimal ValorLimite { get; set; }
+
+        [JsonPropertyName("totalGasto")]
+        public decimal TotalGasto { get; set; }
+
+        [JsonPropertyName("percentualUso")]
+        public decimal PercentualUso { get; set; }
+
+        public ResultadoValidacaoMeta() { }
+
+        public ResultadoValidacaoMeta(bool excedeu, decimal valorLimite, decimal totalGasto, decimal percentualUso)
+        {
+            Excedeu = excedeu;
+            ValorLimite = valorLimite;
+            TotalGasto = totalGasto;
+            PercentualUso = percentualUso;
+        }
+    }
 
     /// <summary>
     /// Caso de uso para validar se um novo gasto ultrapassa o limite da categoria.
@@ -107,7 +127,7 @@ namespace GerenciadorFinanceiro.Application.UseCases
                 var categoria = categorias.FirstOrDefault(c => c.Id == meta.CategoriaId);
                 var nomeCategoria = categoria?.Nome ?? "Sem Categoria";
 
-                resumos.Add(new MetaResumoDto(nomeCategoria, resultado.valorLimite, resultado.totalGasto, resultado.percentualUso));
+                resumos.Add(new MetaResumoDto(nomeCategoria, resultado.ValorLimite, resultado.TotalGasto, resultado.PercentualUso));
             }
 
             return resumos;

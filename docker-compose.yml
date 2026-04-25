@@ -4,15 +4,15 @@ services:
     container_name: gf_database
     restart: always
     environment:
-      POSTGRES_DB: gerenciador_financeiro
-      POSTGRES_USER: admin
+      POSTGRES_DB: GerenciadorFinanceiro
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password123
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
-      - ./infra/data:/var/lib/postgresql/data
+      - gf_db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d gerenciador_financeiro"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d GerenciadorFinanceiro"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -24,7 +24,7 @@ services:
     container_name: gf_api
     restart: always
     environment:
-      - ConnectionStrings__DefaultConnection=Host=db;Database=gerenciador_financeiro;Username=admin;Password=password123
+      - ConnectionStrings__DefaultConnection=Host=db;Database=GerenciadorFinanceiro;Username=postgres;Password=password123
       - ASPNETCORE_ENVIRONMENT=Production
     ports:
       - "5000:8080"
@@ -48,3 +48,6 @@ services:
     depends_on:
       api:
         condition: service_healthy
+
+volumes:
+  gf_db_data:

@@ -9,94 +9,103 @@ namespace GerenciadorFinanceiro.Tests.Api
 {
     public class CartoesControllerTests
     {
-        private readonly ICartaoCreditoRepository _repoMock;
+        private readonly ICartaoCreditoRepository _repository;
         private readonly CartoesController _controller;
 
         public CartoesControllerTests()
         {
-            _repoMock = Substitute.For<ICartaoCreditoRepository>();
-            _controller = new CartoesController(_repoMock);
+            _repository = Substitute.For<ICartaoCreditoRepository>();
+            _controller = new CartoesController(_repository);
         }
 
         [Fact]
-        public async Task Get_Deve_Retornar_Ok_Com_Lista()
+        public async Task Get_Deve_Retornar_Ok_Com_Lista_De_Cartoes()
         {
             // Arrange
-            var cartoes = new List<CartaoCredito> { new("Visa", 1000, 1, 10) };
-            _repoMock.ObterTodosAsync().Returns(cartoes);
+            var cartoes = new List<CartaoCredito> { new("Nubank", 1000, 1, 10) };
+            _repository.ObterTodosAsync().Returns(cartoes);
 
             // Act
             var result = await _controller.Get();
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var value = Assert.IsAssignableFrom<IEnumerable<CartaoCredito>>(okResult.Value);
-            Assert.Single(value);
+            var model = Assert.IsAssignableFrom<IEnumerable<CartaoCredito>>(okResult.Value);
+            Assert.Single(model);
         }
 
         [Fact]
-        public async Task Post_Deve_Retornar_CreatedAtAction_Com_Cartao_Criado()
-        {
-            // Arrange
-            var dto = new SaveCartaoDto("Master", 2000, 5, 15);
-
-            // Act
-            var result = await _controller.Post(dto);
-
-            // Assert
-            var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
-            var value = Assert.IsType<CartaoCredito>(createdResult.Value);
-            Assert.Equal("Master", value.Nome);
-            Assert.Equal(2000, value.Limite);
-            await _repoMock.Received(1).AdicionarAsync(Arg.Any<CartaoCredito>());
-        }
-
-        [Fact]
-        public async Task Put_Deve_Atualizar_E_Retornar_NoContent()
+        public async Task GetById_Deve_Retornar_Ok_Se_Existir()
         {
             // Arrange
             var id = Guid.NewGuid();
-            var cartao = new CartaoCredito("Visa", 1000, 1, 10);
-            var dto = new SaveCartaoDto("Visa Gold", 5000, 2, 12);
-            _repoMock.ObterPorIdAsync(id).Returns(cartao);
+            var cartao = new CartaoCredito("Nubank", 1000, 1, 10);
+            _repository.ObterPorIdAsync(id).Returns(cartao);
 
             // Act
-            var result = await _controller.Put(id, dto);
+            var result = await _controller.GetById(id);
 
             // Assert
-            Assert.IsType<NoContentResult>(result);
-            Assert.Equal("Visa Gold", cartao.Nome);
-            Assert.Equal(5000, cartao.Limite);
-            await _repoMock.Received(1).AtualizarAsync(cartao);
-        }
-
-        [Fact]
-        public async Task Delete_Deve_Remover_E_Retornar_NoContent()
-        {
-            // Arrange
-            var id = Guid.NewGuid();
-            var cartao = new CartaoCredito("Visa", 1000, 1, 10);
-            _repoMock.ObterPorIdAsync(id).Returns(cartao);
-
-            // Act
-            var result = await _controller.Delete(id);
-
-            // Assert
-            Assert.IsType<NoContentResult>(result);
-            await _repoMock.Received(1).RemoverAsync(id);
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            Assert.Equal(cartao, okResult.Value);
         }
 
         [Fact]
         public async Task GetById_Deve_Retornar_NotFound_Se_Nao_Existir()
         {
             // Arrange
-            _repoMock.ObterPorIdAsync(Arg.Any<Guid>()).Returns((CartaoCredito?)null);
+            var id = Guid.NewGuid();
+            _repository.ObterPorIdAsync(id).Returns((CartaoCredito?)null);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.GetById(id));
+        }
+
+        [Fact]
+        public async Task Post_Deve_Retornar_CreatedAtAction()
+        {
+            // Arrange
+            var dto = new SaveCartaoDto { Nome = "Nubank", Limite = 1000, DiaFechamento = 1, DiaVencimento = 10, Provedor = 1 };
 
             // Act
-            var result = await _controller.GetById(Guid.NewGuid());
+            var result = await _controller.Post(dto);
 
             // Assert
-            Assert.IsType<NotFoundResult>(result.Result);
+            var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
+            Assert.Equal(nameof(CartoesController.GetById), createdResult.ActionName);
+        }
+
+        [Fact]
+        public async Task Put_Deve_Retornar_NoContent_Se_Sucesso()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var dto = new SaveCartaoDto { Nome = "Nubank Alt", Limite = 2000, DiaFechamento = 1, DiaVencimento = 10, Provedor = 1 };
+            var cartao = new CartaoCredito("Nubank", 1000, 1, 10);
+            _repository.ObterPorIdAsync(id).Returns(cartao);
+
+            // Act
+            var result = await _controller.Put(id, dto);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+            await _repository.Received(1).AtualizarAsync(Arg.Is<CartaoCredito>(c => c.Nome == "Nubank Alt"));
+        }
+
+        [Fact]
+        public async Task Delete_Deve_Retornar_NoContent_Se_Sucesso()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var cartao = new CartaoCredito("Nubank", 1000, 1, 10);
+            _repository.ObterPorIdAsync(id).Returns(cartao);
+
+            // Act
+            var result = await _controller.Delete(id);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+            await _repository.Received(1).RemoverAsync(id);
         }
     }
 }

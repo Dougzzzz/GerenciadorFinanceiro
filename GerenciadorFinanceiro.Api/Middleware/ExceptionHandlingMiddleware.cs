@@ -1,29 +1,16 @@
 using System.Data.Common;
 using System.Text.Json;
-using GerenciadorFinanceiro.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GerenciadorFinanceiro.Api.Middleware
 {
-    /// <summary>
-    /// Middleware responsável por converter exceções não tratadas em respostas HTTP legíveis pelo frontend.
-    /// </summary>
     public class ExceptionHandlingMiddleware
     {
-        private static readonly Action<ILogger, string, string, Exception?> LogUnhandledException =
-            LoggerMessage.Define<string, string>(
-                LogLevel.Error,
-                new EventId(1, nameof(ExceptionHandlingMiddleware)),
-                "Erro não tratado ao processar a requisição {Method} {Path}.");
-
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
         private readonly IHostEnvironment _environment;
 
-        public ExceptionHandlingMiddleware(
-            RequestDelegate next,
-            ILogger<ExceptionHandlingMiddleware> logger,
-            IHostEnvironment environment)
+        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger, IHostEnvironment environment)
         {
             _next = next;
             _logger = logger;
@@ -38,7 +25,7 @@ namespace GerenciadorFinanceiro.Api.Middleware
             }
             catch (Exception ex)
             {
-                LogUnhandledException(_logger, context.Request.Method, context.Request.Path, ex);
+                _logger.LogError(ex, "Erro não tratado: {Message}", ex.Message);
                 await WriteErrorResponseAsync(context, ex);
             }
         }
@@ -57,23 +44,25 @@ namespace GerenciadorFinanceiro.Api.Middleware
         {
             if (context.Response.HasStarted)
             {
-                throw exception;
+                return;
             }
 
             var (statusCode, message) = MapException(exception);
-            var response = new ApiErrorResponse
+
+            var response = new
             {
-                Message = message,
-                StatusCode = statusCode,
-                TraceId = context.TraceIdentifier,
-                Details = _environment.IsDevelopment() ? exception.Message : null,
+                title = "Erro na Solicitação",
+                status = statusCode,
+                message,
+                traceId = context.TraceIdentifier,
+                details = _environment.IsDevelopment() ? exception.Message : null,
+                stackTrace = _environment.IsDevelopment() ? exception.StackTrace : null,
             };
 
-            context.Response.Clear();
-            context.Response.StatusCode = statusCode;
             context.Response.ContentType = "application/json";
+            context.Response.StatusCode = statusCode;
 
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, WriteIndented = true }));
         }
     }
 }

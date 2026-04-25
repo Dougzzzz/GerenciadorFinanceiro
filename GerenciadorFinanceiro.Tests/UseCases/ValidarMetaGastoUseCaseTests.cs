@@ -46,9 +46,9 @@ namespace GerenciadorFinanceiro.Tests.UseCases
             var resultado = await _useCase.ExecutarAsync(categoriaId, 4, 2026, -200m);
 
             // Assert
-            Assert.True(resultado.excedeu);
-            Assert.Equal(1100m, resultado.totalGasto);
-            Assert.Equal(1.1m, resultado.percentualUso); // 110%
+            Assert.True(resultado.Excedeu);
+            Assert.Equal(1100m, resultado.TotalGasto);
+            Assert.Equal(1.1m, resultado.PercentualUso); // 110%
         }
 
         [Fact]
@@ -63,8 +63,8 @@ namespace GerenciadorFinanceiro.Tests.UseCases
             var resultado = await _useCase.ExecutarAsync(categoriaId, 4, 2026, -200m);
 
             // Assert
-            Assert.False(resultado.excedeu);
-            Assert.Equal(0, resultado.percentualUso);
+            Assert.False(resultado.Excedeu);
+            Assert.Equal(0, resultado.PercentualUso);
         }
 
         [Fact]
@@ -108,8 +108,8 @@ namespace GerenciadorFinanceiro.Tests.UseCases
             Assert.NotNull(resultado);
             var lista = resultado.ToList();
             Assert.Equal(2, lista.Count);
-            Assert.Contains(lista, r => r.categoria == "Alimentação" && r.meta == 1000m);
-            Assert.Contains(lista, r => r.categoria == "Lazer" && r.meta == 500m);
+            Assert.Contains(lista, r => r.Categoria == "Alimentação" && r.Meta == 1000m);
+            Assert.Contains(lista, r => r.Categoria == "Lazer" && r.Meta == 500m);
         }
 
         [Fact]

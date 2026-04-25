@@ -63,7 +63,7 @@ namespace GerenciadorFinanceiro.Tests.Api
             var existing = new Categoria("Original", TipoTransacao.Despesa);
             typeof(Categoria).GetProperty("Id")?.SetValue(existing, id);
 
-            var dto = new SaveCategoriaDto(id, "Update", TipoTransacao.Receita);
+            var dto = new SaveCategoriaDto { Id = id, Nome = "Update", Tipo = (int)TipoTransacao.Receita };
 
             _repository.ObterPorIdAsync(id).Returns(existing);
 
@@ -83,7 +83,7 @@ namespace GerenciadorFinanceiro.Tests.Api
             // Arrange
             var idUrl = Guid.NewGuid();
             var idCorpo = Guid.NewGuid();
-            var dto = new SaveCategoriaDto(idCorpo, "Update", TipoTransacao.Despesa);
+            var dto = new SaveCategoriaDto { Id = idCorpo, Nome = "Update", Tipo = (int)TipoTransacao.Despesa };
 
             // Act
             var result = await _controller.Put(idUrl, dto);
@@ -98,14 +98,11 @@ namespace GerenciadorFinanceiro.Tests.Api
         {
             // Arrange
             var id = Guid.NewGuid();
-            var dto = new SaveCategoriaDto(id, "Update", TipoTransacao.Despesa);
+            var dto = new SaveCategoriaDto { Id = id, Nome = "Update", Tipo = (int)TipoTransacao.Despesa };
             _repository.ObterPorIdAsync(id).Returns((Categoria?)null);
 
-            // Act
-            var result = await _controller.Put(id, dto);
-
-            // Assert
-            Assert.IsType<NotFoundResult>(result);
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.Put(id, dto));
         }
     }
 }

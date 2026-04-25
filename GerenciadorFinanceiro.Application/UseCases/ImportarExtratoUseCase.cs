@@ -82,10 +82,10 @@ namespace GerenciadorFinanceiro.Application.UseCases
                 Guid? cartaoIdFinal = cartaoId;
 
                 // Se o CSV trouxer um nome de categoria, tenta encontrar ou criar
-                if (!string.IsNullOrWhiteSpace(dto.categoria))
+                if (!string.IsNullOrWhiteSpace(dto.Categoria))
                 {
-                    var tipo = dto.valor < 0 ? TipoTransacao.Despesa : TipoTransacao.Receita;
-                    var categoriaExistente = await _categoriaRepository.ObterPorNomeAsync(dto.categoria, tipo);
+                    var tipo = dto.Valor < 0 ? TipoTransacao.Despesa : TipoTransacao.Receita;
+                    var categoriaExistente = await _categoriaRepository.ObterPorNomeAsync(dto.Categoria, tipo);
 
                     if (categoriaExistente != null)
                     {
@@ -94,16 +94,16 @@ namespace GerenciadorFinanceiro.Application.UseCases
                     else
                     {
                         // Cria nova categoria automaticamente
-                        var novaCategoria = new Categoria(dto.categoria, tipo);
+                        var novaCategoria = new Categoria(dto.Categoria, tipo);
                         await _categoriaRepository.AdicionarAsync(novaCategoria);
                         categoriaId = novaCategoria.Id;
                     }
                 }
 
                 // Se o CSV trouxer um nome de cartão, tenta encontrar ou criar (caso não tenha sido passado um cartaoId fixo)
-                if (cartaoIdFinal == null && !string.IsNullOrWhiteSpace(dto.nomeCartao))
+                if (cartaoIdFinal == null && !string.IsNullOrWhiteSpace(dto.NomeCartao))
                 {
-                    var cartaoExistente = await _cartaoRepository.ObterPorNomeAsync(dto.nomeCartao);
+                    var cartaoExistente = await _cartaoRepository.ObterPorNomeAsync(dto.NomeCartao);
                     if (cartaoExistente != null)
                     {
                         cartaoIdFinal = cartaoExistente.Id;
@@ -111,24 +111,24 @@ namespace GerenciadorFinanceiro.Application.UseCases
                     else
                     {
                         // Cria novo cartão automaticamente (valores default para limites e dias)
-                        var novoCartao = new CartaoCredito(dto.nomeCartao, 0, 1, 10);
+                        var novoCartao = new CartaoCredito(dto.NomeCartao, 0, 1, 10);
                         await _cartaoRepository.AdicionarAsync(novoCartao);
                         cartaoIdFinal = novoCartao.Id;
                     }
                 }
 
                 var transacao = new Transacao(
-                    dto.data,
-                    dto.descricao,
-                    dto.valor,
+                    dto.Data,
+                    dto.Descricao,
+                    dto.Valor,
                     categoriaId,
                     contaId,
                     cartaoIdFinal,
-                    dto.categoria,
-                    dto.nomeCartao,
-                    dto.finalCartao,
-                    dto.parcela,
-                    dto.cotacao);
+                    dto.Categoria,
+                    dto.NomeCartao,
+                    dto.FinalCartao,
+                    dto.Parcela,
+                    dto.Cotacao);
 
                 await _repository.AdicionarAsync(transacao);
             }

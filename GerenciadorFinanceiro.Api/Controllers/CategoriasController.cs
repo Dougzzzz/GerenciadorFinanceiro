@@ -26,33 +26,28 @@ namespace GerenciadorFinanceiro.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Categoria>> Post([FromBody] SaveCategoriaDto dto)
+        public async Task<ActionResult<Categoria>> Post([FromBody] SaveCategoriaDto dados)
         {
-            if (dto == null)
+            if (dados == null)
             {
                 return BadRequest();
             }
 
-            var categoria = new Categoria(dto.nome, dto.tipo);
+            var categoria = new Categoria(dados.Nome, (TipoTransacao)dados.Tipo);
             await _repository.AdicionarAsync(categoria);
             return CreatedAtAction(nameof(Get), new { id = categoria.Id }, categoria);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(Guid id, [FromBody] SaveCategoriaDto dto)
+        public async Task<IActionResult> Put(Guid id, [FromBody] SaveCategoriaDto dados)
         {
-            if (dto == null || id != dto.id)
+            if (dados == null || id != dados.Id)
             {
                 return BadRequest("ID da URL não coincide com ID do corpo.");
             }
 
-            var existente = await _repository.ObterPorIdAsync(id);
-            if (existente == null)
-            {
-                return NotFound();
-            }
-
-            existente.Atualizar(dto.nome, dto.tipo);
+            var existente = await _repository.ObterPorIdAsync(id) ?? throw new KeyNotFoundException($"Categoria com ID {id} não encontrada.");
+            existente.Atualizar(dados.Nome, (TipoTransacao)dados.Tipo);
             await _repository.AtualizarAsync(existente);
             return NoContent();
         }
@@ -60,12 +55,7 @@ namespace GerenciadorFinanceiro.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var existente = await _repository.ObterPorIdAsync(id);
-            if (existente == null)
-            {
-                return NotFound();
-            }
-
+            var existente = await _repository.ObterPorIdAsync(id) ?? throw new KeyNotFoundException($"Categoria com ID {id} não encontrada.");
             if (await _transacaoRepository.PossuiTransacoesPorCategoriaAsync(id))
             {
                 return BadRequest($"A categoria '{existente.Nome}' não pode ser excluída porque existem transações vinculadas a ela.");

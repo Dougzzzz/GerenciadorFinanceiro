@@ -28,7 +28,7 @@ namespace GerenciadorFinanceiro.Tests
             var transacao = result.First();
 
             // Assert
-            Assert.Equal(-84.90m, transacao.valor);
+            Assert.Equal(-84.90m, transacao.Valor);
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace GerenciadorFinanceiro.Tests
             var transacao = result.First();
 
             // Assert
-            Assert.Equal(27.77m, transacao.valor);
+            Assert.Equal(27.77m, transacao.Valor);
         }
 
         [Fact]
@@ -66,9 +66,9 @@ namespace GerenciadorFinanceiro.Tests
             var transacao = result.First();
 
             // Assert
-            Assert.Equal(new DateTime(2026, 02, 10), transacao.data.Date);
-            Assert.Equal("MP *ALIEXPRESS", transacao.descricao);
-            Assert.Equal(27.77m, transacao.valor);
+            Assert.Equal(new DateTime(2026, 02, 10), transacao.Data.Date);
+            Assert.Equal("MP *ALIEXPRESS", transacao.Descricao);
+            Assert.Equal(27.77m, transacao.Valor);
         }
 
         [Fact]

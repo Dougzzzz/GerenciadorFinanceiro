@@ -1,4 +1,5 @@
 using GerenciadorFinanceiro.Api.Controllers;
+using GerenciadorFinanceiro.Application.DTOs;
 using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -36,8 +37,11 @@ namespace GerenciadorFinanceiro.Tests.Api
         [Fact]
         public async Task Post_Deve_Retornar_Ok_Com_Conta_Criada()
         {
+            // Arrange
+            var dto = new SaveContaDto { NomeBanco = "Nubank", Saldo = 500, Provedor = (int)ProvedorExtrato.Generico };
+
             // Act
-            var result = await _controller.Post("Nubank", 500);
+            var result = await _controller.Post(dto);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -53,10 +57,11 @@ namespace GerenciadorFinanceiro.Tests.Api
             // Arrange
             var id = Guid.NewGuid();
             var conta = new ContaBancaria("Teste");
+            var dto = new SaveContaDto { NomeBanco = "Novo Nome", Saldo = 1000, Provedor = (int)ProvedorExtrato.C6Bank };
             _repoMock.ObterPorIdAsync(id).Returns(conta);
 
             // Act
-            var result = await _controller.Put(id, "Novo Nome", 1000, ProvedorExtrato.C6Bank);
+            var result = await _controller.Put(id, dto);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
@@ -67,10 +72,11 @@ namespace GerenciadorFinanceiro.Tests.Api
         public async Task Put_Deve_Retornar_NotFound_Quando_Inexistente()
         {
             // Arrange
+            var dto = new SaveContaDto { NomeBanco = "Nome", Saldo = 0, Provedor = (int)ProvedorExtrato.Generico };
             _repoMock.ObterPorIdAsync(Arg.Any<Guid>()).Returns((ContaBancaria?)null);
 
             // Act
-            var result = await _controller.Put(Guid.NewGuid(), "Nome", 0, ProvedorExtrato.Generico);
+            var result = await _controller.Put(Guid.NewGuid(), dto);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);

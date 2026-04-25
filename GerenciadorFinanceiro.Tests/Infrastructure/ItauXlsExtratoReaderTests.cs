@@ -34,14 +34,14 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
             Assert.Equal(2, resultado.Count);
 
             // Validação da Entrada
-            Assert.Equal(new DateTime(2026, 3, 6, 0, 0, 0, DateTimeKind.Utc), resultado[0].data);
-            Assert.Equal("PAGTO SALARIO", resultado[0].descricao);
-            Assert.Equal(4501.03m, resultado[0].valor);
+            Assert.Equal(new DateTime(2026, 3, 6, 0, 0, 0, DateTimeKind.Utc), resultado[0].Data);
+            Assert.Equal("PAGTO SALARIO", resultado[0].Descricao);
+            Assert.Equal(4501.03m, resultado[0].Valor);
 
             // Validação da Saída
-            Assert.Equal(new DateTime(2026, 3, 9, 0, 0, 0, DateTimeKind.Utc), resultado[1].data);
-            Assert.Equal("PIX TRANSF ANA PAU07/03", resultado[1].descricao);
-            Assert.Equal(-4400.00m, resultado[1].valor);
+            Assert.Equal(new DateTime(2026, 3, 9, 0, 0, 0, DateTimeKind.Utc), resultado[1].Data);
+            Assert.Equal("PIX TRANSF ANA PAU07/03", resultado[1].Descricao);
+            Assert.Equal(-4400.00m, resultado[1].Valor);
         }
     }
 }
