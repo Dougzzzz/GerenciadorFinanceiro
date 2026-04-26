@@ -1,3 +1,4 @@
+using GerenciadorFinanceiro.Application.DTOs;
 using GerenciadorFinanceiro.Domain.Entidades;
 using GerenciadorFinanceiro.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -36,15 +37,13 @@ namespace GerenciadorFinanceiro.Api.Controllers
         /// <summary>
         /// Cadastra uma nova conta bancária.
         /// </summary>
-        /// <param name="nomeBanco">Nome da instituição financeira.</param>
-        /// <param name="saldoInicial">Saldo disponível no momento do cadastro.</param>
-        /// <param name="provedor">Tipo de extrato que esta conta costuma importar.</param>
+        /// <param name="dados">Dados da conta bancária.</param>
         /// <returns>A conta bancária criada.</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<ContaBancaria>> Post(string nomeBanco, decimal saldoInicial = 0, ProvedorExtrato provedor = ProvedorExtrato.Generico)
+        public async Task<ActionResult<ContaBancaria>> Post([FromBody] SaveContaDto dados)
         {
-            var conta = new ContaBancaria(nomeBanco, saldoInicial, provedor);
+            var conta = new ContaBancaria(dados.NomeBanco, dados.Saldo, (ProvedorExtrato)dados.Provedor);
             await _repository.AdicionarAsync(conta);
             return Ok(conta);
         }
@@ -53,14 +52,12 @@ namespace GerenciadorFinanceiro.Api.Controllers
         /// Atualiza os dados de uma conta existente.
         /// </summary>
         /// <param name="id">Identificador único da conta.</param>
-        /// <param name="nomeBanco">Novo nome do banco.</param>
-        /// <param name="saldoAtual">Saldo atualizado.</param>
-        /// <param name="provedor">Novo provedor padrão.</param>
+        /// <param name="dados">Dados atualizados da conta.</param>
         /// <returns>NoContent em caso de sucesso.</returns>
         [HttpPut("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Put(Guid id, string nomeBanco, decimal saldoAtual, ProvedorExtrato provedor)
+        public async Task<IActionResult> Put(Guid id, [FromBody] SaveContaDto dados)
         {
             var conta = await _repository.ObterPorIdAsync(id);
             if (conta == null)
@@ -68,7 +65,7 @@ namespace GerenciadorFinanceiro.Api.Controllers
                 return NotFound();
             }
 
-            conta.AtualizarDados(nomeBanco, saldoAtual, provedor);
+            conta.AtualizarDados(dados.NomeBanco, dados.Saldo, (ProvedorExtrato)dados.Provedor);
             await _repository.AtualizarAsync(conta);
             return NoContent();
         }

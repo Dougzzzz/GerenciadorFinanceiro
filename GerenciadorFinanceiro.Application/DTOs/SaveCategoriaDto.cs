@@ -1,9 +1,16 @@
-using GerenciadorFinanceiro.Domain.Entidades;
+using System.Text.Json.Serialization;
 
 namespace GerenciadorFinanceiro.Application.DTOs
 {
-    public record SaveCategoriaDto(
-        Guid id,
-        string nome,
-        TipoTransacao tipo);
+    public class SaveCategoriaDto
+    {
+        [JsonPropertyName("id")]
+        public Guid Id { get; set; }
+
+        [JsonPropertyName("nome")]
+        public string Nome { get; set; } = string.Empty;
+
+        [JsonPropertyName("tipo")]
+        public int Tipo { get; set; }
+    }
 }

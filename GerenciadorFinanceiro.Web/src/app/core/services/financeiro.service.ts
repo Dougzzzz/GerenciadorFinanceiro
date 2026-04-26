@@ -141,12 +141,12 @@ export class FinanceiroService {
     return this.http.get<ContaBancaria[]>(`${this.apiUrl}/contas`);
   }
 
-  criarConta(nomeBanco: string, saldoInicial: number, provedor = 0): Observable<ContaBancaria> {
-    return this.http.post<ContaBancaria>(`${this.apiUrl}/contas?nomeBanco=${nomeBanco}&saldoInicial=${saldoInicial}&provedor=${provedor}`, {});
+  adicionarConta(nomeBanco: string, saldoInicial: number, provedor: number): Observable<ContaBancaria> {
+    return this.http.post<ContaBancaria>(`${this.apiUrl}/contas`, { nomeBanco, saldo: saldoInicial, provedor });
   }
 
   atualizarConta(id: string, nomeBanco: string, saldoAtual: number, provedor: number): Observable<unknown> {
-    return this.http.put(`${this.apiUrl}/contas/${id}?nomeBanco=${nomeBanco}&saldoAtual=${saldoAtual}&provedor=${provedor}`, {});
+    return this.http.put(`${this.apiUrl}/contas/${id}`, { nomeBanco, saldo: saldoAtual, provedor });
   }
 
   excluirConta(id: string): Observable<unknown> {

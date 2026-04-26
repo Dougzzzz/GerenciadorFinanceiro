@@ -34,22 +34,22 @@ namespace GerenciadorFinanceiro.Tests
             var culture = new CultureInfo("pt-BR");
 
             var primeira = list[0];
-            Assert.Equal(new DateTime(2025, 12, 12), primeira.data.Date);
-            Assert.Equal("JIM.COM*49865135 THA", primeira.descricao);
+            Assert.Equal(new DateTime(2025, 12, 12), primeira.Data.Date);
+            Assert.Equal("JIM.COM*49865135 THA", primeira.Descricao);
             var expectedPrimeiraValor = decimal.Parse("1142,72", culture);
-            Assert.Equal(expectedPrimeiraValor, primeira.valor);
-            Assert.Equal("Foto / Fotocópia", primeira.categoria);
-            Assert.Equal("ANA PAULA SIQUEIRA", primeira.nomeCartao);
-            Assert.Equal("8262", primeira.finalCartao);
-            Assert.Equal("03/mar", primeira.parcela);
-            Assert.Equal(0m, primeira.cotacao);
+            Assert.Equal(expectedPrimeiraValor, primeira.Valor);
+            Assert.Equal("Foto / Fotocópia", primeira.Categoria);
+            Assert.Equal("ANA PAULA SIQUEIRA", primeira.NomeCartao);
+            Assert.Equal("8262", primeira.FinalCartao);
+            Assert.Equal("03/mar", primeira.Parcela);
+            Assert.Equal(0m, primeira.Cotacao);
 
             var segunda = list[1];
-            Assert.Equal(new DateTime(2026, 2, 14), segunda.data.Date);
-            Assert.Equal("TRG COMERCIO VAREJISTA", segunda.descricao);
+            Assert.Equal(new DateTime(2026, 2, 14), segunda.Data.Date);
+            Assert.Equal("TRG COMERCIO VAREJISTA", segunda.Descricao);
             var expectedSegundaValor = decimal.Parse("150,00", culture);
-            Assert.Equal(expectedSegundaValor, segunda.valor);
-            Assert.Equal("Vestuário / Roupas", segunda.categoria);
+            Assert.Equal(expectedSegundaValor, segunda.Valor);
+            Assert.Equal("Vestuário / Roupas", segunda.Categoria);
         }
 
         [Fact]
@@ -69,10 +69,10 @@ namespace GerenciadorFinanceiro.Tests
             var transacao = result.First();
 
             // Assert
-            Assert.Equal(DateTimeKind.Utc, transacao.data.Kind);
-            Assert.Equal(15, transacao.data.Day);
-            Assert.Equal(3, transacao.data.Month);
-            Assert.Equal(2026, transacao.data.Year);
+            Assert.Equal(DateTimeKind.Utc, transacao.Data.Kind);
+            Assert.Equal(15, transacao.Data.Day);
+            Assert.Equal(3, transacao.Data.Month);
+            Assert.Equal(2026, transacao.Data.Year);
         }
 
         [Fact]
@@ -97,7 +97,7 @@ namespace GerenciadorFinanceiro.Tests
             Assert.Equal(4, result.Count);
             foreach (var transacao in result)
             {
-                Assert.Equal(1142.72m, transacao.valor);
+                Assert.Equal(1142.72m, transacao.Valor);
             }
         }
 
@@ -137,8 +137,8 @@ namespace GerenciadorFinanceiro.Tests
 
             Assert.Single(list);
             var t = list[0];
-            Assert.Equal(52.50m, t.valor);
-            Assert.Equal(5.25m, t.cotacao);
+            Assert.Equal(52.50m, t.Valor);
+            Assert.Equal(5.25m, t.Cotacao);
         }
 
         [Fact]

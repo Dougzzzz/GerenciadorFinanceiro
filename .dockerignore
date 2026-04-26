@@ -1,0 +1,13 @@
+**/.git
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/node_modules
+**/.angular
+**/dist
+**/wwwroot/browser
+**/wwwroot/index.html
+**/.env
+docker-compose.override.yml
+infra/data

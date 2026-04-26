@@ -41,14 +41,14 @@ namespace GerenciadorFinanceiro.Api.Controllers
         /// <summary>
         /// Cadastra uma nova meta de gasto.
         /// </summary>
-        /// <param name="dto">Dados da meta.</param>
+        /// <param name="dados">Dados da meta.</param>
         /// <returns>A meta criada.</returns>
         [HttpPost]
-        public async Task<ActionResult<MetaGasto>> Post([FromBody] SaveMetaGastoDto dto)
+        public async Task<ActionResult<MetaGasto>> Post([FromBody] SaveMetaGastoDto dados)
         {
             try
             {
-                var meta = new MetaGasto(dto.categoriaId, dto.valorLimite, dto.mes, dto.ano);
+                var meta = new MetaGasto(dados.CategoriaId, dados.ValorLimite, dados.Mes, dados.Ano);
                 await _repository.AdicionarAsync(meta);
                 return CreatedAtAction(nameof(Get), new { id = meta.Id }, meta);
             }
@@ -67,12 +67,7 @@ namespace GerenciadorFinanceiro.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(Guid id, [FromBody] decimal novoValor)
         {
-            var meta = await _repository.ObterPorIdAsync(id);
-            if (meta == null)
-            {
-                return NotFound();
-            }
-
+            var meta = await _repository.ObterPorIdAsync(id) ?? throw new KeyNotFoundException($"Meta com ID {id} não encontrada.");
             try
             {
                 meta.AtualizarValor(novoValor);
@@ -118,7 +113,7 @@ namespace GerenciadorFinanceiro.Api.Controllers
         /// <param name="ano">Ano de referência.</param>
         /// <returns>Indicadores de consumo da meta.</returns>
         [HttpGet("validar/{categoriaId}")]
-        public async Task<ActionResult<ResultadoValidacaoMeta>> Validar(Guid categoriaId, [FromQuery] int mes, [FromQuery] int ano)
+        public async Task<ActionResult<ResultadoValidacaoMetaDto>> Validar(Guid categoriaId, [FromQuery] int mes, [FromQuery] int ano)
         {
             // Valida sem adicionar novo gasto (valor 0)
             var resultado = await _validarUseCase.ExecutarAsync(categoriaId, mes, ano, 0);

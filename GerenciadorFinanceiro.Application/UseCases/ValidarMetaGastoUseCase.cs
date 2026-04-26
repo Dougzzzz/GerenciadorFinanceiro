@@ -5,15 +5,6 @@ using GerenciadorFinanceiro.Domain.Interfaces;
 namespace GerenciadorFinanceiro.Application.UseCases
 {
     /// <summary>
-    /// Resultado da validação de um gasto contra a meta definida.
-    /// </summary>
-    /// <param name="excedeu">Indica se o limite foi ultrapassado.</param>
-    /// <param name="valorLimite">O valor limite definido.</param>
-    /// <param name="totalGasto">O valor total gasto no período (incluindo o novo gasto).</param>
-    /// <param name="percentualUso">A percentagem do limite que foi consumida (1.0 = 100%).</param>
-    public record ResultadoValidacaoMeta(bool excedeu, decimal valorLimite, decimal totalGasto, decimal percentualUso);
-
-    /// <summary>
     /// Caso de uso para validar se um novo gasto ultrapassa o limite da categoria.
     /// </summary>
     public class ValidarMetaGastoUseCase : IValidarMetaGastoUseCase
@@ -46,7 +37,7 @@ namespace GerenciadorFinanceiro.Application.UseCases
         /// <param name="ano">Ano do gasto.</param>
         /// <param name="valorNovoGasto">O valor da nova transação (espera-se negativo para despesas).</param>
         /// <returns>O resultado da validação com indicadores de excesso.</returns>
-        public async Task<ResultadoValidacaoMeta> ExecutarAsync(Guid categoriaId, int mes, int ano, decimal valorNovoGasto)
+        public async Task<ResultadoValidacaoMetaDto> ExecutarAsync(Guid categoriaId, int mes, int ano, decimal valorNovoGasto)
         {
             // Busca meta específica ou recorrente
             var meta = await _metaRepository.ObterEspecificaPorCategoriaAsync(categoriaId, mes, ano)
@@ -54,7 +45,7 @@ namespace GerenciadorFinanceiro.Application.UseCases
 
             if (meta == null)
             {
-                return new ResultadoValidacaoMeta(false, 0, 0, 0);
+                return new ResultadoValidacaoMetaDto(false, 0, 0, 0);
             }
 
             // Define o período (primeiro e último dia do mês)
@@ -78,7 +69,7 @@ namespace GerenciadorFinanceiro.Application.UseCases
             bool excedeu = totalGastoNoMes > meta.ValorLimite;
             decimal percentual = totalGastoNoMes / meta.ValorLimite;
 
-            return new ResultadoValidacaoMeta(excedeu, meta.ValorLimite, totalGastoNoMes, percentual);
+            return new ResultadoValidacaoMetaDto(excedeu, meta.ValorLimite, totalGastoNoMes, percentual);
         }
 
         /// <summary>
@@ -107,7 +98,7 @@ namespace GerenciadorFinanceiro.Application.UseCases
                 var categoria = categorias.FirstOrDefault(c => c.Id == meta.CategoriaId);
                 var nomeCategoria = categoria?.Nome ?? "Sem Categoria";
 
-                resumos.Add(new MetaResumoDto(nomeCategoria, resultado.valorLimite, resultado.totalGasto, resultado.percentualUso));
+                resumos.Add(new MetaResumoDto(nomeCategoria, resultado.ValorLimite, resultado.TotalGasto, resultado.PercentualUso));
             }
 
             return resumos;

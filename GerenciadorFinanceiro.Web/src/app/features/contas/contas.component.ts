@@ -63,7 +63,7 @@ export class ContasComponent implements OnInit {
     const atual = this.editando();
     const obs = atual 
       ? this.service.atualizarConta(atual.id, dados.nomeBanco, dados.saldoInicial, dados.provedor)
-      : this.service.criarConta(dados.nomeBanco, dados.saldoInicial, dados.provedor);
+      : this.service.adicionarConta(dados.nomeBanco, dados.saldoInicial, dados.provedor);
 
     obs.subscribe({
       next: () => {
