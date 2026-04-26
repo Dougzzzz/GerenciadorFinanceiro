@@ -131,7 +131,7 @@ namespace GerenciadorFinanceiro.Api.Controllers
         [HttpPost("importar/confirmar")]
         public async Task<ActionResult<ResultadoImportacaoDto>> ConfirmarImportacao([FromBody] List<TransacaoPreviewDto> transacoes, [FromQuery] Guid? contaId, [FromQuery] Guid? cartaoId)
         {
-            if (transacoes == null || !transacoes.Any())
+            if (transacoes == null || transacoes.Count == 0)
             {
                 return BadRequest("Nenhuma transação para confirmar.");
             }

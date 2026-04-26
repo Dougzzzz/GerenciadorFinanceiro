@@ -4,8 +4,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GerenciadorFinanceiro.Api.Middleware
 {
-    public class ExceptionHandlingMiddleware
+    public partial class ExceptionHandlingMiddleware
     {
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+            WriteIndented = true,
+        };
+
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
         private readonly IHostEnvironment _environment;
@@ -25,10 +31,13 @@ namespace GerenciadorFinanceiro.Api.Middleware
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro não tratado: {Message}", ex.Message);
+                LogUnhandledException(_logger, ex.Message, ex);
                 await WriteErrorResponseAsync(context, ex);
             }
         }
+
+        [LoggerMessage(Level = LogLevel.Error, Message = "Erro não tratado: {Message}")]
+        static partial void LogUnhandledException(ILogger logger, string message, Exception ex);
 
         private static (int statusCode, string message) MapException(Exception exception) => exception switch
         {
@@ -62,7 +71,7 @@ namespace GerenciadorFinanceiro.Api.Middleware
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = statusCode;
 
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, WriteIndented = true }));
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response, _jsonOptions));
         }
     }
 }

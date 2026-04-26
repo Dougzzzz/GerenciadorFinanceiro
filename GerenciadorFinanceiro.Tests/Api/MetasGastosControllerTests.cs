@@ -54,5 +54,18 @@ namespace GerenciadorFinanceiro.Tests.Api
             var result = await _controller.GetResumo(4, 2026);
             Assert.IsType<OkObjectResult>(result.Result);
         }
+
+        [Fact]
+        public async Task Validar_Deve_Retornar_Ok_Com_Resultado()
+        {
+            var esperado = new ResultadoValidacaoMetaDto(false, 100, 50, 0.5m);
+            _useCaseMock.ExecutarAsync(Arg.Any<Guid>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<decimal>())
+                .Returns(esperado);
+
+            var result = await _controller.Validar(Guid.NewGuid(), 4, 2026);
+
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            Assert.Equal(esperado, okResult.Value);
+        }
     }
 }

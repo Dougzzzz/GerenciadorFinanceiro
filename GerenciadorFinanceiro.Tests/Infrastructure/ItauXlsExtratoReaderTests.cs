@@ -16,7 +16,7 @@ namespace GerenciadorFinanceiro.Tests.Infrastructure
             var sb = new StringBuilder();
             for (int i = 1; i <= 10; i++)
             {
-                sb.AppendLine($"Lixo linha {i};;;;"); // 10 linhas de cabeçalho
+                sb.AppendLine(System.Globalization.CultureInfo.InvariantCulture, $"Lixo linha {i};;;;"); // 10 linhas de cabeçalho
             }
 
             sb.AppendLine("18/02/2026;SALDO ANTERIOR;;;0,66"); // Deve ser ignorada

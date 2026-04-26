@@ -113,7 +113,7 @@ namespace GerenciadorFinanceiro.Api.Controllers
         /// <param name="ano">Ano de referência.</param>
         /// <returns>Indicadores de consumo da meta.</returns>
         [HttpGet("validar/{categoriaId}")]
-        public async Task<ActionResult<ResultadoValidacaoMeta>> Validar(Guid categoriaId, [FromQuery] int mes, [FromQuery] int ano)
+        public async Task<ActionResult<ResultadoValidacaoMetaDto>> Validar(Guid categoriaId, [FromQuery] int mes, [FromQuery] int ano)
         {
             // Valida sem adicionar novo gasto (valor 0)
             var resultado = await _validarUseCase.ExecutarAsync(categoriaId, mes, ano, 0);
